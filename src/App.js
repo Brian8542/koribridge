@@ -6,6 +6,7 @@ import AuthPage from "./pages/AuthPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import HomePage from "./pages/HomePage";
 import ProfileDetailPage from "./pages/ProfileDetailPage";
+import ChatPage from "./pages/ChatPage";
 
 function LoadingScreen() {
   return (
@@ -126,6 +127,14 @@ function AppRoutes() {
         element={
           <ProfileRequiredRoute>
             <ProfileDetailPage />
+          </ProfileRequiredRoute>
+        }
+      />
+      <Route
+        path="/chat/:partnerId"
+        element={
+          <ProfileRequiredRoute>
+            <ChatPage />
           </ProfileRequiredRoute>
         }
       />

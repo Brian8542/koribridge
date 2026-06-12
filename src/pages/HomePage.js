@@ -55,38 +55,52 @@ export default function HomePage() {
             </div>
           ) : (
             profiles.map((profile) => (
-              <button
+              <div
                 key={profile.id}
-                type="button"
-                onClick={() => navigate(`/profile/${profile.id}`)}
-                className="card text-left p-6 transition hover:-translate-y-1 hover:shadow-lg"
+                className="card p-6 transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-2xl">🙋</div>
-                  <div>
-                    <p className="font-bold text-gray-900">{profile.display_name}</p>
-                    <p className="text-sm text-gray-500">{profile.nationality}</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="text-sm text-gray-500">
-                    <p>모국어: <span className="text-gray-900">{profile.native_language}</span></p>
-                    <p>배우고 싶은 언어: <span className="text-gray-900">{profile.learning_language}</span></p>
-                  </div>
-                  {profile.interests?.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {profile.interests.map((interest) => (
-                        <span key={interest} className="text-xs bg-red-50 text-red-700 px-3 py-1 rounded-full font-medium">
-                          #{interest}
-                        </span>
-                      ))}
+                <div
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/profile/${profile.id}`)}
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-2xl">🙋</div>
+                    <div>
+                      <p className="font-bold text-gray-900">{profile.display_name}</p>
+                      <p className="text-sm text-gray-500">{profile.nationality}</p>
                     </div>
-                  )}
-                  {profile.bio && (
-                    <p className="text-sm text-gray-600 line-clamp-3">{profile.bio}</p>
-                  )}
+                  </div>
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-500">
+                      <p>모국어: <span className="text-gray-900">{profile.native_language}</span></p>
+                      <p>배우고 싶은 언어: <span className="text-gray-900">{profile.learning_language}</span></p>
+                    </div>
+                    {profile.interests?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {profile.interests.map((interest) => (
+                          <span key={interest} className="text-xs bg-red-50 text-red-700 px-3 py-1 rounded-full font-medium">
+                            #{interest}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {profile.bio && (
+                      <p className="text-sm text-gray-600 line-clamp-3">{profile.bio}</p>
+                    )}
+                  </div>
                 </div>
-              </button>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm text-gray-500">프로필을 더 보려면 클릭하세요.</div>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/chat/${profile.id}`)}
+                    className="btn-primary w-full sm:w-auto px-5 py-3"
+                  >
+                    채팅하기
+                  </button>
+                </div>
+              </div>
             ))
           )}
         </div>

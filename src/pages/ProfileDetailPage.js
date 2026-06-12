@@ -93,6 +93,21 @@ export default function ProfileDetailPage() {
               </div>
             </div>
           </div>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              onClick={() => navigate(`/chat/${profile.id}`)}
+              className="btn-primary w-full sm:w-auto px-5 py-3"
+            >
+              채팅하기
+            </button>
+            <button
+              onClick={() => navigate(-1)}
+              className="btn-secondary w-full sm:w-auto px-5 py-3"
+            >
+              뒤로 가기
+            </button>
+          </div>
         </div>
       </div>
     </div>
