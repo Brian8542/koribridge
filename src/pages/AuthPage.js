@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
 
 export default function AuthPage() {
   const [mode, setMode] = useState("login"); // "login" | "signup"
@@ -13,6 +14,19 @@ export default function AuthPage() {
 
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        scopes: "email profile",
+      },
+    });
+
+    if (error) {
+      setError("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -140,6 +154,15 @@ export default function AuthPage() {
 
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? "처리 중..." : mode === "login" ? "로그인" : "가입하기"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="w-full mt-3 py-3 px-4 bg-white border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors duration-150 flex items-center justify-center gap-3"
+          >
+            <span className="text-xl">🟢</span>
+            Google로 계속하기
           </button>
         </form>
       </div>
