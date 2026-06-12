@@ -1,0 +1,48 @@
+-- KoriBridge 데이터베이스 스키마
+-- Supabase Dashboard → SQL Editor 에서 실행하세요
+
+-- profiles 테이블 (사용자 프로필)
+create table public.profiles (
+  id uuid references auth.users on delete cascade primary key,
+  display_name text not null,
+  nationality text not null,
+  native_language text not null,
+  learning_language text not null,
+  interests text[] default '{}',
+  bio text default '',
+  avatar_url text default '',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Row Level Security 활성화
+alter table public.profiles enable row level security;
+
+-- 정책: 본인 프로필만 수정 가능
+create policy "Users can view all profiles"
+  on public.profiles for select
+  using (true);
+
+create policy "Users can insert own profile"
+  on public.profiles for insert
+  with check (auth.uid() = id);
+
+create policy "Users can update own profile"
+  on public.profiles for update
+  using (auth.uid() = id);
+
+-- updated_at 자동 갱신 트리거
+create or replace function public.handle_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger on_profile_updated
+  before update on public.profiles
+  for each row execute procedure public.handle_updated_at();
+
+-- 신규 가입 시 profiles 행 자동 생성 (선택사항)
+-- 회원가입 직후 프로필 등록 페이지로 이동하는 방식이므로 생략 가능
