@@ -78,11 +78,18 @@ export default function ChatPage() {
   useEffect(() => {
     if (!roomId) return;
 
-    const channel = supabase
-      .channel(`room:${roomId}`)
+    const channelName = `messages-room-${roomId}`;
+    const channel = supabase.channel(channelName);
+
+    channel
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `or(sender_id.eq.${user.id},receiver_id.eq.${user.id})`,
+        },
         (payload) => {
           const message = payload.new;
           if (

@@ -65,5 +65,8 @@ create trigger on_profile_updated
   before update on public.profiles
   for each row execute procedure public.handle_updated_at();
 
+-- Supabase Realtime 활성화를 위해 SQL Editor에서 실행:
+-- ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+
 -- 신규 가입 시 profiles 행 자동 생성 (선택사항)
 -- 회원가입 직후 프로필 등록 페이지로 이동하는 방식이므로 생략 가능
