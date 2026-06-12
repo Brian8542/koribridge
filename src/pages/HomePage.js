@@ -1,26 +1,40 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 
 export default function HomePage() {
   const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => setProfile(data));
+    const loadProfiles = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .neq("id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (!error) {
+        setProfiles(data || []);
+      }
+      setLoading(false);
+    };
+
+    loadProfiles();
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 네비바 */}
+    <div className="min-h-screen bg-gray-50 pb-10">
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <span className="text-red-600 font-bold text-lg">🌏 KoriBridge</span>
+        <div>
+          <p className="text-sm text-gray-500">파트너 탐색</p>
+          <h1 className="text-xl font-bold text-gray-900">KoriBridge</h1>
+        </div>
         <button
           onClick={signOut}
           className="text-sm text-gray-400 active:text-gray-600"
@@ -29,43 +43,52 @@ export default function HomePage() {
         </button>
       </div>
 
-      <div className="px-6 py-8 max-w-md mx-auto space-y-4">
-        {profile ? (
-          <div className="card">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-2xl">
-                🙋
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">{profile.display_name}</p>
-                <p className="text-sm text-gray-500">{profile.nationality} · {profile.native_language} → {profile.learning_language}</p>
-              </div>
+      <div className="px-6 py-8 max-w-5xl mx-auto space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="card animate-pulse h-52" />
+            ))
+          ) : profiles.length === 0 ? (
+            <div className="card text-center py-16">
+              <p className="text-gray-600">현재 다른 사용자가 없습니다.</p>
             </div>
-            {profile.bio && (
-              <p className="text-sm text-gray-600 bg-gray-50 rounded-xl px-4 py-3">{profile.bio}</p>
-            )}
-            {profile.interests?.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {profile.interests.map((i) => (
-                  <span key={i} className="text-xs bg-red-50 text-red-600 px-3 py-1 rounded-full font-medium">
-                    #{i}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="card animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
-          </div>
-        )}
-
-        {/* 준비 중 배너 */}
-        <div className="card text-center py-10">
-          <div className="text-4xl mb-3">🚧</div>
-          <p className="font-semibold text-gray-700">파트너 매칭 기능 준비 중</p>
-          <p className="text-sm text-gray-400 mt-1">곧 업데이트될 예정입니다!</p>
+          ) : (
+            profiles.map((profile) => (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => navigate(`/profile/${profile.id}`)}
+                className="card text-left p-6 transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-2xl">🙋</div>
+                  <div>
+                    <p className="font-bold text-gray-900">{profile.display_name}</p>
+                    <p className="text-sm text-gray-500">{profile.nationality}</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="text-sm text-gray-500">
+                    <p>모국어: <span className="text-gray-900">{profile.native_language}</span></p>
+                    <p>배우고 싶은 언어: <span className="text-gray-900">{profile.learning_language}</span></p>
+                  </div>
+                  {profile.interests?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {profile.interests.map((interest) => (
+                        <span key={interest} className="text-xs bg-red-50 text-red-700 px-3 py-1 rounded-full font-medium">
+                          #{interest}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {profile.bio && (
+                    <p className="text-sm text-gray-600 line-clamp-3">{profile.bio}</p>
+                  )}
+                </div>
+              </button>
+            ))
+          )}
         </div>
       </div>
     </div>

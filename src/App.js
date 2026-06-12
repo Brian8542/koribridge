@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase";
 import AuthPage from "./pages/AuthPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import HomePage from "./pages/HomePage";
+import ProfileDetailPage from "./pages/ProfileDetailPage";
 
 function LoadingScreen() {
   return (
@@ -117,6 +118,14 @@ function AppRoutes() {
         element={
           <ProfileRequiredRoute>
             <HomePage />
+          </ProfileRequiredRoute>
+        }
+      />
+      <Route
+        path="/profile/:id"
+        element={
+          <ProfileRequiredRoute>
+            <ProfileDetailPage />
           </ProfileRequiredRoute>
         }
       />
