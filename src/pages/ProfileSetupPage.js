@@ -17,15 +17,10 @@ const LANGUAGES = [
 
 const INTERESTS = [
   { id: "kpop", label: "K-pop", emoji: "🎵" },
-  { id: "kdrama", label: "K-드라마", emoji: "📺" },
   { id: "food", label: "한국 음식", emoji: "🍜" },
   { id: "travel", label: "여행", emoji: "✈️" },
+  { id: "drama", label: "드라마", emoji: "📺" },
   { id: "language", label: "언어 교환", emoji: "💬" },
-  { id: "culture", label: "문화 교류", emoji: "🎎" },
-  { id: "sports", label: "스포츠", emoji: "⚽" },
-  { id: "gaming", label: "게임", emoji: "🎮" },
-  { id: "beauty", label: "뷰티/패션", emoji: "💄" },
-  { id: "study", label: "공부/학업", emoji: "📚" },
 ];
 
 export default function ProfileSetupPage() {

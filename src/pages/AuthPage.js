@@ -49,7 +49,7 @@ export default function AuthPage() {
       if (err) {
         setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       } else {
-        navigate("/profile-setup");
+        navigate("/home");
       }
     } else {
       const { error: err } = await signUp(email, password);
