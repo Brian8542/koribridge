@@ -30,23 +30,21 @@ export default function ChatPage() {
     if (!user || !partnerId) return;
 
     const loadChat = async () => {
-      const [{ data: partnerData, error: partnerError }, { data: messagesData, error: messagesError }] =
-        await Promise.all([
-          supabase
-            .from("profiles")
-            .select("id, display_name, nationality, native_language, learning_language")
-            .eq("id", partnerId)
-            .maybeSingle(),
-          supabase
-            .from("messages")
-            .select("id, sender_id, receiver_id, content, created_at")
-            .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
-            .order("created_at", { ascending: true }),
-        ]);
+      const partnerResult = await supabase
+        .from("profiles")
+        .select("id, display_name, nationality, native_language, learning_language")
+        .eq("id", partnerId)
+        .maybeSingle();
 
-      if (partnerError) {
+      const messagesResult = await supabase
+        .from("messages")
+        .select("id, sender_id, receiver_id, content, created_at")
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
+        .order("created_at", { ascending: true });
+
+      if (partnerResult.error) {
         setPartner(null);
-      } else if (!partnerData) {
+      } else if (!partnerResult.data) {
         setPartner({
           id: partnerId,
           display_name: "알 수 없는 사용자",
@@ -55,10 +53,10 @@ export default function ChatPage() {
           learning_language: "",
         });
       } else {
-        setPartner(partnerData);
+        setPartner(partnerResult.data);
       }
 
-      setMessages(messagesData || []);
+      setMessages(messagesResult.data || []);
       setChatLoading(false);
     };
 
