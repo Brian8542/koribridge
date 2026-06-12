@@ -10,6 +10,18 @@ function formatTime(timestamp) {
   }).format(new Date(timestamp));
 }
 
+function sortMessages(messages) {
+  return [...messages].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+}
+
+function mergeMessages(existing, next) {
+  const map = new Map();
+  sortMessages([...existing, ...next]).forEach((message) => {
+    map.set(message.id, message);
+  });
+  return Array.from(map.values());
+}
+
 export default function ChatPage() {
   const { partnerId } = useParams();
   const { user, loading } = useAuth();
@@ -56,7 +68,7 @@ export default function ChatPage() {
         setPartner(partnerResult.data);
       }
 
-      setMessages(messagesResult.data || []);
+      setMessages(messagesResult.data ? sortMessages(messagesResult.data) : []);
       setChatLoading(false);
     };
 
@@ -66,21 +78,25 @@ export default function ChatPage() {
   useEffect(() => {
     if (!roomId) return;
 
-    const subscription = supabase
-      .channel(`public:messages:room=${roomId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        const message = payload.new;
-        if (
-          (message.sender_id === user.id && message.receiver_id === partnerId) ||
-          (message.sender_id === partnerId && message.receiver_id === user.id)
-        ) {
-          setMessages((prev) => [...prev, message]);
+    const channel = supabase
+      .channel(`room:${roomId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          const message = payload.new;
+          if (
+            (message.sender_id === user.id && message.receiver_id === partnerId) ||
+            (message.sender_id === partnerId && message.receiver_id === user.id)
+          ) {
+            setMessages((prev) => mergeMessages(prev, [message]));
+          }
         }
-      })
+      )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channel);
     };
   }, [roomId, user, partnerId]);
 
@@ -91,21 +107,32 @@ export default function ChatPage() {
   }, [messages]);
 
   const handleSend = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!newMessage.trim() || !user || !partnerId) return;
 
     setSendLoading(true);
-    const { error } = await supabase.from("messages").insert([
+    const content = newMessage.trim();
+
+    const { data, error } = await supabase.from("messages").insert([
       {
         sender_id: user.id,
         receiver_id: partnerId,
-        content: newMessage.trim(),
+        content,
       },
     ]);
+
     setSendLoading(false);
 
-    if (!error) {
+    if (!error && data?.length > 0) {
+      setMessages((prev) => mergeMessages(prev, data));
       setNewMessage("");
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
     }
   };
 
@@ -147,15 +174,17 @@ export default function ChatPage() {
         <div className="card overflow-hidden">
           <div className="space-y-4 max-h-[70vh] overflow-y-auto px-4 py-5">
             {messages.length === 0 ? (
-              <div className="text-center text-gray-500 py-20">
-                첫 메시지를 보내보세요.
-              </div>
+              <div className="text-center text-gray-500 py-20">첫 메시지를 보내보세요.</div>
             ) : (
               messages.map((message) => {
                 const isMine = message.sender_id === user.id;
                 return (
                   <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] rounded-3xl px-4 py-3 text-sm ${isMine ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"}`}>
+                    <div
+                      className={`max-w-[80%] rounded-3xl px-4 py-3 text-sm ${
+                        isMine ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"
+                      }`}
+                    >
                       <p>{message.content}</p>
                       <p className="mt-2 text-[11px] text-gray-400 text-right">{formatTime(message.created_at)}</p>
                     </div>
@@ -171,6 +200,7 @@ export default function ChatPage() {
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
             rows={4}
             className="input-field resize-none"
             placeholder="메시지를 입력하세요..."
