@@ -9,12 +9,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const rememberMeValue = window.localStorage.getItem("rememberMe");
-      const rememberMe = rememberMeValue === null ? true : rememberMeValue === "true";
-
-      supabase.auth.storage = rememberMe
-        ? window.localStorage
-        : window.sessionStorage;
+      supabase.auth.storage = window.localStorage;
     }
 
     // 초기 세션 확인
@@ -28,7 +23,23 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    const handleBeforeUnload = () => {
+      if (typeof window === "undefined") return;
+
+      const rememberMeValue = window.localStorage.getItem("rememberMe");
+      const rememberMe = rememberMeValue === null ? true : rememberMeValue === "true";
+      if (!rememberMe) {
+        window.localStorage.removeItem("supabase.auth.token");
+        supabase.auth.signOut().catch(() => {});
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
   }, []);
 
   const signUp = async (email, password) => {
@@ -36,13 +47,7 @@ export function AuthProvider({ children }) {
     return { data, error };
   };
 
-  const signIn = async (email, password, rememberMe = true) => {
-    if (typeof window !== "undefined") {
-      supabase.auth.storage = rememberMe
-        ? window.localStorage
-        : window.sessionStorage;
-    }
-
+  const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     return { data, error };
   };

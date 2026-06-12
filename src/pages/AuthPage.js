@@ -27,9 +27,7 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = async () => {
     if (typeof window !== "undefined") {
-      supabase.auth.storage = rememberMe
-        ? window.localStorage
-        : window.sessionStorage;
+      window.localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
     }
 
     const { error } = await supabase.auth.signInWithOAuth({
@@ -65,7 +63,7 @@ export default function AuthPage() {
     setLoading(true);
 
     if (mode === "login") {
-      const { error: err } = await signIn(email, password, rememberMe);
+      const { error: err } = await signIn(email, password);
       if (err) {
         setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       } else {
