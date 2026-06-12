@@ -27,7 +27,13 @@ export function AuthProvider({ children }) {
     return { data, error };
   };
 
-  const signIn = async (email, password) => {
+  const signIn = async (email, password, rememberMe = true) => {
+    if (typeof window !== "undefined") {
+      supabase.auth.storage = rememberMe
+        ? window.localStorage
+        : window.sessionStorage;
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     return { data, error };
   };

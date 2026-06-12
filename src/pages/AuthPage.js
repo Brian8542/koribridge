@@ -8,6 +8,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,12 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
+    if (typeof window !== "undefined") {
+      supabase.auth.storage = rememberMe
+        ? window.localStorage
+        : window.sessionStorage;
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -45,7 +52,7 @@ export default function AuthPage() {
     setLoading(true);
 
     if (mode === "login") {
-      const { error: err } = await signIn(email, password);
+      const { error: err } = await signIn(email, password, rememberMe);
       if (err) {
         setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       } else {
@@ -155,6 +162,18 @@ export default function AuthPage() {
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? "처리 중..." : mode === "login" ? "로그인" : "가입하기"}
           </button>
+
+          {mode === "login" && (
+            <label className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              로그인 유지
+            </label>
+          )}
 
           <button
             type="button"
