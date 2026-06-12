@@ -76,7 +76,7 @@ export default function ChatPage() {
   }, [user, partnerId]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !partnerId) return;
 
     const channel = supabase
       .channel("messages")
