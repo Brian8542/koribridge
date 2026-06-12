@@ -76,27 +76,22 @@ export default function ChatPage() {
   }, [user, partnerId]);
 
   useEffect(() => {
-    if (!roomId) return;
+    if (!user) return;
 
-    const channelName = `messages-room-${roomId}`;
-    const channel = supabase.channel(channelName);
-
-    channel
+    const channel = supabase
+      .channel("messages")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `or(sender_id.eq.${user.id},receiver_id.eq.${user.id})`,
+          filter: `receiver_id=eq.${user.id}`,
         },
         (payload) => {
           const message = payload.new;
-          if (
-            (message.sender_id === user.id && message.receiver_id === partnerId) ||
-            (message.sender_id === partnerId && message.receiver_id === user.id)
-          ) {
-            setMessages((prev) => mergeMessages(prev, [message]));
+          if (message.sender_id === partnerId && message.receiver_id === user.id) {
+            setMessages((prev) => [...prev, message]);
           }
         }
       )
@@ -105,7 +100,7 @@ export default function ChatPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, user, partnerId]);
+  }, [user, partnerId]);
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -131,7 +126,7 @@ export default function ChatPage() {
     setSendLoading(false);
 
     if (!error && data?.length > 0) {
-      setMessages((prev) => mergeMessages(prev, data));
+      setMessages((prev) => [...prev, ...data]);
       setNewMessage("");
     }
   };
