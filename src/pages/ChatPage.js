@@ -30,13 +30,13 @@ export default function ChatPage() {
     if (!user || !partnerId) return;
 
     const loadChat = async () => {
-      const [{ data: partnerData }, { data: messagesData, error: messagesError }] =
+      const [{ data: partnerData, error: partnerError }, { data: messagesData, error: messagesError }] =
         await Promise.all([
           supabase
             .from("profiles")
             .select("id, display_name, nationality, native_language, learning_language")
             .eq("id", partnerId)
-            .single(),
+            .maybeSingle(),
           supabase
             .from("messages")
             .select("id, sender_id, receiver_id, content, created_at")
@@ -44,12 +44,21 @@ export default function ChatPage() {
             .order("created_at", { ascending: true }),
         ]);
 
-      if (partnerData.error || messagesError) {
+      if (partnerError) {
         setPartner(null);
+      } else if (!partnerData) {
+        setPartner({
+          id: partnerId,
+          display_name: "알 수 없는 사용자",
+          nationality: "",
+          native_language: "",
+          learning_language: "",
+        });
       } else {
-        setPartner(partnerData.data);
-        setMessages(messagesData || []);
+        setPartner(partnerData);
       }
+
+      setMessages(messagesData || []);
       setChatLoading(false);
     };
 
