@@ -8,6 +8,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const rememberMeValue = window.localStorage.getItem("rememberMe");
+      const rememberMe = rememberMeValue === null ? true : rememberMeValue === "true";
+
+      supabase.auth.storage = rememberMe
+        ? window.localStorage
+        : window.sessionStorage;
+    }
+
     // 초기 세션 확인
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);

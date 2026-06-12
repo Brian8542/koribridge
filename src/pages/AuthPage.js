@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
@@ -9,6 +9,15 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = window.localStorage.getItem("rememberMe");
+      if (saved !== null) {
+        setRememberMe(saved === "true");
+      }
+    }
+  }, []);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,6 +48,10 @@ export default function AuthPage() {
     e.preventDefault();
     setError("");
     setMessage("");
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
+    }
 
     if (mode === "signup" && password !== confirmPassword) {
       setError("비밀번호가 일치하지 않습니다.");
