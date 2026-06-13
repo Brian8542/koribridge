@@ -104,20 +104,21 @@ export default function ChatPage() {
 
     setSendLoading(true);
     const content = newMessage.trim();
+    try {
+      const { data, error } = await supabase.from("messages").insert([
+        {
+          sender_id: user.id,
+          receiver_id: partnerId,
+          content,
+        },
+      ]).select();
 
-    const { data, error } = await supabase.from("messages").insert([
-      {
-        sender_id: user.id,
-        receiver_id: partnerId,
-        content,
-      },
-    ]);
-
-    setSendLoading(false);
-
-    if (!error && data?.length > 0) {
-      addMessage(data[0]);
-      setNewMessage("");
+      if (!error) {
+        if (data?.length > 0) addMessage(data[0]);
+        setNewMessage("");
+      }
+    } finally {
+      setSendLoading(false);
     }
   };
 
