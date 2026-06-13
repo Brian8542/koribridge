@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./components/Toast";
@@ -13,6 +13,7 @@ import ProfileSetupPage from "./pages/ProfileSetupPage";
 import SplashScreen from "./pages/SplashScreen";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import AdminPage from "./pages/AdminPage";
 
 function LoadingScreen() {
   return (
@@ -40,21 +41,6 @@ function ProfileSetupRoute({ children }) {
   return children;
 }
 
-function PageViewTracker() {
-  const location = useLocation();
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "page_view", {
-        page_path: location.pathname + location.search,
-        page_location: window.location.href,
-      });
-    }
-  }, [location]);
-
-  return null;
-}
-
 function AppRoutes() {
   return (
     <Routes>
@@ -66,6 +52,7 @@ function AppRoutes() {
       <Route path="/chat/:partnerId" element={<ProfileRequiredRoute><ChatPage /></ProfileRequiredRoute>} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/admin" element={<ProfileRequiredRoute><AdminPage /></ProfileRequiredRoute>} />
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
@@ -75,7 +62,6 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <PageViewTracker />
       <ErrorBoundary>
         <ThemeProvider>
           <AuthProvider>
