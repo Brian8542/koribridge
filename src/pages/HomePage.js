@@ -77,10 +77,10 @@ export default function HomePage() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
 
-  // 프로필 수정 폼
+  // 프로필 수정 폼 (Profile Edit Form)
   const [profileForm, setProfileForm] = useState({
     display_name: "", nationality: "", native_language: "",
-    learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [],
+    learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [], is_public: true,
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -89,7 +89,7 @@ export default function HomePage() {
   // 신고/차단 모달
   const [reportModal, setReportModal] = useState(null); // { profileId, displayName }
   const [reportReason, setReportReason] = useState("");
-  const [reportLoading, setReportLoading] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false); // Report/Block Modal
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -112,7 +112,7 @@ export default function HomePage() {
     const loadAll = async () => {
       // 내 프로필
       const { data: me } = await supabase
-        .from("profiles")
+        .from("profiles") // My Profile
         .select("*")
         .eq("id", user.id)
         .single();
@@ -127,10 +127,11 @@ export default function HomePage() {
           bio: me.bio || "",
           avatar_url: me.avatar_url || "",
           interests: me.interests || [],
+          is_public: me.is_public ?? true,
         });
       }
 
-      // 차단 목록
+      // 차단 목록 (Blocked Users List)
       const { data: blocks } = await supabase
         .from("blocked_users")
         .select("blocked_id")
@@ -139,7 +140,7 @@ export default function HomePage() {
       setBlockedIds(bIds);
 
       const { data: favs } = await supabase
-        .from("favorites")
+        .from("favorites") // Favorites List
         .select("partner_id")
         .eq("user_id", user.id);
       const fIds = new Set((favs || []).map((f) => f.partner_id));
@@ -156,12 +157,13 @@ export default function HomePage() {
       setFavoritesLoading(false);
 
       // 파트너 목록
-      const { data: allProfiles, error: profilesError } = await supabase
+      const { data: allProfiles, error: profilesError } = await supabase // Partner List
         .from("profiles")
+        .eq("is_public", true) // Only fetch public profiles for other users
         .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
         .neq("id", user.id)
         .order("created_at", { ascending: false });
-      if (!profilesError) setProfiles(allProfiles || []);
+      if (!profilesError) setProfiles(allProfiles || []); // Filter out blocked users in useMemo
       setProfilesLoading(false);
 
       // 대화 목록
@@ -204,7 +206,7 @@ export default function HomePage() {
         }
       }
       setConvoLoading(false);
-    };
+    }; // Conversation List
 
     loadAll();
   }, [user]);
@@ -229,7 +231,7 @@ export default function HomePage() {
             icon: "/favicon.ico",
           });
         }
-        // 대화 목록 업데이트
+        // 대화 목록 업데이트 (Update Conversation List)
         setConversations((prev) => {
           const partnerId = msg.sender_id;
           const existing = prev.find((c) => c.partnerId === partnerId);
@@ -248,7 +250,7 @@ export default function HomePage() {
     return () => supabase.removeChannel(channel);
   }, [user?.id]);
 
-  // AI 추천 파트너 (상위 3명)
+  // AI 추천 파트너 (상위 3명) (AI Recommended Partners - Top 3)
   const recommendedProfiles = useMemo(() => {
     if (!myProfile || profiles.length === 0) return [];
     return profiles
@@ -278,7 +280,7 @@ export default function HomePage() {
     });
   }, [profiles, nationalityFilter, languageFilter, levelFilter, blockedIds, searchQuery]);
 
-  // 프로필 수정
+  // 프로필 수정 (Edit Profile)
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
 
   const toggleInterest = (interest) => {
@@ -330,10 +332,11 @@ export default function HomePage() {
         learning_language: profileForm.learning_language,
         language_level: profileForm.language_level || "초급",
         bio: profileForm.bio.trim(),
-        avatar_url: avatar_url || "",
+        avatar_url: avatar_url || profileForm.avatar_url || "", // Use existing avatar_url if no new file or upload fails
         interests: profileForm.interests,
+        is_public: profileForm.is_public,
       });
-      if (error) throw error;
+      if (error) throw error; // Save Profile
       setTab("home");
       // 프로필 목록 갱신
       const { data } = await supabase
@@ -349,7 +352,7 @@ export default function HomePage() {
     }
   };
 
-  // 차단
+  // 차단 (Block User)
   const blockUser = async (targetId, displayName) => {
     if (!window.confirm(`${displayName} 님을 차단하시겠습니까?`)) return;
     await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: targetId });
@@ -357,7 +360,7 @@ export default function HomePage() {
     setReportModal(null);
   };
 
-  // 신고
+  // 신고 (Report User)
   const submitReport = async () => {
     if (!reportModal || !reportReason.trim()) return;
     setReportLoading(true);
@@ -372,7 +375,7 @@ export default function HomePage() {
     alert("신고가 접수되었습니다.");
   };
 
-  // 프로필 카드 컴포넌트
+  // 프로필 카드 컴포넌트 (Profile Card Component)
   const ProfileCard = ({ profile, showActions = true }) => {
     const level = profile.language_level || getLanguageLevel(profile);
     const isOnline = onlineIds.has(profile.id);
@@ -460,7 +463,7 @@ export default function HomePage() {
   const renderHomeContent = () => (
     <div className="space-y-8">
       <AnnouncementBanner />
-      {/* AI 추천 파트너 */}
+      {/* AI 추천 파트너 (AI Recommended Partners) */}
       {recommendedProfiles.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
@@ -475,7 +478,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 필터 */}
+      {/* 필터 (Filters) */}
       <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
         <p className="text-sm font-semibold text-gray-700 mb-4">파트너 필터</p>
 <div className="grid gap-4 sm:grid-cols-3">
@@ -505,7 +508,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 파트너 목록 */}
+      {/* 파트너 목록 (Partner List) */}
       <div>
         <p className="text-sm font-semibold text-gray-700 mb-4">전체 파트너 ({filteredProfiles.length}명)</p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -525,7 +528,7 @@ export default function HomePage() {
 
   const renderFavoritesContent = () => (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"> {/* Favorites Content */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900">즐겨찾기</h2>
           <p className="text-sm text-gray-500">자주 연락하는 파트너를 모아보세요.</p>
@@ -616,7 +619,7 @@ export default function HomePage() {
   const renderProfileContent = () => (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">프로필 수정</h2>
+        <h2 className="text-xl font-bold text-gray-900">프로필 수정</h2> {/* Profile Edit */}
         <button type="button" onClick={() => setTab("home")} className="text-sm text-gray-500 hover:text-gray-700">돌아가기</button>
       </div>
       <form onSubmit={saveProfile} className="space-y-5">
@@ -678,6 +681,17 @@ export default function HomePage() {
           </select>
         </div>
 
+        {/* 프로필 공개/비공개 토글 */}
+        <div className="flex items-center justify-between">
+          <label htmlFor="is_public_toggle" className="block text-sm font-semibold text-gray-700">프로필 공개</label>
+          <input
+            type="checkbox"
+            id="is_public_toggle"
+            checked={profileForm.is_public}
+            onChange={(e) => handleProfileChange("is_public", e.target.checked)}
+            className="toggle toggle-primary" // Assuming you have a toggle style, adjust as needed
+          />
+        </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">관심사</label>
           <div className="flex flex-wrap gap-2">
@@ -704,14 +718,14 @@ export default function HomePage() {
         </button>
       </form>
 
-      {/* 약관 링크 */}
+      {/* 약관 링크 (Terms Links) */}
       <div className="flex items-center justify-center gap-4 pt-2 text-xs text-gray-400">
         <button onClick={() => navigate("/terms")} className="hover:text-gray-600 underline">이용약관</button>
         <span>·</span>
         <button onClick={() => navigate("/privacy")} className="hover:text-gray-600 underline">개인정보처리방침</button>
       </div>
 
-      {/* 회원 탈퇴 */}
+      {/* 회원 탈퇴 (Delete Account) */}
       <div className="pt-2 text-center">
         <button
           type="button"
@@ -728,7 +742,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      {/* 헤더 */}
+      {/* 헤더 (Header) */}
       <div className="bg-white border-b border-gray-100 px-6 py-4">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -742,7 +756,7 @@ export default function HomePage() {
             <button type="button" onClick={signOut} className="text-sm text-gray-400 hover:text-gray-600">로그아웃</button>
           </div>
         </div>
-        {/* 검색창 */}
+        {/* 검색창 (Search Bar) */}
         <input
           type="text"
           className="input-field text-sm"
@@ -750,7 +764,7 @@ export default function HomePage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        {/* 탭 */}
+        {/* 탭 (Tabs) */}
         <div className="flex gap-2 mt-3">
           {[{ key: "home", label: "홈" }, { key: "favorites", label: "즐겨찾기" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "profile", label: "내 프로필" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
@@ -773,7 +787,7 @@ export default function HomePage() {
         {tab === "profile" && renderProfileContent()}
       </div>
 
-      {/* 하단 네비게이션 */}
+      {/* 하단 네비게이션 (Bottom Navigation) */}
       <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
           {[{ key: "home", label: "홈", icon: "🏠" }, { key: "favorites", label: "즐겨찾기", icon: "⭐" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
@@ -791,7 +805,7 @@ export default function HomePage() {
         </nav>
       </div>
 
-      {/* 신고/차단 모달 */}
+      {/* 신고/차단 모달 (Report/Block Modal) */}
       {reportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm">
@@ -836,7 +850,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 회원 탈퇴 모달 */}
+      {/* 회원 탈퇴 모달 (Delete Account Modal) */}
       {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
     </div>
   );
