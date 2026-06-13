@@ -27,6 +27,7 @@ export default function ChatPage() {
 
   const addMessage = (message) => {
     if (!message?.id) return;
+
     setMessages((prev) => {
       if (prev.some((item) => item.id === message.id)) {
         return prev;
@@ -48,7 +49,9 @@ export default function ChatPage() {
       const messagesResult = await supabase
         .from("messages")
         .select("id, sender_id, receiver_id, content, created_at")
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
+        .or(
+          `and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`
+        )
         .order("created_at", { ascending: true });
 
       if (partnerResult.error) {
@@ -76,16 +79,20 @@ export default function ChatPage() {
     if (!user?.id || !partnerId) return;
 
     const channel = supabase
-      .channel('messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `receiver_id=eq.${user.id}`
-      }, (payload) => {
-        setMessages(prev => [...prev, payload.new])
-      })
-      .subscribe()
+      .channel("messages")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        (payload) => {
+          setMessages((prev) => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -102,16 +109,21 @@ export default function ChatPage() {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !user?.id || !partnerId) return;
 
+    const msgToSend = newMessage.trim();
+    setNewMessage("");
     setSendLoading(true);
-    const content = newMessage.trim();
+
     try {
-      const { data, error } = await supabase.from("messages").insert([
-        {
-          sender_id: user.id,
-          receiver_id: partnerId,
-          content,
-        },
-      ]).select();
+      const { data, error } = await supabase
+        .from("messages")
+        .insert([
+          {
+            sender_id: user.id,
+            receiver_id: partnerId,
+            content: msgToSend,
+          },
+        ])
+        .select();
 
       if (!error && data?.length > 0) {
         addMessage(data[0]);
@@ -119,7 +131,6 @@ export default function ChatPage() {
     } catch (err) {
       console.error("메시지 전송 실패:", err);
     } finally {
-      setNewMessage("");
       setSendLoading(false);
     }
   };
