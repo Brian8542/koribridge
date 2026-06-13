@@ -1,6 +1,7 @@
-import React from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AuthPage from "./pages/AuthPage";
 import ChatPage from "./pages/ChatPage";
@@ -38,6 +39,21 @@ function ProfileSetupRoute({ children }) {
   return children;
 }
 
+function PageViewTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "page_view", {
+        page_path: location.pathname + location.search,
+        page_location: window.location.href,
+      });
+    }
+  }, [location]);
+
+  return null;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -58,10 +74,13 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
+      <PageViewTracker />
       <ErrorBoundary>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </BrowserRouter>
   );

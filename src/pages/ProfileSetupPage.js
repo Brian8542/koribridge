@@ -24,6 +24,7 @@ export default function ProfileSetupPage() {
     nationality: "",
     native_language: "",
     learning_language: "",
+    language_level: "초급",
     bio: "",
     avatar_url: "",
     interests: [],
@@ -87,6 +88,7 @@ export default function ProfileSetupPage() {
     if (!form.nationality) return setError("국적을 선택해 주세요.");
     if (!form.native_language) return setError("모국어를 선택해 주세요.");
     if (!form.learning_language) return setError("배우고 싶은 언어를 선택해 주세요.");
+    if (!form.language_level) return setError("언어 수준을 선택해 주세요.");
 
     setLoading(true);
     try {
@@ -101,6 +103,7 @@ export default function ProfileSetupPage() {
         nationality: form.nationality,
         native_language: form.native_language,
         learning_language: form.learning_language,
+        language_level: form.language_level,
         bio: form.bio.trim(),
         avatar_url: avatar_url || "",
         interests: form.interests,
@@ -178,6 +181,16 @@ export default function ProfileSetupPage() {
             <select className="input-field" value={form.learning_language} onChange={(e) => handleChange("learning_language", e.target.value)}>
               <option value="">선택</option>
               {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">언어 수준</label>
+            <select className="input-field" value={form.language_level} onChange={(e) => handleChange("language_level", e.target.value)}>
+              <option value="">선택</option>
+              {['초급', '중급', '고급'].map((level) => (
+                <option key={level} value={level}>{level}</option>
+              ))}
             </select>
           </div>
 

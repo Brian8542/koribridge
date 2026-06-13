@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import DeleteAccountModal from "../components/DeleteAccountModal";
@@ -59,14 +60,19 @@ export default function HomePage() {
   const navigate = useNavigate();
   const onlineIds = useOnlineUsers(user?.id);
 
+  const { darkMode, toggleDarkMode } = useTheme();
   const [myProfile, setMyProfile] = useState(null);
   const [profiles, setProfiles] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [blockedIds, setBlockedIds] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [tab, setTab] = useState("home");
   const [nationalityFilter, setNationalityFilter] = useState("");
   const [languageFilter, setLanguageFilter] = useState("");
+  const [levelFilter, setLevelFilter] = useState("");
   const [profilesLoading, setProfilesLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [convoLoading, setConvoLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
@@ -74,7 +80,7 @@ export default function HomePage() {
   // 프로필 수정 폼
   const [profileForm, setProfileForm] = useState({
     display_name: "", nationality: "", native_language: "",
-    learning_language: "", bio: "", avatar_url: "", interests: [],
+    learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [],
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -117,6 +123,7 @@ export default function HomePage() {
           nationality: me.nationality || "",
           native_language: me.native_language || "",
           learning_language: me.learning_language || "",
+          language_level: me.language_level || "초급",
           bio: me.bio || "",
           avatar_url: me.avatar_url || "",
           interests: me.interests || [],
@@ -131,10 +138,27 @@ export default function HomePage() {
       const bIds = (blocks || []).map((b) => b.blocked_id);
       setBlockedIds(bIds);
 
+      const { data: favs } = await supabase
+        .from("favorites")
+        .select("partner_id")
+        .eq("user_id", user.id);
+      const fIds = new Set((favs || []).map((f) => f.partner_id));
+      setFavoriteIds(fIds);
+      if (fIds.size > 0) {
+        const { data: favoriteProfiles } = await supabase
+          .from("profiles")
+          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
+          .in("id", Array.from(fIds));
+        setFavorites(favoriteProfiles || []);
+      } else {
+        setFavorites([]);
+      }
+      setFavoritesLoading(false);
+
       // 파트너 목록
       const { data: allProfiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, display_name, nationality, native_language, learning_language, avatar_url, bio, interests")
+        .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
         .neq("id", user.id)
         .order("created_at", { ascending: false });
       if (!profilesError) setProfiles(allProfiles || []);
@@ -165,7 +189,7 @@ export default function HomePage() {
         if (partnerIds.length > 0) {
           const { data: partnerProfiles } = await supabase
             .from("profiles")
-            .select("id, display_name, nationality, native_language, learning_language, avatar_url, bio, interests")
+            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
             .in("id", partnerIds);
           const partnerMap = new Map(partnerProfiles?.map((p) => [p.id, p]));
           const sorted = Array.from(byPartner.values())
@@ -240,6 +264,7 @@ export default function HomePage() {
       if (blockedIds.includes(p.id)) return false;
       if (nationalityFilter && p.nationality !== nationalityFilter) return false;
       if (languageFilter && p.learning_language !== languageFilter) return false;
+      if (levelFilter && p.language_level !== levelFilter) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         if (
@@ -251,7 +276,7 @@ export default function HomePage() {
       }
       return true;
     });
-  }, [profiles, nationalityFilter, languageFilter, blockedIds, searchQuery]);
+  }, [profiles, nationalityFilter, languageFilter, levelFilter, blockedIds, searchQuery]);
 
   // 프로필 수정
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
@@ -303,6 +328,7 @@ export default function HomePage() {
         nationality: profileForm.nationality,
         native_language: profileForm.native_language,
         learning_language: profileForm.learning_language,
+        language_level: profileForm.language_level || "초급",
         bio: profileForm.bio.trim(),
         avatar_url: avatar_url || "",
         interests: profileForm.interests,
@@ -348,8 +374,9 @@ export default function HomePage() {
 
   // 프로필 카드 컴포넌트
   const ProfileCard = ({ profile, showActions = true }) => {
-    const level = getLanguageLevel(profile);
+    const level = profile.language_level || getLanguageLevel(profile);
     const isOnline = onlineIds.has(profile.id);
+    const isFavorite = favoriteIds.has(profile.id);
     const levelColor = { 고급: "bg-blue-50 text-blue-700", 중급: "bg-yellow-50 text-yellow-700", 초급: "bg-green-50 text-green-700" };
     return (
       <div className="card p-6 transition hover:-translate-y-1 hover:shadow-lg">
@@ -371,6 +398,30 @@ export default function HomePage() {
                 <p className="text-sm text-gray-500">{profile.nationality}</p>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!user?.id) return;
+                    const isFav = favoriteIds.has(profile.id);
+                    if (isFav) {
+                      await supabase.from("favorites").delete().match({ user_id: user.id, partner_id: profile.id });
+                      setFavoriteIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(profile.id);
+                        return next;
+                      });
+                      setFavorites((prev) => prev.filter((item) => item.id !== profile.id));
+                    } else {
+                      await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
+                      setFavoriteIds((prev) => new Set(prev).add(profile.id));
+                      setFavorites((prev) => [...prev, profile]);
+                    }
+                  }}
+                  className={`rounded-full p-2 ${isFavorite ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
+                  title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+                >
+                  {isFavorite ? "♥" : "♡"}
+                </button>
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${levelColor[level]}`}>{level}</span>
                 {showActions && (
                   <button
@@ -427,21 +478,28 @@ export default function HomePage() {
       {/* 필터 */}
       <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
         <p className="text-sm font-semibold text-gray-700 mb-4">파트너 필터</p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="text-sm text-gray-600">국적</label>
-            <select className="input-field mt-1" value={nationalityFilter} onChange={(e) => setNationalityFilter(e.target.value)}>
-              <option value="">전체</option>
-              {[...new Set(profiles.map((p) => p.nationality))].map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-sm text-gray-600">배우고 싶은 언어</label>
-            <select className="input-field mt-1" value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)}>
-              <option value="">전체</option>
-              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+<div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="text-sm text-gray-600">국적</label>
+              <select className="input-field mt-1" value={nationalityFilter} onChange={(e) => setNationalityFilter(e.target.value)}>
+                <option value="">전체</option>
+                {[...new Set(profiles.map((p) => p.nationality))].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-600">배우고 싶은 언어</label>
+              <select className="input-field mt-1" value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)}>
+                <option value="">전체</option>
+                {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-600">언어 수준</label>
+              <select className="input-field mt-1" value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
+                <option value="">전체</option>
+                {['초급', '중급', '고급'].map((level) => <option key={level} value={level}>{level}</option>)}
             </select>
           </div>
         </div>
@@ -462,6 +520,35 @@ export default function HomePage() {
           )}
         </div>
       </div>
+    </div>
+  );
+
+  const renderFavoritesContent = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">즐겨찾기</h2>
+          <p className="text-sm text-gray-500">자주 연락하는 파트너를 모아보세요.</p>
+        </div>
+        {favorites.length > 0 && (
+          <button type="button" onClick={() => setTab("home")} className="text-sm text-red-600 hover:text-red-700">
+            더 많은 파트너 보기
+          </button>
+        )}
+      </div>
+
+      {favoritesLoading ? (
+        Array.from({ length: 4 }).map((_, idx) => <div key={idx} className="card animate-pulse h-44" />)
+      ) : favorites.length === 0 ? (
+        <div className="card text-center py-16">
+          <p className="text-gray-500">즐겨찾기에 추가한 파트너가 없습니다.</p>
+          <button onClick={() => setTab("home")} className="mt-4 btn-primary px-6 py-2.5 text-sm">파트너 찾기</button>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {favorites.map((profile) => <ProfileCard key={profile.id} profile={profile} />)}
+        </div>
+      )}
     </div>
   );
 
@@ -583,6 +670,15 @@ export default function HomePage() {
         </div>
 
         <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">언어 수준</label>
+          <select className="input-field" value={profileForm.language_level} onChange={(e) => handleProfileChange("language_level", e.target.value)}>
+            {['초급', '중급', '고급'].map((level) => (
+              <option key={level} value={level}>{level}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">관심사</label>
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((interest) => (
@@ -639,7 +735,12 @@ export default function HomePage() {
             <p className="text-xs text-gray-400">환영합니다, {user.email?.split("@")[0] || "사용자"}님</p>
             <h1 className="text-2xl font-extrabold text-gray-900">KoriBridge</h1>
           </div>
-          <button type="button" onClick={signOut} className="text-sm text-gray-400 hover:text-gray-600">로그아웃</button>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={toggleDarkMode} className="text-sm text-gray-500 hover:text-gray-700">
+              {darkMode ? "🌙 다크" : "☀️ 라이트"}
+            </button>
+            <button type="button" onClick={signOut} className="text-sm text-gray-400 hover:text-gray-600">로그아웃</button>
+          </div>
         </div>
         {/* 검색창 */}
         <input
@@ -651,7 +752,7 @@ export default function HomePage() {
         />
         {/* 탭 */}
         <div className="flex gap-2 mt-3">
-          {[{ key: "home", label: "홈" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "profile", label: "내 프로필" }].map((item) => (
+          {[{ key: "home", label: "홈" }, { key: "favorites", label: "즐겨찾기" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "profile", label: "내 프로필" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
               className={`relative rounded-2xl px-4 py-2 text-sm font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
               {item.label}
@@ -667,6 +768,7 @@ export default function HomePage() {
 
       <div className="px-4 py-6 max-w-6xl mx-auto">
         {tab === "home" && renderHomeContent()}
+        {tab === "favorites" && renderFavoritesContent()}
         {tab === "chatlist" && renderChatListContent()}
         {tab === "profile" && renderProfileContent()}
       </div>
@@ -674,7 +776,7 @@ export default function HomePage() {
       {/* 하단 네비게이션 */}
       <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
-          {[{ key: "home", label: "홈", icon: "🏠" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
+          {[{ key: "home", label: "홈", icon: "🏠" }, { key: "favorites", label: "즐겨찾기", icon: "⭐" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
               className={`relative flex-1 flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "text-gray-500 hover:bg-gray-100"}`}>
               <span className="text-base">{item.icon}</span>

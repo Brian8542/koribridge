@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -23,19 +23,22 @@ export default function ChatPage() {
   const [translations, setTranslations] = useState({});
   const [translationLoading, setTranslationLoading] = useState({});
   const [visibleTranslation, setVisibleTranslation] = useState({});
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const [saveLoading, setSaveLoading] = useState(false);
   const messageEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const addMessage = (msg) => {
+  const addMessage = useCallback((msg) => {
     if (!msg?.id) return;
     setMessages((prev) => prev.some((m) => m.id === msg.id) ? prev : sortMsgs([...prev, msg]));
-  };
+  }, []);
 
-  const markRead = async () => {
+  const markRead = useCallback(async () => {
     if (!user?.id || !partnerId) return;
     await supabase.from("messages").update({ read_at: new Date().toISOString() })
       .match({ sender_id: partnerId, receiver_id: user.id }).is("read_at", null);
-  };
+  }, [user?.id, partnerId]);
 
   useEffect(() => {
     if (!user || !partnerId) return;
@@ -44,7 +47,7 @@ export default function ChatPage() {
         .select("id, display_name, nationality, native_language, learning_language, avatar_url")
         .eq("id", partnerId).maybeSingle();
       const mr = await supabase.from("messages")
-        .select("id, sender_id, receiver_id, content, image_url, created_at, read_at")
+        .select("id, sender_id, receiver_id, content, image_url, created_at, read_at, edited_at")
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
         .order("created_at", { ascending: true });
       setPartner(pr.data || { id: partnerId, display_name: "알 수 없는 사용자", nationality: "" });
@@ -53,7 +56,7 @@ export default function ChatPage() {
       await markRead();
     };
     load();
-  }, [user, partnerId]);
+  }, [user, partnerId, markRead]);
 
   useEffect(() => {
     if (!user?.id || !partnerId) return;
@@ -61,12 +64,12 @@ export default function ChatPage() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: "receiver_id=eq." + user.id },
         (p) => { addMessage(p.new); markRead(); })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: "sender_id=eq." + user.id },
-        (p) => setMessages((prev) => prev.map((m) => m.id === p.new.id ? { ...m, read_at: p.new.read_at } : m)))
+        (p) => setMessages((prev) => prev.map((m) => m.id === p.new.id ? { ...m, ...p.new } : m)))
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" },
         (p) => setMessages((prev) => prev.filter((m) => m.id !== p.old.id)))
       .subscribe();
     return () => supabase.removeChannel(ch);
-  }, [user?.id, partnerId]);
+  }, [user?.id, partnerId, addMessage, markRead]);
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,6 +105,33 @@ export default function ChatPage() {
     if (!window.confirm("메시지를 삭제하시겠습니까?")) return;
     const { error } = await supabase.from("messages").delete().eq("id", id).eq("sender_id", user.id);
     if (!error) setMessages((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const startEditMessage = (msg) => {
+    setEditingMessageId(msg.id);
+    setEditContent(msg.content);
+  };
+
+  const cancelEditMessage = () => {
+    setEditingMessageId(null);
+    setEditContent("");
+  };
+
+  const saveEditedMessage = async (msgId) => {
+    if (!editContent.trim() || !user?.id) return;
+    setSaveLoading(true);
+    try {
+      const { error } = await supabase.from("messages").update({ content: editContent.trim(), edited_at: new Date().toISOString() })
+        .eq("id", msgId)
+        .eq("sender_id", user.id);
+      if (error) throw error;
+      setMessages((prev) => prev.map((msg) => msg.id === msgId ? { ...msg, content: editContent.trim(), edited_at: new Date().toISOString() } : msg));
+      cancelEditMessage();
+    } catch {
+      alert("메시지 수정에 실패했습니다.");
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const handleImageSelect = async (e) => {
@@ -193,9 +223,25 @@ export default function ChatPage() {
                       <img src={msg.image_url} alt="이미지" className="max-w-full max-h-64 object-cover" />
                     </a>
                   )}
-                  {!msg.image_url && <div className="px-4 pt-3 pb-1"><p className="leading-relaxed">{msg.content}</p></div>}
+                  {!msg.image_url && (
+                    <div className="px-4 pt-3 pb-1">
+                      {editingMessageId === msg.id ? (
+                        <textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          rows={3}
+                          className="w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-900"
+                        />
+                      ) : (
+                        <p className="leading-relaxed">{msg.content}</p>
+                      )}
+                    </div>
+                  )}
                   <div className={"px-4 pb-3 flex items-center justify-between gap-2 text-xs " + (isMine ? "text-red-200" : "text-gray-400")}>
-                    <span>{formatTime(msg.created_at)}</span>
+                    <span>
+                      {formatTime(msg.created_at)}
+                      {msg.edited_at && <span className="ml-2 text-[10px] text-current opacity-80">(수정됨)</span>}
+                    </span>
                     <div className="flex items-center gap-2">
                       {isMine && <span className={msg.read_at ? "text-blue-300" : ""}>{msg.read_at ? "✓✓" : "✓"}</span>}
                       {!msg.image_url && (
@@ -203,7 +249,18 @@ export default function ChatPage() {
                           {tLoad ? "번역중..." : tTxt ? (tVis ? "숨기기" : "번역보기") : "번역보기"}
                         </button>
                       )}
-                      {isMine && (
+                      {isMine && !msg.image_url && editingMessageId !== msg.id && (
+                        <button onClick={() => startEditMessage(msg)} className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white">수정</button>
+                      )}
+                      {isMine && editingMessageId === msg.id && (
+                        <>
+                          <button onClick={() => saveEditedMessage(msg.id)} disabled={saveLoading} className="text-xs rounded-full bg-white bg-opacity-10 px-2 py-1 text-white hover:bg-opacity-20">
+                            {saveLoading ? "저장중" : "저장"}
+                          </button>
+                          <button onClick={cancelEditMessage} className="text-xs text-white hover:underline">취소</button>
+                        </>
+                      )}
+                      {isMine && editingMessageId !== msg.id && (
                         <button onClick={() => deleteMessage(msg.id)} className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white">삭제</button>
                       )}
                     </div>
