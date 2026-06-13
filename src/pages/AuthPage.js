@@ -228,7 +228,7 @@ export default function AuthPage() {
             </div>
           )}
 
-          <button type="submit" className="btn-primary w-full py-3" disabled={loading}>
+          <button type="submit" className="btn-primary w-full py-3"  disabled={loading}>
             {loading
               ? "처리 중..."
               : mode === "login"

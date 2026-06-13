@@ -103,3 +103,14 @@ CREATE POLICY "Users can update own avatar"
 CREATE POLICY "Users can delete own avatar"
   ON storage.objects FOR DELETE
   USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- 5. profiles 테이블에 is_public, last_seen_at 컬럼 추가
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS is_public boolean DEFAULT true;
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS last_seen_at timestamptz DEFAULT NULL;
+
+-- image_url 컬럼 추가 (chat messages)
+ALTER TABLE public.messages
+  ADD COLUMN IF NOT EXISTS image_url text DEFAULT NULL;

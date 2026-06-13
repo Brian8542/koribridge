@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { ToastProvider } from "./components/Toast";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AuthPage from "./pages/AuthPage";
 import ChatPage from "./pages/ChatPage";
@@ -78,7 +79,9 @@ export default function App() {
       <ErrorBoundary>
         <ThemeProvider>
           <AuthProvider>
-            <AppRoutes />
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
       </ErrorBoundary>

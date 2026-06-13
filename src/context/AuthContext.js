@@ -7,6 +7,15 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const updateLastSeen = async (userId) => {
+    if (!userId) return;
+    try {
+      await supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", userId);
+    } catch (error) {
+      console.error("Failed to update last_seen_at:", error);
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       supabase.auth.storage = window.localStorage;
@@ -14,13 +23,17 @@ export function AuthProvider({ children }) {
 
     // 초기 세션 확인
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const sessionUser = session?.user ?? null;
+      setUser(sessionUser);
+      if (sessionUser?.id) updateLastSeen(sessionUser.id);
       setLoading(false);
     });
 
     // 인증 상태 변경 구독
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const sessionUser = session?.user ?? null;
+      setUser(sessionUser);
+      if (sessionUser?.id) updateLastSeen(sessionUser.id);
     });
 
     const handleBeforeUnload = () => {
@@ -49,6 +62,9 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error && data?.user?.id) {
+      await updateLastSeen(data.user.id);
+    }
     return { data, error };
   };
 
