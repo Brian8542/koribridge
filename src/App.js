@@ -9,6 +9,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import ProfileDetailPage from "./pages/ProfileDetailPage";
 import ProfileSetupPage from "./pages/ProfileSetupPage";
 import SplashScreen from "./pages/SplashScreen";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 
 function LoadingScreen() {
   return (
@@ -19,13 +21,6 @@ function LoadingScreen() {
       </div>
     </div>
   );
-}
-
-function RequireAuth({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
-  if (!user) return <Navigate to="/auth" replace />;
-  return children;
 }
 
 function ProfileRequiredRoute({ children }) {
@@ -52,6 +47,8 @@ function AppRoutes() {
       <Route path="/home" element={<ProfileRequiredRoute><HomePage /></ProfileRequiredRoute>} />
       <Route path="/profile/:id" element={<ProfileRequiredRoute><ProfileDetailPage /></ProfileRequiredRoute>} />
       <Route path="/chat/:partnerId" element={<ProfileRequiredRoute><ChatPage /></ProfileRequiredRoute>} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

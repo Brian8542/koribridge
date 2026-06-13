@@ -283,6 +283,13 @@ export default function AuthPage() {
               </button>
             </>
           )}
+
+          {/* 약관 링크 */}
+          <div className="flex items-center justify-center gap-3 pt-2 text-xs text-gray-400">
+            <a href="/terms" className="hover:text-gray-600 underline">이용약관</a>
+            <span>·</span>
+            <a href="/privacy" className="hover:text-gray-600 underline">개인정보처리방침</a>
+          </div>
         </form>
       </div>
     </div>

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
+import DeleteAccountModal from "../components/DeleteAccountModal";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -82,6 +84,8 @@ export default function HomePage() {
   const [reportModal, setReportModal] = useState(null); // { profileId, displayName }
   const [reportReason, setReportReason] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // 알림 권한
   const notifGranted = useRef(false);
@@ -236,9 +240,18 @@ export default function HomePage() {
       if (blockedIds.includes(p.id)) return false;
       if (nationalityFilter && p.nationality !== nationalityFilter) return false;
       if (languageFilter && p.learning_language !== languageFilter) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        if (
+          !p.display_name?.toLowerCase().includes(q) &&
+          !p.nationality?.toLowerCase().includes(q) &&
+          !p.native_language?.toLowerCase().includes(q) &&
+          !p.learning_language?.toLowerCase().includes(q)
+        ) return false;
+      }
       return true;
     });
-  }, [profiles, nationalityFilter, languageFilter, blockedIds]);
+  }, [profiles, nationalityFilter, languageFilter, blockedIds, searchQuery]);
 
   // 프로필 수정
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
@@ -395,6 +408,7 @@ export default function HomePage() {
 
   const renderHomeContent = () => (
     <div className="space-y-8">
+      <AnnouncementBanner />
       {/* AI 추천 파트너 */}
       {recommendedProfiles.length > 0 && (
         <div>
@@ -593,6 +607,24 @@ export default function HomePage() {
           {avatarUploading ? "사진 업로드 중..." : profileLoading ? "저장 중..." : "프로필 저장"}
         </button>
       </form>
+
+      {/* 약관 링크 */}
+      <div className="flex items-center justify-center gap-4 pt-2 text-xs text-gray-400">
+        <button onClick={() => navigate("/terms")} className="hover:text-gray-600 underline">이용약관</button>
+        <span>·</span>
+        <button onClick={() => navigate("/privacy")} className="hover:text-gray-600 underline">개인정보처리방침</button>
+      </div>
+
+      {/* 회원 탈퇴 */}
+      <div className="pt-2 text-center">
+        <button
+          type="button"
+          onClick={() => setShowDeleteModal(true)}
+          className="text-xs text-gray-300 hover:text-red-400 underline"
+        >
+          회원 탈퇴
+        </button>
+      </div>
     </div>
   );
 
@@ -602,15 +634,23 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* 헤더 */}
       <div className="bg-white border-b border-gray-100 px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-xs text-gray-400">환영합니다, {user.email?.split("@")[0] || "사용자"}님</p>
             <h1 className="text-2xl font-extrabold text-gray-900">KoriBridge</h1>
           </div>
           <button type="button" onClick={signOut} className="text-sm text-gray-400 hover:text-gray-600">로그아웃</button>
         </div>
+        {/* 검색창 */}
+        <input
+          type="text"
+          className="input-field text-sm"
+          placeholder="닉네임, 국적, 언어로 검색..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         {/* 탭 */}
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-3">
           {[{ key: "home", label: "홈" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "profile", label: "내 프로필" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
               className={`relative rounded-2xl px-4 py-2 text-sm font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
@@ -693,6 +733,9 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* 회원 탈퇴 모달 */}
+      {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
     </div>
   );
 }
