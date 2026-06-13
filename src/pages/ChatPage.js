@@ -139,6 +139,18 @@ export default function ChatPage() {
     }
   };
 
+  const deleteMessage = async (messageId) => {
+    if (!window.confirm("메시지를 삭제하시겠습니까?")) return;
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId)
+      .eq("sender_id", user.id); // 본인 메시지만 삭제 가능
+    if (!error) {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    }
+  };
+
   const sendMessage = async (e) => {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !user?.id || !partnerId) return;
@@ -215,7 +227,7 @@ export default function ChatPage() {
             const isVisible = visibleTranslation[message.id];
             const isLoading = translationLoading[message.id];
             return (
-              <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+              <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"} group`}>
                 <div className="max-w-[80%]">
                   <div className={`rounded-3xl px-4 py-3 text-sm ${isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900"}`}>
                     <p className="leading-relaxed">{message.content}</p>
@@ -223,7 +235,7 @@ export default function ChatPage() {
                       <span>{formatTime(message.created_at)}</span>
                       <div className="flex items-center gap-2">
                         {isMine && (
-                          <span className={message.read_at ? "text-blue-300" : (isMine ? "text-red-200" : "text-gray-300")}>
+                          <span className={message.read_at ? "text-blue-300" : "text-red-200"}>
                             {message.read_at ? "✓✓" : "✓"}
                           </span>
                         )}
@@ -234,6 +246,16 @@ export default function ChatPage() {
                         >
                           {isLoading ? "번역 중..." : translatedText ? (isVisible ? "숨기기" : "번역 보기") : "번역 보기"}
                         </button>
+                        {isMine && (
+                          <button
+                            type="button"
+                            onClick={() => deleteMessage(message.id)}
+                            className="text-xs text-red-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="삭제"
+                          >
+                            삭제
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
