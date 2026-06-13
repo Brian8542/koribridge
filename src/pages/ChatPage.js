@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../components/Toast";
 
 function formatTime(ts) {
   return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(ts));
@@ -14,6 +15,7 @@ export default function ChatPage() {
   const { partnerId } = useParams();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -134,6 +136,21 @@ export default function ChatPage() {
     }
   };
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("복사됨", "success", 2000);
+    });
+  };
+
+  const handleEditKeyDown = (e, msgId) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      saveEditedMessage(msgId);
+    } else if (e.key === "Escape") {
+      cancelEditMessage();
+    }
+  };
+
   const handleImageSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -217,7 +234,10 @@ export default function ChatPage() {
           return (
             <div key={msg.id} className={"flex " + (isMine ? "justify-end" : "justify-start") + " group"}>
               <div className="max-w-xs sm:max-w-sm">
-                <div className={"rounded-3xl overflow-hidden text-sm " + (isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900")}>
+                <div 
+                  onDoubleClick={() => isMine && !msg.image_url && startEditMessage(msg)}
+                  className={"rounded-3xl overflow-hidden text-sm cursor-default " + (isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900")}
+                >
                   {msg.image_url && (
                     <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
                       <img src={msg.image_url} alt="이미지" className="max-w-full max-h-64 object-cover" />
@@ -229,6 +249,7 @@ export default function ChatPage() {
                         <textarea
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
+                          onKeyDown={(e) => handleEditKeyDown(e, msg.id)}
                           rows={3}
                           className="w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-900"
                         />
@@ -244,13 +265,18 @@ export default function ChatPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       {isMine && <span className={msg.read_at ? "text-blue-300" : ""}>{msg.read_at ? "✓✓" : "✓"}</span>}
+                      {!msg.image_url && editingMessageId !== msg.id && (
+                        <button 
+                          onClick={() => copyToClipboard(msg.content)} 
+                          className={"opacity-0 group-hover:opacity-100 transition-opacity text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-gray-400 hover:text-gray-600")}
+                        >
+                          복사
+                        </button>
+                      )}
                       {!msg.image_url && (
                         <button onClick={() => translateMessage(msg)} className={"text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-blue-500 hover:text-blue-700")}>
                           {tLoad ? "번역중..." : tTxt ? (tVis ? "숨기기" : "번역보기") : "번역보기"}
                         </button>
-                      )}
-                      {isMine && !msg.image_url && editingMessageId !== msg.id && (
-                        <button onClick={() => startEditMessage(msg)} className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white">수정</button>
                       )}
                       {isMine && editingMessageId === msg.id && (
                         <>

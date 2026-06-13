@@ -766,7 +766,7 @@ export default function HomePage() {
         />
         {/* 탭 (Tabs) */}
         <div className="flex gap-2 mt-3">
-          {[{ key: "home", label: "홈" }, { key: "favorites", label: "즐겨찾기" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "profile", label: "내 프로필" }].map((item) => (
+          {[{ key: "home", label: "홈" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "favorites", label: "즐겨찾기" }, { key: "profile", label: "내 프로필" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
               className={`relative rounded-2xl px-4 py-2 text-sm font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
               {item.label}
@@ -790,7 +790,7 @@ export default function HomePage() {
       {/* 하단 네비게이션 (Bottom Navigation) */}
       <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
-          {[{ key: "home", label: "홈", icon: "🏠" }, { key: "favorites", label: "즐겨찾기", icon: "⭐" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
+          {[{ key: "home", label: "홈", icon: "🏠" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "favorites", label: "즐겨찾기", icon: "⭐" }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
               className={`relative flex-1 flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "text-gray-500 hover:bg-gray-100"}`}>
               <span className="text-base">{item.icon}</span>
