@@ -23,6 +23,9 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [chatLoading, setChatLoading] = useState(true);
   const [sendLoading, setSendLoading] = useState(false);
+  const [translations, setTranslations] = useState({});
+  const [translationLoading, setTranslationLoading] = useState({});
+  const [visibleTranslation, setVisibleTranslation] = useState({});
   const messageEndRef = useRef(null);
 
   const addMessage = (message) => {
@@ -105,6 +108,49 @@ export default function ChatPage() {
     }
   }, [messages]);
 
+  const translateMessage = async (message) => {
+    if (!message?.id) return;
+
+    const isVisible = visibleTranslation[message.id];
+    if (translations[message.id]) {
+      setVisibleTranslation((prev) => ({ ...prev, [message.id]: !isVisible }));
+      return;
+    }
+
+    const targetLang = message.sender_id === user.id ? "ko" : "en";
+    const sourceLang = targetLang === "ko" ? "en" : "ko";
+    setTranslationLoading((prev) => ({ ...prev, [message.id]: true }));
+
+    try {
+      const response = await fetch("https://libretranslate.de/translate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          q: message.content,
+          source: sourceLang,
+          target: targetLang,
+          format: "text",
+        }),
+      });
+      const result = await response.json();
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setTranslations((prev) => ({ ...prev, [message.id]: result.translatedText || result.translated_text || "번역 불가" }));
+      setVisibleTranslation((prev) => ({ ...prev, [message.id]: true }));
+    } catch (err) {
+      console.error("Translation Error:", err);
+      setTranslations((prev) => ({ ...prev, [message.id]: "번역 실패" }));
+      setVisibleTranslation((prev) => ({ ...prev, [message.id]: true }));
+    } finally {
+      setTranslationLoading((prev) => ({ ...prev, [message.id]: false }));
+    }
+  };
+
   const sendMessage = async (e) => {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !user?.id || !partnerId) return;
@@ -184,15 +230,36 @@ export default function ChatPage() {
             ) : (
               messages.map((message) => {
                 const isMine = message.sender_id === user.id;
+                const messageId = message.id;
+                const translatedText = translations[messageId];
+                const isVisible = visibleTranslation[messageId];
+                const isLoading = translationLoading[messageId];
+
                 return (
                   <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-[80%] rounded-3xl px-4 py-3 text-sm ${
-                        isMine ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"
-                      }`}
-                    >
-                      <p>{message.content}</p>
-                      <p className="mt-2 text-[11px] text-gray-400 text-right">{formatTime(message.created_at)}</p>
+                    <div className="max-w-[80%]">
+                      <div
+                        className={`rounded-3xl px-4 py-3 text-sm ${
+                          isMine ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"
+                        }`}
+                      >
+                        <p>{message.content}</p>
+                        <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-gray-500">
+                          <span>{formatTime(message.created_at)}</span>
+                          <button
+                            type="button"
+                            onClick={() => translateMessage(message)}
+                            className="text-xs text-blue-600 hover:text-blue-800"
+                          >
+                            {isLoading ? "번역 중..." : translatedText ? (isVisible ? "번역 숨기기" : "번역 보기") : "번역 보기"}
+                          </button>
+                        </div>
+                      </div>
+                      {translatedText && isVisible && (
+                        <div className="mt-2 rounded-2xl bg-gray-50 px-4 py-3 text-xs text-gray-700 border border-gray-100">
+                          {translatedText}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
