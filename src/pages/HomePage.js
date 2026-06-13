@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import { useOnlineUsers } from "../hooks/useOnlineUsers";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -54,6 +55,7 @@ function getMatchScore(me, other) {
 export default function HomePage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const onlineIds = useOnlineUsers(user?.id);
 
   const [myProfile, setMyProfile] = useState(null);
   const [profiles, setProfiles] = useState([]);
@@ -334,6 +336,7 @@ export default function HomePage() {
   // 프로필 카드 컴포넌트
   const ProfileCard = ({ profile, showActions = true }) => {
     const level = getLanguageLevel(profile);
+    const isOnline = onlineIds.has(profile.id);
     const levelColor = { 고급: "bg-blue-50 text-blue-700", 중급: "bg-yellow-50 text-yellow-700", 초급: "bg-green-50 text-green-700" };
     return (
       <div className="card p-6 transition hover:-translate-y-1 hover:shadow-lg">
@@ -346,7 +349,7 @@ export default function HomePage() {
                 {profile.display_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
-            <span className="absolute -bottom-0.5 right-0 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
+            <span className={`absolute -bottom-0.5 right-0 h-4 w-4 rounded-full border-2 border-white ${isOnline ? "bg-emerald-400" : "bg-gray-300"}`} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
