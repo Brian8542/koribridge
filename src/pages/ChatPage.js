@@ -113,11 +113,13 @@ export default function ChatPage() {
         },
       ]).select();
 
-      if (!error) {
-        if (data?.length > 0) addMessage(data[0]);
-        setNewMessage("");
+      if (!error && data?.length > 0) {
+        addMessage(data[0]);
       }
+    } catch (err) {
+      console.error("메시지 전송 실패:", err);
     } finally {
+      setNewMessage("");
       setSendLoading(false);
     }
   };
