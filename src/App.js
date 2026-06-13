@@ -1,113 +1,42 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { supabase } from "./lib/supabase";
 import AuthPage from "./pages/AuthPage";
-import ProfileSetupPage from "./pages/ProfileSetupPage";
+import ChatPage from "./pages/ChatPage";
 import HomePage from "./pages/HomePage";
 import ProfileDetailPage from "./pages/ProfileDetailPage";
-import ChatPage from "./pages/ChatPage";
+import ProfileSetupPage from "./pages/ProfileSetupPage";
+import SplashScreen from "./pages/SplashScreen";
 
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-3 animate-bounce">🌏</div>
-        <p className="text-gray-400 text-sm">로딩 중...</p>
-      </div>
-    </div>
-  );
+function RequireAuth({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-gray-400">로딩 중...</div></div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  return children;
 }
 
 function ProfileRequiredRoute({ children }) {
-  const { user, loading } = useAuth();
-  const [profileExists, setProfileExists] = useState(undefined);
-
-  useEffect(() => {
-    if (!user) {
-      setProfileExists(undefined);
-      return;
-    }
-
-    setProfileExists(undefined);
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", user.id)
-        .maybeSingle();
-      setProfileExists(!!data);
-    };
-
-    fetchProfile();
-  }, [user]);
-
-  if (loading || (user && profileExists === undefined)) {
-    return <LoadingScreen />;
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return profileExists ? children : <Navigate to="/profile-setup" replace />;
+  const { user, loading, profile } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-gray-400">로딩 중...</div></div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (profile === null) return <Navigate to="/setup" replace />;
+  return children;
 }
 
 function ProfileSetupRoute({ children }) {
   const { user, loading } = useAuth();
-  const [profileExists, setProfileExists] = useState(undefined);
-
-  useEffect(() => {
-    if (!user) {
-      setProfileExists(undefined);
-      return;
-    }
-
-    setProfileExists(undefined);
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", user.id)
-        .maybeSingle();
-      setProfileExists(!!data);
-    };
-
-    fetchProfile();
-  }, [user]);
-
-  if (loading || (user && profileExists === undefined)) {
-    return <LoadingScreen />;
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return profileExists ? <Navigate to="/home" replace /> : children;
-}
-
-function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
-
-  if (loading) return null;
-  return user ? <Navigate to="/home" replace /> : children;
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-gray-400">로딩 중...</div></div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  return children;
 }
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/auth" replace />} />
+      <Route path="/" element={<SplashScreen />} />
+      <Route path="/auth" element={<AuthPage />} />
       <Route
-        path="/auth"
-        element={
-          <PublicRoute>
-            <AuthPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/profile-setup"
+        path="/setup"
         element={
           <ProfileSetupRoute>
             <ProfileSetupPage />
@@ -138,7 +67,7 @@ function AppRoutes() {
           </ProfileRequiredRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/auth" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

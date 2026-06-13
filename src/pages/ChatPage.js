@@ -4,10 +4,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 
 function formatTime(timestamp) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(timestamp));
+  return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(timestamp));
 }
 
 function sortMessages(messages) {
@@ -18,6 +15,7 @@ export default function ChatPage() {
   const { partnerId } = useParams();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -30,13 +28,19 @@ export default function ChatPage() {
 
   const addMessage = (message) => {
     if (!message?.id) return;
-
     setMessages((prev) => {
-      if (prev.some((item) => item.id === message.id)) {
-        return prev;
-      }
+      if (prev.some((item) => item.id === message.id)) return prev;
       return sortMessages([...prev, message]);
     });
+  };
+
+  const markMessagesRead = async () => {
+    if (!user?.id || !partnerId) return;
+    await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() })
+      .match({ sender_id: partnerId, receiver_id: user.id })
+      .is("read_at", null);
   };
 
   useEffect(() => {
@@ -45,34 +49,25 @@ export default function ChatPage() {
     const loadChat = async () => {
       const partnerResult = await supabase
         .from("profiles")
-        .select("id, display_name, nationality, native_language, learning_language")
+        .select("id, display_name, nationality, native_language, learning_language, avatar_url")
         .eq("id", partnerId)
         .maybeSingle();
 
       const messagesResult = await supabase
         .from("messages")
-        .select("id, sender_id, receiver_id, content, created_at")
-        .or(
-          `and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`
-        )
+        .select("id, sender_id, receiver_id, content, created_at, read_at")
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
         .order("created_at", { ascending: true });
 
-      if (partnerResult.error) {
-        setPartner(null);
-      } else if (!partnerResult.data) {
-        setPartner({
-          id: partnerId,
-          display_name: "알 수 없는 사용자",
-          nationality: "",
-          native_language: "",
-          learning_language: "",
-        });
+      if (!partnerResult.data) {
+        setPartner({ id: partnerId, display_name: "알 수 없는 사용자", nationality: "" });
       } else {
         setPartner(partnerResult.data);
       }
 
       setMessages(messagesResult.data ? sortMessages(messagesResult.data) : []);
       setChatLoading(false);
+      await markMessagesRead();
     };
 
     loadChat();
@@ -82,24 +77,30 @@ export default function ChatPage() {
     if (!user?.id || !partnerId) return;
 
     const channel = supabase
-      .channel("messages")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        (payload) => {
-          setMessages((prev) => [...prev, payload.new]);
-        }
-      )
+      .channel(`chat-${partnerId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `receiver_id=eq.${user.id}`,
+      }, (payload) => {
+        addMessage(payload.new);
+        markMessagesRead();
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: `sender_id=eq.${user.id}`,
+      }, (payload) => {
+        // 읽음 상태 업데이트 반영
+        setMessages((prev) =>
+          prev.map((m) => m.id === payload.new.id ? { ...m, read_at: payload.new.read_at } : m)
+        );
+      })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => supabase.removeChannel(channel);
   }, [user?.id, partnerId]);
 
   useEffect(() => {
@@ -110,7 +111,6 @@ export default function ChatPage() {
 
   const translateMessage = async (message) => {
     if (!message?.id) return;
-
     const isVisible = visibleTranslation[message.id];
     if (translations[message.id]) {
       setVisibleTranslation((prev) => ({ ...prev, [message.id]: !isVisible }));
@@ -124,26 +124,14 @@ export default function ChatPage() {
     try {
       const response = await fetch("https://libretranslate.de/translate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          q: message.content,
-          source: sourceLang,
-          target: targetLang,
-          format: "text",
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q: message.content, source: sourceLang, target: targetLang, format: "text" }),
       });
       const result = await response.json();
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      setTranslations((prev) => ({ ...prev, [message.id]: result.translatedText || result.translated_text || "번역 불가" }));
+      if (result.error) throw new Error(result.error);
+      setTranslations((prev) => ({ ...prev, [message.id]: result.translatedText || "번역 불가" }));
       setVisibleTranslation((prev) => ({ ...prev, [message.id]: true }));
-    } catch (err) {
-      console.error("Translation Error:", err);
+    } catch {
       setTranslations((prev) => ({ ...prev, [message.id]: "번역 실패" }));
       setVisibleTranslation((prev) => ({ ...prev, [message.id]: true }));
     } finally {
@@ -154,26 +142,15 @@ export default function ChatPage() {
   const sendMessage = async (e) => {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !user?.id || !partnerId) return;
-
     const msgToSend = newMessage.trim();
     setNewMessage("");
     setSendLoading(true);
-
     try {
       const { data, error } = await supabase
         .from("messages")
-        .insert([
-          {
-            sender_id: user.id,
-            receiver_id: partnerId,
-            content: msgToSend,
-          },
-        ])
+        .insert([{ sender_id: user.id, receiver_id: partnerId, content: msgToSend }])
         .select();
-
-      if (!error && data?.length > 0) {
-        addMessage(data[0]);
-      }
+      if (!error && data?.length > 0) addMessage(data[0]);
     } catch (err) {
       console.error("메시지 전송 실패:", err);
     } finally {
@@ -181,17 +158,17 @@ export default function ChatPage() {
     }
   };
 
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
-    }
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   if (loading || chatLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-gray-500">채팅 로딩 중...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">채팅 불러오는 중...</p>
+        </div>
       </div>
     );
   }
@@ -201,85 +178,95 @@ export default function ChatPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 max-w-md w-full text-center">
           <p className="text-red-600 font-semibold">채팅 상대를 찾을 수 없습니다.</p>
-          <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">
-            뒤로 가기
-          </button>
+          <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">뒤로 가기</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-6">
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-800">
-          ← 뒤로
-        </button>
-        <div>
-          <p className="text-sm text-gray-500">채팅 상대</p>
-          <p className="text-lg font-bold text-gray-900">{partner.display_name}</p>
-        </div>
-        <div className="w-16" />
-      </div>
-
-      <div className="px-6 py-6 max-w-4xl mx-auto grid gap-4">
-        <div className="card overflow-hidden">
-          <div className="space-y-4 max-h-[70vh] overflow-y-auto px-4 py-5">
-            {messages.length === 0 ? (
-              <div className="text-center text-gray-500 py-20">첫 메시지를 보내보세요.</div>
-            ) : (
-              messages.map((message) => {
-                const isMine = message.sender_id === user.id;
-                const messageId = message.id;
-                const translatedText = translations[messageId];
-                const isVisible = visibleTranslation[messageId];
-                const isLoading = translationLoading[messageId];
-
-                return (
-                  <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                    <div className="max-w-[80%]">
-                      <div
-                        className={`rounded-3xl px-4 py-3 text-sm ${
-                          isMine ? "bg-red-600 text-white" : "bg-gray-100 text-gray-900"
-                        }`}
-                      >
-                        <p>{message.content}</p>
-                        <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-gray-500">
-                          <span>{formatTime(message.created_at)}</span>
-                          <button
-                            type="button"
-                            onClick={() => translateMessage(message)}
-                            className="text-xs text-blue-600 hover:text-blue-800"
-                          >
-                            {isLoading ? "번역 중..." : translatedText ? (isVisible ? "번역 숨기기" : "번역 보기") : "번역 보기"}
-                          </button>
-                        </div>
-                      </div>
-                      {translatedText && isVisible && (
-                        <div className="mt-2 rounded-2xl bg-gray-50 px-4 py-3 text-xs text-gray-700 border border-gray-100">
-                          {translatedText}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-            <div ref={messageEndRef} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* 헤더 */}
+      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-4 sticky top-0 z-10">
+        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-800 flex-shrink-0">← 뒤로</button>
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {partner.avatar_url ? (
+            <img src={partner.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-sm font-bold text-red-600 flex-shrink-0">
+              {partner.display_name?.[0]?.toUpperCase() || "?"}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="font-bold text-gray-900 truncate">{partner.display_name}</p>
+            <p className="text-xs text-gray-400 truncate">{partner.nationality}</p>
           </div>
         </div>
+      </div>
 
-        <form onSubmit={sendMessage} className="grid gap-3">
+      {/* 메시지 영역 */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-400 py-20 text-sm">첫 메시지를 보내보세요.</div>
+        ) : (
+          messages.map((message) => {
+            const isMine = message.sender_id === user.id;
+            const translatedText = translations[message.id];
+            const isVisible = visibleTranslation[message.id];
+            const isLoading = translationLoading[message.id];
+            return (
+              <div key={message.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                <div className="max-w-[80%]">
+                  <div className={`rounded-3xl px-4 py-3 text-sm ${isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900"}`}>
+                    <p className="leading-relaxed">{message.content}</p>
+                    <div className={`mt-2 flex items-center justify-between gap-3 text-[11px] ${isMine ? "text-red-200" : "text-gray-400"}`}>
+                      <span>{formatTime(message.created_at)}</span>
+                      <div className="flex items-center gap-2">
+                        {isMine && (
+                          <span className={message.read_at ? "text-blue-300" : (isMine ? "text-red-200" : "text-gray-300")}>
+                            {message.read_at ? "✓✓" : "✓"}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => translateMessage(message)}
+                          className={`text-xs ${isMine ? "text-red-200 hover:text-white" : "text-blue-500 hover:text-blue-700"}`}
+                        >
+                          {isLoading ? "번역 중..." : translatedText ? (isVisible ? "숨기기" : "번역 보기") : "번역 보기"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {translatedText && isVisible && (
+                    <div className={`mt-1.5 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-2.5 text-xs text-gray-600 ${isMine ? "text-right" : ""}`}>
+                      {translatedText}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={messageEndRef} />
+      </div>
+
+      {/* 입력 영역 */}
+      <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0">
+        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto">
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            rows={4}
-            className="input-field resize-none"
-            placeholder="메시지를 입력하세요..."
+            rows={2}
+            className="input-field resize-none flex-1 text-sm"
+            placeholder="메시지를 입력하세요... (Enter로 전송)"
           />
-          <button type="submit" disabled={sendLoading || !newMessage.trim()} className="btn-primary">
-            {sendLoading ? "전송 중..." : "보내기"}
+          <button
+            type="submit"
+            disabled={sendLoading || !newMessage.trim()}
+            className="btn-primary px-5 self-end disabled:opacity-50"
+          >
+            {sendLoading ? "..." : "보내기"}
           </button>
         </form>
       </div>
