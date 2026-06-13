@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -14,14 +14,6 @@ function sortMessages(messages) {
   return [...messages].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
 
-function mergeMessages(existing, next) {
-  const map = new Map();
-  sortMessages([...existing, ...next]).forEach((message) => {
-    map.set(message.id, message);
-  });
-  return Array.from(map.values());
-}
-
 export default function ChatPage() {
   const { partnerId } = useParams();
   const { user, loading } = useAuth();
@@ -33,10 +25,15 @@ export default function ChatPage() {
   const [sendLoading, setSendLoading] = useState(false);
   const messageEndRef = useRef(null);
 
-  const roomId = useMemo(() => {
-    if (!user || !partnerId) return null;
-    return [user.id, partnerId].sort().join(":");
-  }, [user, partnerId]);
+  const addMessage = (message) => {
+    if (!message?.id) return;
+    setMessages((prev) => {
+      if (prev.some((item) => item.id === message.id)) {
+        return prev;
+      }
+      return sortMessages([...prev, message]);
+    });
+  };
 
   useEffect(() => {
     if (!user || !partnerId) return;
@@ -76,31 +73,24 @@ export default function ChatPage() {
   }, [user, partnerId]);
 
   useEffect(() => {
-    if (!user || !partnerId) return;
+    if (!user?.id || !partnerId) return;
 
     const channel = supabase
-      .channel("messages")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const message = payload.new;
-          if (message.sender_id === partnerId && message.receiver_id === user.id) {
-            setMessages((prev) => [...prev, message]);
-          }
-        }
-      )
-      .subscribe();
+      .channel('messages')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `receiver_id=eq.${user.id}`
+      }, (payload) => {
+        setMessages(prev => [...prev, payload.new])
+      })
+      .subscribe()
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, partnerId]);
+  }, [user?.id, partnerId]);
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -108,9 +98,9 @@ export default function ChatPage() {
     }
   }, [messages]);
 
-  const handleSend = async (e) => {
+  const sendMessage = async (e) => {
     if (e) e.preventDefault();
-    if (!newMessage.trim() || !user || !partnerId) return;
+    if (!newMessage.trim() || !user?.id || !partnerId) return;
 
     setSendLoading(true);
     const content = newMessage.trim();
@@ -126,7 +116,7 @@ export default function ChatPage() {
     setSendLoading(false);
 
     if (!error && data?.length > 0) {
-      setMessages((prev) => [...prev, ...data]);
+      addMessage(data[0]);
       setNewMessage("");
     }
   };
@@ -134,7 +124,7 @@ export default function ChatPage() {
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      handleSend();
+      sendMessage();
     }
   };
 
@@ -198,7 +188,7 @@ export default function ChatPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSend} className="grid gap-3">
+        <form onSubmit={sendMessage} className="grid gap-3">
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
