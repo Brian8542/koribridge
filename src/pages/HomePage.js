@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
+import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import AnnouncementBanner from "../components/AnnouncementBanner";
@@ -58,6 +59,7 @@ function getMatchScore(me, other) {
 export default function HomePage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
 
   const { darkMode, toggleDarkMode } = useTheme();
@@ -112,7 +114,7 @@ export default function HomePage() {
     const loadAll = async () => {
       // 내 프로필
       const { data: me } = await supabase
-        .from("profiles") // My Profile
+        .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
@@ -127,7 +129,7 @@ export default function HomePage() {
           bio: me.bio || "",
           avatar_url: me.avatar_url || "",
           interests: me.interests || [],
-          is_public: me.is_public ?? true,
+          is_public: me.is_public ?? true, //
         });
       }
 
@@ -140,7 +142,7 @@ export default function HomePage() {
       setBlockedIds(bIds);
 
       const { data: favs } = await supabase
-        .from("favorites") // Favorites List
+        .from("favorites")
         .select("partner_id")
         .eq("user_id", user.id);
       const fIds = new Set((favs || []).map((f) => f.partner_id));
@@ -157,7 +159,7 @@ export default function HomePage() {
       setFavoritesLoading(false);
 
       // 파트너 목록
-      const { data: allProfiles, error: profilesError } = await supabase // Partner List
+      const { data: allProfiles, error: profilesError } = await supabase
         .from("profiles")
         .eq("is_public", true) // Only fetch public profiles for other users
         .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
@@ -166,7 +168,7 @@ export default function HomePage() {
       if (!profilesError) setProfiles(allProfiles || []); // Filter out blocked users in useMemo
       setProfilesLoading(false);
 
-      // 대화 목록
+      // 대화 목록 (Conversation List)
       const { data: msgs, error: msgsError } = await supabase
         .from("messages")
         .select("id, sender_id, receiver_id, content, created_at, read_at")
@@ -231,7 +233,7 @@ export default function HomePage() {
             icon: "/favicon.ico",
           });
         }
-        // 대화 목록 업데이트 (Update Conversation List)
+        // 대화 목록 업데이트
         setConversations((prev) => {
           const partnerId = msg.sender_id;
           const existing = prev.find((c) => c.partnerId === partnerId);
@@ -250,7 +252,7 @@ export default function HomePage() {
     return () => supabase.removeChannel(channel);
   }, [user?.id]);
 
-  // AI 추천 파트너 (상위 3명) (AI Recommended Partners - Top 3)
+  // AI 추천 파트너 (상위 3명)
   const recommendedProfiles = useMemo(() => {
     if (!myProfile || profiles.length === 0) return [];
     return profiles
@@ -280,7 +282,7 @@ export default function HomePage() {
     });
   }, [profiles, nationalityFilter, languageFilter, levelFilter, blockedIds, searchQuery]);
 
-  // 프로필 수정 (Edit Profile)
+  // 프로필 수정
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
 
   const toggleInterest = (interest) => {
@@ -356,10 +358,11 @@ export default function HomePage() {
   const blockUser = async (targetId, displayName) => {
     if (!window.confirm(`${displayName} 님을 차단하시겠습니까?`)) return;
     await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: targetId });
-    setBlockedIds((prev) => [...prev, targetId]);
-    setReportModal(null);
+    setBlockedIds((prev) => [...prev, targetId]); //
+    setReportModal(null); //
+    showToast(`${displayName} 님을 차단했습니다.`, "success");
   };
-
+  
   // 신고 (Report User)
   const submitReport = async () => {
     if (!reportModal || !reportReason.trim()) return;
@@ -369,12 +372,13 @@ export default function HomePage() {
       reported_id: reportModal.profileId,
       reason: reportReason.trim(),
     });
-    setReportLoading(false);
-    setReportModal(null);
-    setReportReason("");
-    alert("신고가 접수되었습니다.");
+    setReportLoading(false); //
+    setReportModal(null); //
+    setReportReason(""); //
+    showToast("신고가 접수되었습니다.", "success");
   };
 
+  // 프로필 카드 컴포넌트
   // 프로필 카드 컴포넌트 (Profile Card Component)
   const ProfileCard = ({ profile, showActions = true }) => {
     const level = profile.language_level || getLanguageLevel(profile);
@@ -382,6 +386,7 @@ export default function HomePage() {
     const isFavorite = favoriteIds.has(profile.id);
     const levelColor = { 고급: "bg-blue-50 text-blue-700", 중급: "bg-yellow-50 text-yellow-700", 초급: "bg-green-50 text-green-700" };
     return (
+      //
       <div className="card p-6 transition hover:-translate-y-1 hover:shadow-lg">
         <div className="flex items-start gap-4">
           <div className="relative flex-shrink-0">
@@ -411,13 +416,13 @@ export default function HomePage() {
                       setFavoriteIds((prev) => {
                         const next = new Set(prev);
                         next.delete(profile.id);
-                        return next;
+                        return next; //
                       });
-                      setFavorites((prev) => prev.filter((item) => item.id !== profile.id));
+                      setFavorites((prev) => prev.filter((item) => item.id !== profile.id)); //
                     } else {
                       await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
-                      setFavoriteIds((prev) => new Set(prev).add(profile.id));
-                      setFavorites((prev) => [...prev, profile]);
+                      setFavoriteIds((prev) => new Set(prev).add(profile.id)); //
+                      setFavorites((prev) => [...prev, profile]); //
                     }
                   }}
                   className={`rounded-full p-2 ${isFavorite ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
@@ -441,6 +446,13 @@ export default function HomePage() {
             <div className="mt-3 space-y-1 text-sm text-gray-600">
               <p><strong className="text-gray-800">모국어:</strong> {profile.native_language}</p>
               <p><strong className="text-gray-800">학습언어:</strong> {profile.learning_language}</p>
+              {/* 공통 관심사 태그 */}
+              {myProfile && (
+                (() => {
+                  const commonInterests = (myProfile.interests || []).filter((i) => (profile.interests || []).includes(i));
+                  return commonInterests.length > 0 && <p className="mt-2 text-xs text-gray-500">공통 관심사: {commonInterests.slice(0, 2).join(", ")}{commonInterests.length > 2 && " 등"}</p>;
+                })()
+              )}
             </div>
             {profile.bio && <p className="mt-3 text-sm text-gray-500 line-clamp-2">{profile.bio}</p>}
             {profile.reason && (
@@ -462,8 +474,27 @@ export default function HomePage() {
 
   const renderHomeContent = () => (
     <div className="space-y-8">
+      {/* 내 프로필 요약 카드 */}
+      {myProfile && (
+        <div className="card p-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {myProfile.avatar_url ? (
+              <img src={myProfile.avatar_url} alt="내 프로필" className="w-12 h-12 rounded-full object-cover" />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-xl font-bold text-red-600">
+                {myProfile.display_name?.[0]?.toUpperCase() || "?"}
+              </div>
+            )}
+            <div>
+              <p className="font-bold text-gray-900">{myProfile.display_name}</p>
+              <p className="text-sm text-gray-500">{myProfile.nationality} | {myProfile.native_language} → {myProfile.learning_language}</p>
+            </div>
+          </div>
+          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm">프로필 수정</button>
+        </div>
+      )}
       <AnnouncementBanner />
-      {/* AI 추천 파트너 (AI Recommended Partners) */}
+      {/* AI 추천 파트너 */}
       {recommendedProfiles.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
@@ -478,7 +509,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 필터 (Filters) */}
+      {/* 필터 */}
       <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
         <p className="text-sm font-semibold text-gray-700 mb-4">파트너 필터</p>
 <div className="grid gap-4 sm:grid-cols-3">
@@ -508,7 +539,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 파트너 목록 (Partner List) */}
+      {/* 파트너 목록 */}
       <div>
         <p className="text-sm font-semibold text-gray-700 mb-4">전체 파트너 ({filteredProfiles.length}명)</p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -528,7 +559,7 @@ export default function HomePage() {
 
   const renderFavoritesContent = () => (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"> {/* Favorites Content */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">즐겨찾기</h2>
           <p className="text-sm text-gray-500">자주 연락하는 파트너를 모아보세요.</p>
@@ -619,7 +650,7 @@ export default function HomePage() {
   const renderProfileContent = () => (
     <div className="card p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">프로필 수정</h2> {/* Profile Edit */}
+        <h2 className="text-xl font-bold text-gray-900">프로필 수정</h2>
         <button type="button" onClick={() => setTab("home")} className="text-sm text-gray-500 hover:text-gray-700">돌아가기</button>
       </div>
       <form onSubmit={saveProfile} className="space-y-5">
@@ -681,7 +712,7 @@ export default function HomePage() {
           </select>
         </div>
 
-        {/* 프로필 공개/비공개 토글 */}
+        {/* 프로필 공개/비공개 토글 */} 
         <div className="flex items-center justify-between">
           <label htmlFor="is_public_toggle" className="block text-sm font-semibold text-gray-700">프로필 공개</label>
           <input
@@ -689,7 +720,7 @@ export default function HomePage() {
             id="is_public_toggle"
             checked={profileForm.is_public}
             onChange={(e) => handleProfileChange("is_public", e.target.checked)}
-            className="toggle toggle-primary" // Assuming you have a toggle style, adjust as needed
+            className="toggle toggle-primary"
           />
         </div>
         <div>
@@ -718,14 +749,14 @@ export default function HomePage() {
         </button>
       </form>
 
-      {/* 약관 링크 (Terms Links) */}
+      {/* 약관 링크 */}
       <div className="flex items-center justify-center gap-4 pt-2 text-xs text-gray-400">
         <button onClick={() => navigate("/terms")} className="hover:text-gray-600 underline">이용약관</button>
         <span>·</span>
         <button onClick={() => navigate("/privacy")} className="hover:text-gray-600 underline">개인정보처리방침</button>
       </div>
 
-      {/* 회원 탈퇴 (Delete Account) */}
+      {/* 회원 탈퇴 */}
       <div className="pt-2 text-center">
         <button
           type="button"
@@ -789,7 +820,7 @@ export default function HomePage() {
 
       {/* 하단 네비게이션 (Bottom Navigation) */}
       <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2"> 
           {[{ key: "home", label: "홈", icon: "🏠" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "favorites", label: "즐겨찾기", icon: "⭐" }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
               className={`relative flex-1 flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "text-gray-500 hover:bg-gray-100"}`}>

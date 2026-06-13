@@ -104,19 +104,24 @@ export default function ChatPage() {
   };
 
   const deleteMessage = async (id) => {
-    if (!window.confirm("메시지를 삭제하시겠습니까?")) return;
-    const { error } = await supabase.from("messages").delete().eq("id", id).eq("sender_id", user.id);
-    if (!error) setMessages((prev) => prev.filter((m) => m.id !== id));
+    if (!window.confirm("메시지를 삭제하시겠습니까?")) return; //
+    const { error } = await supabase.from("messages").delete().eq("id", id).eq("sender_id", user.id); //
+    if (!error) {
+      setMessages((prev) => prev.filter((m) => m.id !== id)); //
+      showToast("메시지가 삭제되었습니다.", "success");
+    } else {
+      showToast("메시지 삭제에 실패했습니다.", "error");
+    }
   };
 
   const startEditMessage = (msg) => {
-    setEditingMessageId(msg.id);
-    setEditContent(msg.content);
+    setEditingMessageId(msg.id); //
+    setEditContent(msg.content); //
   };
 
   const cancelEditMessage = () => {
-    setEditingMessageId(null);
-    setEditContent("");
+    setEditingMessageId(null); //
+    setEditContent(""); //
   };
 
   const saveEditedMessage = async (msgId) => {
@@ -125,10 +130,11 @@ export default function ChatPage() {
     try {
       const { error } = await supabase.from("messages").update({ content: editContent.trim(), edited_at: new Date().toISOString() })
         .eq("id", msgId)
-        .eq("sender_id", user.id);
-      if (error) throw error;
-      setMessages((prev) => prev.map((msg) => msg.id === msgId ? { ...msg, content: editContent.trim(), edited_at: new Date().toISOString() } : msg));
-      cancelEditMessage();
+        .eq("sender_id", user.id); //
+      if (error) throw error; //
+      setMessages((prev) => prev.map((msg) => msg.id === msgId ? { ...msg, content: editContent.trim(), edited_at: new Date().toISOString() } : msg)); //
+      cancelEditMessage(); //
+      showToast("메시지가 수정되었습니다.", "success");
     } catch {
       alert("메시지 수정에 실패했습니다.");
     } finally {
@@ -178,7 +184,9 @@ export default function ChatPage() {
     try {
       const { data, error } = await supabase.from("messages")
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: msg }]).select();
-      if (!error && data?.length > 0) addMessage(data[0]);
+      if (!error && data?.length > 0) addMessage(data[0]); //
+    } catch (e) {
+      showToast("메시지 전송에 실패했습니다.", "error");
     } finally { setSendLoading(false); }
   };
 
