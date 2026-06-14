@@ -6,7 +6,13 @@ import { supabase } from "../lib/supabase";
 import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import DeleteAccountModal from "../components/DeleteAccountModal";
-import AnnouncementBanner from "../components/AnnouncementBanner";
+import ProfileCard from "../components/ProfileCard";
+import ProfileSkeleton from "../components/ProfileSkeleton";
+import ProfileFilters from "../components/ProfileFilters";
+import ConversationItem from "../components/ConversationItem";
+import StatsBanner from "../components/StatsBanner";
+import ConfirmModal from "../components/ConfirmModal";
+import { getMatchScore } from "../utils/matching";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -20,48 +26,13 @@ const NATIONALITIES = [
 
 const INTERESTS = ["K-pop", "한국 음식", "여행", "드라마", "언어 교환", "게임", "영화", "스포츠"];
 
-const getLanguageLevel = (profile) => {
-  const text = (profile.bio || "").toLowerCase();
-  if (text.includes("고급") || text.includes("advanced")) return "고급";
-  if (text.includes("중급") || text.includes("intermediate")) return "중급";
-  return "초급";
-};
-
-const formatTime = (value) => {
-  return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
-};
-
-// AI 파트너 추천 점수 계산
-function getMatchScore(me, other) {
-  if (!me || !other) return { score: 0, percentage: 0, reason: "" };
-  let score = 20; // 기본 점수
-  let reasons = [];
-
-  // 언어 교환 매칭 (상대가 내 모국어를 배우고, 내가 상대 모국어를 배움)
-  if (me.learning_language === other.native_language) {
-    score += 40;
-    reasons.push(`${other.native_language} 원어민`);
-  }
-  if (me.native_language === other.learning_language) {
-    score += 20;
-    reasons.push(`나의 ${me.native_language}를 배우고 싶어함`);
-  }
-
-  // 공통 관심사
-  const commonInterests = (me.interests || []).filter((i) => (other.interests || []).includes(i));
-  score += Math.min(commonInterests.length * 10, 20); // 최대 20점
-  if (commonInterests.length > 0) reasons.push(`공통 관심사: ${commonInterests[0]}`);
-
-  return { score, percentage: Math.min(score, 100), reason: reasons[0] || "관심사가 비슷해요" };
-}
-
 export default function HomePage() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
-
   const { darkMode, toggleDarkMode } = useTheme();
+
   const [myProfile, setMyProfile] = useState(null);
   const [profiles, setProfiles] = useState([]);
   const [conversations, setConversations] = useState([]);
@@ -79,7 +50,6 @@ export default function HomePage() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
 
-  // 프로필 수정 폼 (Profile Edit Form)
   const [profileForm, setProfileForm] = useState({
     display_name: "", nationality: "", native_language: "",
     learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [], is_public: true,
@@ -88,14 +58,13 @@ export default function HomePage() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
 
-  // 신고/차단 모달
   const [reportModal, setReportModal] = useState(null); // { profileId, displayName }
   const [reportReason, setReportReason] = useState("");
-  const [reportLoading, setReportLoading] = useState(false); // Report/Block Modal
+  const [reportLoading, setReportLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [blockConfirm, setBlockConfirm] = useState(null); // { targetId, displayName }
 
-  // 알림 권한
   const notifGranted = useRef(false);
 
   useEffect(() => {
@@ -112,12 +81,7 @@ export default function HomePage() {
     if (!user) return;
 
     const loadAll = async () => {
-      // 내 프로필
-      const { data: me } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      const { data: me } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       if (me) {
         setMyProfile(me);
         setProfileForm({
@@ -129,22 +93,15 @@ export default function HomePage() {
           bio: me.bio || "",
           avatar_url: me.avatar_url || "",
           interests: me.interests || [],
-          is_public: me.is_public ?? true, //
+          is_public: me.is_public ?? true,
         });
       }
 
-      // 차단 목록 (Blocked Users List)
-      const { data: blocks } = await supabase
-        .from("blocked_users")
-        .select("blocked_id")
-        .eq("blocker_id", user.id);
+      const { data: blocks } = await supabase.from("blocked_users").select("blocked_id").eq("blocker_id", user.id);
       const bIds = (blocks || []).map((b) => b.blocked_id);
       setBlockedIds(bIds);
 
-      const { data: favs } = await supabase
-        .from("favorites")
-        .select("partner_id")
-        .eq("user_id", user.id);
+      const { data: favs } = await supabase.from("favorites").select("partner_id").eq("user_id", user.id);
       const fIds = new Set((favs || []).map((f) => f.partner_id));
       setFavoriteIds(fIds);
       if (fIds.size > 0) {
@@ -158,28 +115,22 @@ export default function HomePage() {
       }
       setFavoritesLoading(false);
 
-      // 앱 통계 가져오기
-      const { count: totalCount } = await supabase.from("profiles").select("*", { count: 'exact', head: true });
+      const { count: totalCount } = await supabase.from("profiles").select("*", { count: "exact", head: true });
       const startOfToday = new Date();
       startOfToday.setHours(0, 0, 0, 0);
       const { count: todayCount } = await supabase
-        .from("profiles")
-        .select("*", { count: 'exact', head: true })
-        .gte("created_at", startOfToday.toISOString());
-      
+        .from("profiles").select("*", { count: "exact", head: true }).gte("created_at", startOfToday.toISOString());
       setStats({ total: totalCount || 0, today: todayCount || 0 });
 
-      // 파트너 목록
       const { data: allProfiles, error: profilesError } = await supabase
         .from("profiles")
-        .eq("is_public", true) // Only fetch public profiles for other users
         .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
+        .eq("is_public", true)
         .neq("id", user.id)
         .order("created_at", { ascending: false });
-      if (!profilesError) setProfiles(allProfiles || []); // Filter out blocked users in useMemo
+      if (!profilesError) setProfiles(allProfiles || []);
       setProfilesLoading(false);
 
-      // 대화 목록 (Conversation List)
       const { data: msgs, error: msgsError } = await supabase
         .from("messages")
         .select("id, sender_id, receiver_id, content, created_at, read_at")
@@ -194,9 +145,7 @@ export default function HomePage() {
           if (new Date(message.created_at) > new Date(current.lastMessage.created_at)) {
             current.lastMessage = message;
           }
-          if (message.receiver_id === user.id && !message.read_at) {
-            current.unreadCount += 1;
-          }
+          if (message.receiver_id === user.id && !message.read_at) current.unreadCount += 1;
           byPartner.set(partnerId, current);
         });
 
@@ -219,51 +168,37 @@ export default function HomePage() {
         }
       }
       setConvoLoading(false);
-    }; // Conversation List
+    };
 
     loadAll();
   }, [user]);
 
-  // 실시간 메시지 수신 → 브라우저 알림
   useEffect(() => {
     if (!user?.id) return;
-
     const channel = supabase
       .channel("home-messages")
       .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
-        filter: `receiver_id=eq.${user.id}`,
+        event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${user.id}`,
       }, (payload) => {
         const msg = payload.new;
-        // 브라우저 알림
         if (notifGranted.current && document.visibilityState !== "visible") {
-          new Notification("KoriBridge 새 메시지", {
-            body: msg.content,
-            icon: "/favicon.ico",
-          });
+          new Notification("KoriBridge 새 메시지", { body: msg.content, icon: "/favicon.ico" });
         }
-        // 대화 목록 업데이트
         setConversations((prev) => {
           const partnerId = msg.sender_id;
           const existing = prev.find((c) => c.partnerId === partnerId);
           if (existing) {
             return prev.map((c) =>
-              c.partnerId === partnerId
-                ? { ...c, lastMessage: msg, unreadCount: c.unreadCount + 1 }
-                : c
+              c.partnerId === partnerId ? { ...c, lastMessage: msg, unreadCount: c.unreadCount + 1 } : c
             );
           }
           return prev;
         });
       })
       .subscribe();
-
     return () => supabase.removeChannel(channel);
   }, [user?.id]);
 
-  // AI 추천 파트너 (상위 3명)
   const recommendedProfiles = useMemo(() => {
     if (!myProfile || profiles.length === 0) return [];
     return profiles
@@ -293,7 +228,6 @@ export default function HomePage() {
     });
   }, [profiles, nationalityFilter, languageFilter, levelFilter, blockedIds, searchQuery]);
 
-  // 프로필 수정
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
 
   const toggleInterest = (interest) => {
@@ -306,10 +240,7 @@ export default function HomePage() {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setProfileError("사진 크기는 2MB 이하여야 합니다.");
-      return;
-    }
+    if (file.size > 2 * 1024 * 1024) { setProfileError("사진 크기는 2MB 이하여야 합니다."); return; }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
@@ -333,7 +264,6 @@ export default function HomePage() {
     if (!profileForm.nationality) return setProfileError("국적을 선택해 주세요.");
     if (!profileForm.native_language) return setProfileError("모국어를 선택해 주세요.");
     if (!profileForm.learning_language) return setProfileError("배우고 싶은 언어를 선택해 주세요.");
-
     setProfileLoading(true);
     try {
       const avatar_url = await uploadAvatar();
@@ -345,13 +275,12 @@ export default function HomePage() {
         learning_language: profileForm.learning_language,
         language_level: profileForm.language_level || "초급",
         bio: profileForm.bio.trim(),
-        avatar_url: avatar_url || profileForm.avatar_url || "", // Use existing avatar_url if no new file or upload fails
+        avatar_url: avatar_url || profileForm.avatar_url || "",
         interests: profileForm.interests,
         is_public: profileForm.is_public,
       });
-      if (error) throw error; // Save Profile
+      if (error) throw error;
       setTab("home");
-      // 프로필 목록 갱신
       const { data } = await supabase
         .from("profiles")
         .select("id, display_name, nationality, native_language, learning_language, avatar_url, bio, interests")
@@ -365,16 +294,30 @@ export default function HomePage() {
     }
   };
 
-  // 차단 (Block User)
-  const blockUser = async (targetId, displayName) => {
-    if (!window.confirm(`${displayName} 님을 차단하시겠습니까?`)) return;
+  const handleToggleFavorite = async (profile) => {
+    if (!user?.id) return;
+    const isFav = favoriteIds.has(profile.id);
+    if (isFav) {
+      await supabase.from("favorites").delete().match({ user_id: user.id, partner_id: profile.id });
+      setFavoriteIds((prev) => { const next = new Set(prev); next.delete(profile.id); return next; });
+      setFavorites((prev) => prev.filter((item) => item.id !== profile.id));
+    } else {
+      await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
+      setFavoriteIds((prev) => new Set(prev).add(profile.id));
+      setFavorites((prev) => [...prev, profile]);
+    }
+  };
+
+  const blockUser = async () => {
+    if (!blockConfirm) return;
+    const { targetId, displayName } = blockConfirm;
     await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: targetId });
-    setBlockedIds((prev) => [...prev, targetId]); //
-    setReportModal(null); //
+    setBlockedIds((prev) => [...prev, targetId]);
+    setBlockConfirm(null);
+    setReportModal(null);
     showToast(`${displayName} 님을 차단했습니다.`, "success");
   };
-  
-  // 신고 (Report User)
+
   const submitReport = async () => {
     if (!reportModal || !reportReason.trim()) return;
     setReportLoading(true);
@@ -383,149 +326,16 @@ export default function HomePage() {
       reported_id: reportModal.profileId,
       reason: reportReason.trim(),
     });
-    setReportLoading(false); //
-    setReportModal(null); //
-    setReportReason(""); //
+    setReportLoading(false);
+    setReportModal(null);
+    setReportReason("");
     showToast("신고가 접수되었습니다.", "success");
   };
 
-  // 프로필 카드 컴포넌트
-  // 프로필 카드 컴포넌트 (Profile Card Component)
-  const ProfileCard = ({ profile, showActions = true }) => {
-    const level = profile.language_level || getLanguageLevel(profile);
-    const isOnline = onlineIds.has(profile.id);
-    const isFavorite = favoriteIds.has(profile.id);
-    const levelColor = { 고급: "bg-blue-50 text-blue-700", 중급: "bg-yellow-50 text-yellow-700", 초급: "bg-green-50 text-green-700" };
-    const match = getMatchScore(myProfile, profile);
-
-    return (
-      <div className="card p-6 transition hover:-translate-y-1 hover:shadow-lg">
-        <div className="flex items-start gap-4">
-          <div className="relative flex-shrink-0">
-            {/* 매칭 점수 배지 */}
-            <div className="absolute -top-2 -left-2 z-10 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm">
-              매칭 {match.percentage}%
-            </div>
-            {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.display_name} className="w-16 h-16 rounded-full object-cover border border-gray-200" />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-2xl text-red-600 border border-gray-200 font-bold">
-                {profile.display_name?.charAt(0)?.toUpperCase() || "?"}
-              </div>
-            )}
-            <span className={`absolute -bottom-0.5 right-0 h-4 w-4 rounded-full border-2 border-white ${isOnline ? "bg-emerald-400" : "bg-gray-300"}`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-lg font-bold text-gray-900 truncate">{profile.display_name}</p>
-                <p className="text-sm text-gray-500">{profile.nationality}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (!user?.id) return;
-                    const isFav = favoriteIds.has(profile.id);
-                    if (isFav) {
-                      await supabase.from("favorites").delete().match({ user_id: user.id, partner_id: profile.id });
-                      setFavoriteIds((prev) => {
-                        const next = new Set(prev);
-                        next.delete(profile.id);
-                        return next; //
-                      });
-                      setFavorites((prev) => prev.filter((item) => item.id !== profile.id)); //
-                    } else {
-                      await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
-                      setFavoriteIds((prev) => new Set(prev).add(profile.id)); //
-                      setFavorites((prev) => [...prev, profile]); //
-                    }
-                  }}
-                  className={`rounded-full p-2 ${isFavorite ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
-                  title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
-                >
-                  {isFavorite ? "♥" : "♡"}
-                </button>
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${levelColor[level]}`}>{level}</span>
-                {showActions && (
-                  <button
-                    type="button"
-                    onClick={() => setReportModal({ profileId: profile.id, displayName: profile.display_name })}
-                    className="text-gray-300 hover:text-gray-500 text-lg leading-none"
-                    title="신고/차단"
-                  >
-                    ⋯
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="mt-3 space-y-1 text-sm text-gray-600">
-              <p><strong className="text-gray-800">모국어:</strong> {profile.native_language}</p>
-              <p><strong className="text-gray-800">학습언어:</strong> {profile.learning_language}</p>
-              {/* 공통 관심사 태그 */}
-              {myProfile && (
-                (() => {
-                  const commonInterests = (myProfile.interests || []).filter((i) => (profile.interests || []).includes(i));
-                  return commonInterests.length > 0 && <p className="mt-2 text-xs text-gray-500">공통 관심사: {commonInterests.slice(0, 2).join(", ")}{commonInterests.length > 2 && " 등"}</p>;
-                })()
-              )}
-            </div>
-            {profile.bio && <p className="mt-3 text-sm text-gray-500 line-clamp-2">{profile.bio}</p>}
-            {profile.reason && (
-              <p className="mt-2 text-xs text-red-600 font-medium">추천 이유: {profile.reason}</p>
-            )}
-          </div>
-        </div>
-        <div className="mt-5 flex gap-3">
-          <button type="button" onClick={() => navigate(`/profile/${profile.id}`)} className="btn-secondary flex-1 py-2.5 text-sm">
-            프로필 보기
-          </button>
-          <button type="button" onClick={() => navigate(`/chat/${profile.id}`)} className="btn-primary flex-1 py-2.5 text-sm">
-            채팅하기
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // 스켈레톤 UI 컴포넌트
-  const ProfileSkeleton = () => (
-    <div className="card p-6 animate-pulse border-gray-100">
-      <div className="flex gap-4">
-        <div className="w-16 h-16 bg-gray-200 rounded-full" />
-        <div className="flex-1 space-y-3">
-          <div className="h-4 bg-gray-200 rounded w-1/3" />
-          <div className="h-3 bg-gray-100 rounded w-1/2" />
-          <div className="h-10 bg-gray-50 rounded-xl w-full mt-4" />
-        </div>
-      </div>
-      <div className="flex gap-3 mt-6">
-        <div className="h-10 bg-gray-200 rounded-2xl flex-1" />
-        <div className="h-10 bg-gray-200 rounded-2xl flex-1" />
-      </div>
-    </div>
-  );
-
-  const renderStatsBanner = () => (
-    <div className="grid grid-cols-3 gap-3">
-      <div className="bg-red-600 rounded-3xl p-4 text-white text-center shadow-lg shadow-red-100">
-        <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider mb-1">Online</p>
-        <p className="text-xl font-black">{onlineIds.size}</p>
-      </div>
-      <div className="bg-white border border-gray-100 rounded-3xl p-4 text-center">
-        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Total</p>
-        <p className="text-xl font-black text-gray-900">{stats.total}</p>
-      </div>
-      <div className="bg-white border border-gray-100 rounded-3xl p-4 text-center">
-        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Today</p>
-        <p className="text-xl font-black text-red-600">+{stats.today}</p>
-      </div>
-    </div>
-  );
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   const renderHomeContent = () => (
     <div className="space-y-8">
-      {/* 내 프로필 요약 카드 */}
       {myProfile && (
         <div className="card p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -538,16 +348,19 @@ export default function HomePage() {
             )}
             <div>
               <p className="font-bold text-gray-900">{myProfile.display_name}</p>
-              <p className="text-sm text-gray-500">{myProfile.nationality} | {myProfile.native_language} → {myProfile.learning_language}</p>
+              <p className="text-sm text-gray-500">
+                {myProfile.nationality} | {myProfile.native_language} → {myProfile.learning_language}
+              </p>
             </div>
           </div>
-          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm">프로필 수정</button>
+          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm">
+            프로필 수정
+          </button>
         </div>
       )}
 
-      {renderStatsBanner()}
+      <StatsBanner onlineCount={onlineIds.size} total={stats.total} today={stats.today} />
 
-      {/* AI 추천 파트너 */}
       {recommendedProfiles.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
@@ -556,43 +369,31 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {recommendedProfiles.map((profile) => (
-              <ProfileCard key={profile.id} profile={profile} />
+              <ProfileCard
+                key={profile.id}
+                profile={profile}
+                myProfile={myProfile}
+                isOnline={onlineIds.has(profile.id)}
+                isFavorite={favoriteIds.has(profile.id)}
+                onToggleFavorite={handleToggleFavorite}
+                onReport={(profileId, displayName) => setReportModal({ profileId, displayName })}
+              />
             ))}
           </div>
         </div>
       )}
 
-      {/* 필터 */}
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
-        <p className="text-sm font-semibold text-gray-700 mb-4">파트너 필터</p>
-<div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className="text-sm text-gray-600">국적</label>
-              <select className="input-field mt-1" value={nationalityFilter} onChange={(e) => setNationalityFilter(e.target.value)}>
-                <option value="">전체</option>
-                {[...new Set(profiles.map((p) => p.nationality))].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-sm text-gray-600">배우고 싶은 언어</label>
-              <select className="input-field mt-1" value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)}>
-                <option value="">전체</option>
-                {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-sm text-gray-600">언어 수준</label>
-              <select className="input-field mt-1" value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
-                <option value="">전체</option>
-                {['초급', '중급', '고급'].map((level) => <option key={level} value={level}>{level}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
+      <ProfileFilters
+        profiles={profiles}
+        languages={LANGUAGES}
+        nationalityFilter={nationalityFilter}
+        languageFilter={languageFilter}
+        levelFilter={levelFilter}
+        onNationality={setNationalityFilter}
+        onLanguage={setLanguageFilter}
+        onLevel={setLevelFilter}
+      />
 
-      {/* 파트너 목록 */}
       <div>
         <p className="text-sm font-semibold text-gray-700 mb-4">전체 파트너 ({filteredProfiles.length}명)</p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -603,11 +404,25 @@ export default function HomePage() {
               <div className="text-4xl mb-4">🔍</div>
               <p className="text-gray-500 font-medium">검색 결과가 없습니다.</p>
               <p className="text-xs text-gray-400 mt-1">필터를 변경하거나 검색어를 다르게 입력해보세요.</p>
-              <button onClick={() => {setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter("");}} 
-                className="mt-6 text-red-600 text-sm font-bold hover:underline">필터 초기화하기</button>
+              <button
+                onClick={() => { setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter(""); }}
+                className="mt-6 text-red-600 text-sm font-bold hover:underline"
+              >
+                필터 초기화하기
+              </button>
             </div>
           ) : (
-            filteredProfiles.map((profile) => <ProfileCard key={profile.id} profile={profile} />)
+            filteredProfiles.map((profile) => (
+              <ProfileCard
+                key={profile.id}
+                profile={profile}
+                myProfile={myProfile}
+                isOnline={onlineIds.has(profile.id)}
+                isFavorite={favoriteIds.has(profile.id)}
+                onToggleFavorite={handleToggleFavorite}
+                onReport={(profileId, displayName) => setReportModal({ profileId, displayName })}
+              />
+            ))
           )}
         </div>
       </div>
@@ -627,7 +442,6 @@ export default function HomePage() {
           </button>
         )}
       </div>
-
       {favoritesLoading ? (
         Array.from({ length: 4 }).map((_, idx) => <div key={idx} className="card animate-pulse h-44" />)
       ) : favorites.length === 0 ? (
@@ -637,7 +451,17 @@ export default function HomePage() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {favorites.map((profile) => <ProfileCard key={profile.id} profile={profile} />)}
+          {favorites.map((profile) => (
+            <ProfileCard
+              key={profile.id}
+              profile={profile}
+              myProfile={myProfile}
+              isOnline={onlineIds.has(profile.id)}
+              isFavorite={favoriteIds.has(profile.id)}
+              onToggleFavorite={handleToggleFavorite}
+              onReport={(profileId, displayName) => setReportModal({ profileId, displayName })}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -646,7 +470,15 @@ export default function HomePage() {
   const renderChatListContent = () => (
     <div className="space-y-4">
       {convoLoading ? (
-        Array.from({ length: 4 }).map((_, i) => <div key={i} className="card p-5 animate-pulse flex items-center gap-4"><div className="w-14 h-14 bg-gray-200 rounded-full"/><div className="flex-1 space-y-2"><div className="h-4 bg-gray-200 rounded w-1/4"/><div className="h-3 bg-gray-100 rounded w-3/4"/></div></div>)
+        Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="card p-5 animate-pulse flex items-center gap-4">
+            <div className="w-14 h-14 bg-gray-200 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-1/4" />
+              <div className="h-3 bg-gray-100 rounded w-3/4" />
+            </div>
+          </div>
+        ))
       ) : conversations.length === 0 ? (
         <div className="card text-center py-16">
           <p className="text-gray-500 font-medium">아직 나눈 대화가 없습니다.</p>
@@ -654,51 +486,12 @@ export default function HomePage() {
         </div>
       ) : (
         conversations.map((conv) => (
-          <div key={conv.partnerId} className="card p-5 transition hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="relative flex-shrink-0">
-                {conv.partner.avatar_url ? (
-                  <img src={conv.partner.avatar_url} alt={conv.partner.display_name} className="w-14 h-14 rounded-full object-cover border border-gray-200" />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-2xl font-bold text-red-600 border border-gray-200">
-                    {conv.partner.display_name?.charAt(0)?.toUpperCase() || "?"}
-                  </div>
-                )}
-                <span className="absolute -bottom-0.5 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-semibold text-gray-900">{conv.partner.display_name}</p>
-                    <p className="text-xs text-gray-500">{conv.partner.nationality}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-xs text-gray-400">{formatTime(conv.lastMessage.created_at)}</p>
-                    {conv.unreadCount > 0 && (
-                      <span className="mt-1 inline-flex items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-bold text-white min-w-[20px]">
-                        {conv.unreadCount}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-2 flex items-center gap-1">
-                  {conv.lastMessage.sender_id === user.id && (
-                    <span className={`text-xs ${conv.lastMessage.read_at ? "text-blue-500" : "text-gray-300"}`}>
-                      {conv.lastMessage.read_at ? "✓✓" : "✓"}
-                    </span>
-                  )}
-                  <p className="text-sm text-gray-500 truncate">{conv.lastMessage.content}</p>
-                </div>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate(`/chat/${conv.partnerId}`)}
-              className="mt-4 btn-primary w-full py-2.5 text-sm"
-            >
-              대화 이어가기
-            </button>
-          </div>
+          <ConversationItem
+            key={conv.partnerId}
+            conv={conv}
+            userId={user.id}
+            isOnline={onlineIds.has(conv.partnerId)}
+          />
         ))
       )}
     </div>
@@ -711,7 +504,6 @@ export default function HomePage() {
         <button type="button" onClick={() => setTab("home")} className="text-sm text-gray-500 hover:text-gray-700">돌아가기</button>
       </div>
       <form onSubmit={saveProfile} className="space-y-5">
-        {/* 사진 업로드 */}
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
             {avatarPreview || profileForm.avatar_url ? (
@@ -732,7 +524,8 @@ export default function HomePage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">닉네임</label>
-            <input type="text" className="input-field" value={profileForm.display_name} onChange={(e) => handleProfileChange("display_name", e.target.value)} />
+            <input type="text" className="input-field" value={profileForm.display_name}
+              onChange={(e) => handleProfileChange("display_name", e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">국적</label>
@@ -763,13 +556,10 @@ export default function HomePage() {
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">언어 수준</label>
           <select className="input-field" value={profileForm.language_level} onChange={(e) => handleProfileChange("language_level", e.target.value)}>
-            {['초급', '중급', '고급'].map((level) => (
-              <option key={level} value={level}>{level}</option>
-            ))}
+            {["초급", "중급", "고급"].map((level) => <option key={level} value={level}>{level}</option>)}
           </select>
         </div>
 
-        {/* 프로필 공개/비공개 토글 */} 
         <div className="flex items-center justify-between">
           <label htmlFor="is_public_toggle" className="block text-sm font-semibold text-gray-700">프로필 공개</label>
           <input
@@ -780,12 +570,15 @@ export default function HomePage() {
             className="toggle toggle-primary"
           />
         </div>
+
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">관심사</label>
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((interest) => (
               <button type="button" key={interest} onClick={() => toggleInterest(interest)}
-                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${profileForm.interests.includes(interest) ? "bg-red-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                  profileForm.interests.includes(interest) ? "bg-red-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}>
                 {interest}
               </button>
             ))}
@@ -794,7 +587,8 @@ export default function HomePage() {
 
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">자기소개</label>
-          <textarea rows={4} className="input-field resize-none" value={profileForm.bio} onChange={(e) => handleProfileChange("bio", e.target.value)} placeholder="초급/중급/고급 수준을 포함해 주세요" />
+          <textarea rows={4} className="input-field resize-none" value={profileForm.bio}
+            onChange={(e) => handleProfileChange("bio", e.target.value)} placeholder="초급/중급/고급 수준을 포함해 주세요" />
         </div>
 
         {profileError && (
@@ -806,31 +600,22 @@ export default function HomePage() {
         </button>
       </form>
 
-      {/* 약관 링크 */}
       <div className="flex items-center justify-center gap-4 pt-2 text-xs text-gray-400">
         <button onClick={() => navigate("/terms")} className="hover:text-gray-600 underline">이용약관</button>
         <span>·</span>
         <button onClick={() => navigate("/privacy")} className="hover:text-gray-600 underline">개인정보처리방침</button>
       </div>
 
-      {/* 회원 탈퇴 */}
       <div className="pt-2 text-center">
-        <button
-          type="button"
-          onClick={() => setShowDeleteModal(true)}
-          className="text-xs text-gray-300 hover:text-red-400 underline"
-        >
+        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-gray-300 hover:text-red-400 underline">
           회원 탈퇴
         </button>
       </div>
     </div>
   );
 
-  const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
-
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      {/* 헤더 (Header) */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-40">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -844,29 +629,34 @@ export default function HomePage() {
             <button type="button" onClick={signOut} className="text-sm text-gray-400 hover:text-gray-600">로그아웃</button>
           </div>
         </div>
-        {/* 검색창 (Search Bar) */}
-        <div className="relative group">
-        <input
-          type="text"
-          className="input-field text-sm pl-4 pr-10 h-11"
-          placeholder="닉네임, 국적, 언어로 검색..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button 
-            onClick={() => setSearchQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center hover:bg-gray-200 transition-colors"
-          >
-            ✕
-          </button>
-        )}
+        <div className="relative">
+          <input
+            type="text"
+            className="input-field text-sm pl-4 pr-10 h-11"
+            placeholder="닉네임, 국적, 언어로 검색..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center hover:bg-gray-200 transition-colors"
+            >
+              ✕
+            </button>
+          )}
         </div>
-        {/* 탭 (Tabs) */}
         <div className="flex gap-2 mt-3">
-          {[{ key: "home", label: "홈" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "favorites", label: "즐겨찾기" }, { key: "profile", label: "내 프로필" }].map((item) => (
+          {[
+            { key: "home", label: "홈" },
+            { key: "chatlist", label: "채팅", badge: totalUnread },
+            { key: "favorites", label: "즐겨찾기" },
+            { key: "profile", label: "내 프로필" },
+          ].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
-              className={`relative rounded-2xl px-4 py-2 text-sm font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
+              className={`relative rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                tab === item.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}>
               {item.label}
               {item.badge > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 border-2 border-white text-[9px] text-white flex items-center justify-center font-bold">
@@ -885,12 +675,18 @@ export default function HomePage() {
         {tab === "profile" && renderProfileContent()}
       </div>
 
-      {/* 하단 네비게이션 (Bottom Navigation) */}
       <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2"> 
-          {[{ key: "home", label: "홈", icon: "🏠" }, { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread }, { key: "favorites", label: "즐겨찾기", icon: "⭐" }, { key: "profile", label: "프로필", icon: "👤" }].map((item) => (
+        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
+          {[
+            { key: "home", label: "홈", icon: "🏠" },
+            { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread },
+            { key: "favorites", label: "즐겨찾기", icon: "⭐" },
+            { key: "profile", label: "프로필", icon: "👤" },
+          ].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
-              className={`relative flex-1 flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${tab === item.key ? "bg-red-600 text-white" : "text-gray-500 hover:bg-gray-100"}`}>
+              className={`relative flex-1 flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${
+                tab === item.key ? "bg-red-600 text-white" : "text-gray-500 hover:bg-gray-100"
+              }`}>
               <span className="text-base">{item.icon}</span>
               {item.label}
               {item.badge > 0 && (
@@ -903,13 +699,11 @@ export default function HomePage() {
         </nav>
       </div>
 
-      {/* 신고/차단 모달 (Report/Block Modal) */}
       {reportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm">
             <h3 className="text-lg font-bold text-gray-900 mb-1">{reportModal.displayName}</h3>
             <p className="text-sm text-gray-500 mb-4">신고 또는 차단할 수 있습니다.</p>
-
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">신고 사유</label>
@@ -931,7 +725,7 @@ export default function HomePage() {
               </button>
               <button
                 type="button"
-                onClick={() => blockUser(reportModal.profileId, reportModal.displayName)}
+                onClick={() => setBlockConfirm({ targetId: reportModal.profileId, displayName: reportModal.displayName })}
                 className="w-full rounded-2xl bg-red-600 text-white py-2.5 text-sm font-semibold hover:bg-red-700"
               >
                 차단하기
@@ -948,7 +742,17 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 회원 탈퇴 모달 (Delete Account Modal) */}
+      {blockConfirm && (
+        <ConfirmModal
+          message={`${blockConfirm.displayName} 님을 차단하시겠습니까?`}
+          confirmLabel="차단하기"
+          cancelLabel="취소"
+          danger
+          onConfirm={blockUser}
+          onCancel={() => setBlockConfirm(null)}
+        />
+      )}
+
       {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
     </div>
   );

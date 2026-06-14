@@ -3,47 +3,22 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
-
-const getLanguageLevel = (profile) => {
-  const text = (profile.bio || "").toLowerCase();
-  if (text.includes("고급") || text.includes("advanced")) return "고급";
-  if (text.includes("중급") || text.includes("intermediate")) return "중급";
-  return "초급";
-};
-
-function formatRelativeTime(timestamp) {
-  if (!timestamp) return "활동 정보 없음";
-  const now = new Date();
-  const diff = now - new Date(timestamp);
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (minutes < 1) return "방금 전 활동";
-  if (minutes < 60) return `${minutes}분 전 활동`;
-  if (hours < 24) return `${hours}시간 전 활동`;
-  return `${days}일 전 활동`;
-}
-
-function getMatchPercentage(me, other) {
-  if (!me || !other) return 0;
-  let score = 20;
-  if (me.learning_language === other.native_language) score += 40;
-  if (me.native_language === other.learning_language) score += 20;
-  const commonInterests = (me.interests || []).filter((i) => (other.interests || []).includes(i));
-  score += Math.min(commonInterests.length * 10, 20);
-  return Math.min(score, 100);
-}
+import ConfirmModal from "../components/ConfirmModal";
+import { getLanguageLevel } from "../utils/languageLevel";
+import { getMatchPercentage } from "../utils/matching";
+import { formatRelativeTime } from "../utils/formatters";
 
 export default function ProfileDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, profile: myProfile } = useAuth();
   const onlineIds = useOnlineUsers(user?.id);
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isBlocked, setIsBlocked] = useState(false);
+  const [blockConfirm, setBlockConfirm] = useState(false);
   const [reportModal, setReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
@@ -51,26 +26,17 @@ export default function ProfileDetailPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", id)
-        .single();
-
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", id).single();
       if (error) {
         setError("프로필을 불러오는 중 오류가 발생했습니다.");
       } else {
         setProfile(data);
       }
 
-      // 차단 여부 확인
       if (user?.id) {
         const { data: block } = await supabase
-          .from("blocked_users")
-          .select("id")
-          .eq("blocker_id", user.id)
-          .eq("blocked_id", id)
-          .maybeSingle();
+          .from("blocked_users").select("id")
+          .eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle();
         setIsBlocked(!!block);
       }
 
@@ -79,17 +45,13 @@ export default function ProfileDetailPage() {
     load();
   }, [id, user]);
 
-  const handleBlock = async () => {
-    if (!window.confirm(`${profile.display_name} 님을 차단하시겠습니까?`)) return;
+  const confirmBlock = async () => {
+    setBlockConfirm(false);
     if (isBlocked) {
-      await supabase.from("blocked_users")
-        .delete()
-        .eq("blocker_id", user.id)
-        .eq("blocked_id", id);
+      await supabase.from("blocked_users").delete().eq("blocker_id", user.id).eq("blocked_id", id);
       setIsBlocked(false);
     } else {
-      await supabase.from("blocked_users")
-        .insert({ blocker_id: user.id, blocked_id: id });
+      await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: id });
       setIsBlocked(true);
     }
   };
@@ -131,44 +93,33 @@ export default function ProfileDetailPage() {
 
   const level = getLanguageLevel(profile);
   const isOnline = onlineIds.has(profile.id);
+  const matchPercentage = getMatchPercentage(myProfile, profile);
+  const lastActive = formatRelativeTime(profile.updated_at || profile.created_at);
+  const commonInterests = (myProfile?.interests || []).filter((i) => (profile.interests || []).includes(i));
+
   const levelColor = {
     고급: "bg-blue-50 text-blue-700",
     중급: "bg-yellow-50 text-yellow-700",
     초급: "bg-green-50 text-green-700",
   };
 
-  // 공통 관심사 계산
-  const commonInterests = (myProfile?.interests || []).filter(i => 
-    (profile.interests || []).includes(i)
-  );
-  const lastActive = formatRelativeTime(profile.updated_at || profile.created_at);
-
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
-      {/* 헤더 */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-800">← 뒤로</button>
         <h1 className="font-bold text-lg text-gray-900">프로필 상세</h1>
-        <button
-          onClick={() => setReportModal(true)}
-          className="text-sm text-gray-400 hover:text-red-500"
-        >
+        <button onClick={() => setReportModal(true)} className="text-sm text-gray-400 hover:text-red-500">
           신고
         </button>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-4">
-        {/* 프로필 카드 */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-          {/* 아바타 + 이름 */}
           <div className="flex items-center gap-5">
             <div className="relative flex-shrink-0">
               {profile.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.display_name}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-100"
-                />
+                <img src={profile.avatar_url} alt={profile.display_name}
+                  className="w-20 h-20 rounded-full object-cover border-2 border-gray-100" />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-3xl font-bold text-red-600 border-2 border-gray-100">
                   {profile.display_name?.[0]?.toUpperCase() || "?"}
@@ -180,6 +131,11 @@ export default function ProfileDetailPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="text-2xl font-bold text-gray-900">{profile.display_name}</p>
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${levelColor[level]}`}>{level}</span>
+                {matchPercentage > 0 && (
+                  <span className="text-xs font-bold bg-red-600 text-white px-2.5 py-1 rounded-full">
+                    매칭 {matchPercentage}%
+                  </span>
+                )}
               </div>
               <p className="text-sm text-gray-500 mt-0.5">{profile.nationality}</p>
               <p className={`text-xs mt-1 font-medium ${isOnline ? "text-emerald-500" : "text-gray-400"}`}>
@@ -188,7 +144,6 @@ export default function ProfileDetailPage() {
             </div>
           </div>
 
-          {/* 언어 정보 */}
           <div className="mt-5 grid grid-cols-2 gap-3">
             <div className="bg-gray-50 rounded-2xl p-3">
               <p className="text-xs text-gray-400 mb-1">모국어</p>
@@ -200,16 +155,15 @@ export default function ProfileDetailPage() {
             </div>
           </div>
 
-          {/* 관심사 */}
           {profile.interests?.length > 0 && (
             <div className="mt-5">
               <p className="text-xs text-gray-400 mb-2">관심사</p>
               <div className="flex flex-wrap gap-2">
                 {profile.interests.map((interest) => (
                   <span key={interest} className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-colors ${
-                    commonInterests.includes(interest) 
-                    ? "bg-red-600 text-white shadow-md shadow-red-100" 
-                    : "bg-gray-100 text-gray-600"
+                    commonInterests.includes(interest)
+                      ? "bg-red-600 text-white shadow-md shadow-red-100"
+                      : "bg-gray-100 text-gray-600"
                   }`}>
                     #{interest}
                   </span>
@@ -218,18 +172,16 @@ export default function ProfileDetailPage() {
             </div>
           )}
 
-          {/* 공통 관심사 안내 */}
           {commonInterests.length > 0 && (
             <div className="mt-4 p-3 bg-red-50 rounded-2xl flex items-center gap-2">
               <span className="text-lg">✨</span>
               <p className="text-xs text-red-800 font-medium">
-                <span className="font-bold">{profile.display_name}</span> 님과 
+                <span className="font-bold">{profile.display_name}</span> 님과
                 <span className="text-red-600"> {commonInterests.length}개</span>의 공통 관심사가 있어요!
               </p>
             </div>
           )}
 
-          {/* 자기소개 */}
           {profile.bio && (
             <div className="mt-5">
               <p className="text-xs text-gray-400 mb-2">자기소개</p>
@@ -240,7 +192,6 @@ export default function ProfileDetailPage() {
           )}
         </div>
 
-        {/* 액션 버튼 */}
         <button
           onClick={() => navigate(`/chat/${profile.id}`)}
           className="btn-primary w-full py-4 text-lg shadow-lg shadow-red-200 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
@@ -250,18 +201,15 @@ export default function ProfileDetailPage() {
         </button>
 
         <button
-          onClick={handleBlock}
+          onClick={() => setBlockConfirm(true)}
           className={`w-full py-3 rounded-2xl text-sm font-semibold transition ${
-            isBlocked
-              ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              : "bg-red-50 text-red-600 hover:bg-red-100"
+            isBlocked ? "bg-gray-100 text-gray-600 hover:bg-gray-200" : "bg-red-50 text-red-600 hover:bg-red-100"
           }`}
         >
           {isBlocked ? "차단 해제" : "차단하기"}
         </button>
       </div>
 
-      {/* 신고 모달 */}
       {reportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm">
@@ -307,6 +255,17 @@ export default function ProfileDetailPage() {
             )}
           </div>
         </div>
+      )}
+
+      {blockConfirm && (
+        <ConfirmModal
+          message={isBlocked ? `${profile.display_name} 님의 차단을 해제하시겠습니까?` : `${profile.display_name} 님을 차단하시겠습니까?`}
+          confirmLabel={isBlocked ? "차단 해제" : "차단하기"}
+          cancelLabel="취소"
+          danger={!isBlocked}
+          onConfirm={confirmBlock}
+          onCancel={() => setBlockConfirm(false)}
+        />
       )}
     </div>
   );

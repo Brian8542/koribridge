@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import { useToast } from "../components/Toast";
 
 export default function AuthPage() {
   const [mode, setMode] = useState("login"); // "login" | "signup" | "reset"
@@ -16,6 +17,7 @@ export default function AuthPage() {
 
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -115,7 +117,7 @@ export default function AuthPage() {
           <button
             onClick={async () => {
               await supabase.auth.resend({ type: "signup", email });
-              alert("재발송했습니다.");
+              showToast("재발송했습니다.", "success");
             }}
             className="mt-3 text-sm text-gray-400 hover:text-gray-600 underline"
           >

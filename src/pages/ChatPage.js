@@ -4,10 +4,9 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
+import ConfirmModal from "../components/ConfirmModal";
+import { formatTime } from "../utils/formatters";
 
-function formatTime(ts) {
-  return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(ts));
-}
 function sortMsgs(msgs) {
   return [...msgs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
@@ -18,6 +17,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
+
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -30,6 +30,8 @@ export default function ChatPage() {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
   const messageEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
@@ -80,6 +82,13 @@ export default function ChatPage() {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
+    }
+  }, [newMessage]);
+
   const translateMessage = async (msg) => {
     if (!msg?.id) return;
     if (translations[msg.id]) {
@@ -106,11 +115,16 @@ export default function ChatPage() {
     }
   };
 
-  const deleteMessage = async (id) => {
-    if (!window.confirm("메시지를 삭제하시겠습니까?")) return; //
-    const { error } = await supabase.from("messages").delete().eq("id", id).eq("sender_id", user.id); //
+  const deleteMessage = (id) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDeleteMessage = async () => {
+    const id = deleteConfirmId;
+    setDeleteConfirmId(null);
+    const { error } = await supabase.from("messages").delete().eq("id", id).eq("sender_id", user.id);
     if (!error) {
-      setMessages((prev) => prev.filter((m) => m.id !== id)); //
+      setMessages((prev) => prev.filter((m) => m.id !== id));
       showToast("메시지가 삭제되었습니다.", "success");
     } else {
       showToast("메시지 삭제에 실패했습니다.", "error");
@@ -118,28 +132,31 @@ export default function ChatPage() {
   };
 
   const startEditMessage = (msg) => {
-    setEditingMessageId(msg.id); //
-    setEditContent(msg.content); //
+    setEditingMessageId(msg.id);
+    setEditContent(msg.content);
   };
 
   const cancelEditMessage = () => {
-    setEditingMessageId(null); //
-    setEditContent(""); //
+    setEditingMessageId(null);
+    setEditContent("");
   };
 
   const saveEditedMessage = async (msgId) => {
     if (!editContent.trim() || !user?.id) return;
     setSaveLoading(true);
     try {
-      const { error } = await supabase.from("messages").update({ content: editContent.trim(), edited_at: new Date().toISOString() })
+      const { error } = await supabase.from("messages")
+        .update({ content: editContent.trim(), edited_at: new Date().toISOString() })
         .eq("id", msgId)
-        .eq("sender_id", user.id); //
-      if (error) throw error; //
-      setMessages((prev) => prev.map((msg) => msg.id === msgId ? { ...msg, content: editContent.trim(), edited_at: new Date().toISOString() } : msg)); //
-      cancelEditMessage(); //
+        .eq("sender_id", user.id);
+      if (error) throw error;
+      setMessages((prev) => prev.map((msg) =>
+        msg.id === msgId ? { ...msg, content: editContent.trim(), edited_at: new Date().toISOString() } : msg
+      ));
+      cancelEditMessage();
       showToast("메시지가 수정되었습니다.", "success");
     } catch {
-      alert("메시지 수정에 실패했습니다.");
+      showToast("메시지 수정에 실패했습니다.", "error");
     } finally {
       setSaveLoading(false);
     }
@@ -152,18 +169,17 @@ export default function ChatPage() {
   };
 
   const handleEditKeyDown = (e, msgId) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      saveEditedMessage(msgId);
-    } else if (e.key === "Escape") {
-      cancelEditMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveEditedMessage(msgId); }
+    else if (e.key === "Escape") { cancelEditMessage(); }
   };
 
   const handleImageSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { alert("이미지는 5MB 이하여야 합니다."); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("이미지는 5MB 이하여야 합니다.", "error");
+      return;
+    }
     setImageUploading(true);
     try {
       const ext = file.name.split(".").pop();
@@ -174,8 +190,12 @@ export default function ChatPage() {
       const { data: md, error: me } = await supabase.from("messages")
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: "이미지", image_url: data.publicUrl }]).select();
       if (!me && md?.length > 0) addMessage(md[0]);
-    } catch { alert("이미지 전송에 실패했습니다."); }
-    finally { setImageUploading(false); e.target.value = ""; }
+    } catch {
+      showToast("이미지 전송에 실패했습니다.", "error");
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+    }
   };
 
   const sendMessage = async (e) => {
@@ -187,14 +207,21 @@ export default function ChatPage() {
     try {
       const { data, error } = await supabase.from("messages")
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: msg }]).select();
-      if (!error && data?.length > 0) addMessage(data[0]); //
-    } catch (e) {
+      if (!error && data?.length > 0) addMessage(data[0]);
+    } catch {
       showToast("메시지 전송에 실패했습니다.", "error");
-    } finally { setSendLoading(false); }
+    } finally {
+      setSendLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const handleEmojiClick = (emoji) => {
+    setNewMessage((prev) => prev + emoji);
+    textareaRef.current?.focus();
   };
 
   if (loading || chatLoading) return (
@@ -216,19 +243,6 @@ export default function ChatPage() {
   );
 
   const isPartnerOnline = onlineIds.has(partner?.id);
-
-  // 자동 높이 조절
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
-    }
-  }, [newMessage]);
-
-  const handleEmojiClick = (emoji) => {
-    setNewMessage((prev) => prev + emoji);
-    textareaRef.current?.focus();
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -262,87 +276,98 @@ export default function ChatPage() {
           const tTxt = translations[msg.id];
           const tVis = visibleTranslation[msg.id];
           const tLoad = translationLoading[msg.id];
-          
-          const currentDate = new Date(msg.created_at).toLocaleDateString('ko-KR', {
-            year: 'numeric', month: 'long', day: 'numeric'
+
+          const currentDate = new Date(msg.created_at).toLocaleDateString("ko-KR", {
+            year: "numeric", month: "long", day: "numeric",
           });
-          const prevDate = idx > 0 ? new Date(messages[idx-1].created_at).toLocaleDateString('ko-KR', {
-            year: 'numeric', month: 'long', day: 'numeric'
-          }) : null;
+          const prevDate = idx > 0
+            ? new Date(messages[idx - 1].created_at).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
+            : null;
           const showDateDivider = currentDate !== prevDate;
 
           return (
             <React.Fragment key={msg.id}>
               {showDateDivider && (
-                <div className="flex justify-center my-6"><span className="bg-gray-200/60 text-gray-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span></div>
-              )}
-            <div key={msg.id} className={"flex " + (isMine ? "justify-end" : "justify-start") + " group"}>
-              <div className="max-w-xs sm:max-w-sm">
-                <div 
-                  onDoubleClick={() => isMine && !msg.image_url && startEditMessage(msg)}
-                  className={"rounded-3xl overflow-hidden text-sm cursor-default " + (isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900")}
-                >
-                  {msg.image_url && (
-                    <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
-                      <img src={msg.image_url} alt="이미지" className="max-w-full max-h-64 object-cover" />
-                    </a>
-                  )}
-                  {!msg.image_url && (
-                    <div className="px-4 pt-3 pb-1">
-                      {editingMessageId === msg.id ? (
-                        <textarea
-                          value={editContent}
-                          onChange={(e) => setEditContent(e.target.value)}
-                          onKeyDown={(e) => handleEditKeyDown(e, msg.id)}
-                          rows={3}
-                          className="w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-900"
-                        />
-                      ) : (
-                        <p className="leading-relaxed">{msg.content}</p>
-                      )}
-                    </div>
-                  )}
-                  <div className={"px-4 pb-3 flex items-center justify-between gap-2 text-xs " + (isMine ? "text-red-200" : "text-gray-400")}>
-                    <span>
-                      {formatTime(msg.created_at)}
-                      {msg.edited_at && <span className="ml-2 text-[10px] text-current opacity-80">(수정됨)</span>}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {isMine && <span className={msg.read_at ? "text-blue-300" : ""}>{msg.read_at ? "✓✓" : "✓"}</span>}
-                      {!msg.image_url && editingMessageId !== msg.id && (
-                        <button 
-                          onClick={() => copyToClipboard(msg.content)} 
-                          className={"opacity-0 group-hover:opacity-100 transition-opacity text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-gray-400 hover:text-gray-600")}
-                        >
-                          복사
-                        </button>
-                      )}
-                      {!msg.image_url && (
-                        <button onClick={() => translateMessage(msg)} className={"text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-blue-500 hover:text-blue-700")}>
-                          {tLoad ? "번역중..." : tTxt ? (tVis ? "숨기기" : "번역보기") : "번역보기"}
-                        </button>
-                      )}
-                      {isMine && editingMessageId === msg.id && (
-                        <>
-                          <button onClick={() => saveEditedMessage(msg.id)} disabled={saveLoading} className="text-xs rounded-full bg-white bg-opacity-10 px-2 py-1 text-white hover:bg-opacity-20">
-                            {saveLoading ? "저장중" : "저장"}
-                          </button>
-                          <button onClick={cancelEditMessage} className="text-xs text-white hover:underline">취소</button>
-                        </>
-                      )}
-                      {isMine && editingMessageId !== msg.id && (
-                        <button onClick={() => deleteMessage(msg.id)} className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white">삭제</button>
-                      )}
-                    </div>
-                  </div>
+                <div className="flex justify-center my-6">
+                  <span className="bg-gray-200/60 text-gray-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span>
                 </div>
-                {tTxt && tVis && (
-                  <div className={"mt-1 rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2 text-xs text-gray-600 " + (isMine ? "text-right" : "")}>
-                    {tTxt}
+              )}
+              <div className={"flex " + (isMine ? "justify-end" : "justify-start") + " group"}>
+                <div className="max-w-xs sm:max-w-sm">
+                  <div
+                    onDoubleClick={() => isMine && !msg.image_url && startEditMessage(msg)}
+                    className={"rounded-3xl overflow-hidden text-sm cursor-default " + (isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900")}
+                  >
+                    {msg.image_url && (
+                      <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
+                        <img src={msg.image_url} alt="이미지" className="max-w-full max-h-64 object-cover" />
+                      </a>
+                    )}
+                    {!msg.image_url && (
+                      <div className="px-4 pt-3 pb-1">
+                        {editingMessageId === msg.id ? (
+                          <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            onKeyDown={(e) => handleEditKeyDown(e, msg.id)}
+                            rows={3}
+                            className="w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-900"
+                          />
+                        ) : (
+                          <p className="leading-relaxed">{msg.content}</p>
+                        )}
+                      </div>
+                    )}
+                    <div className={"px-4 pb-3 flex items-center justify-between gap-2 text-xs " + (isMine ? "text-red-200" : "text-gray-400")}>
+                      <span>
+                        {formatTime(msg.created_at)}
+                        {msg.edited_at && <span className="ml-2 text-[10px] text-current opacity-80">(수정됨)</span>}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {isMine && <span className={msg.read_at ? "text-blue-300" : ""}>{msg.read_at ? "✓✓" : "✓"}</span>}
+                        {!msg.image_url && editingMessageId !== msg.id && (
+                          <button
+                            onClick={() => copyToClipboard(msg.content)}
+                            className={"opacity-0 group-hover:opacity-100 transition-opacity text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-gray-400 hover:text-gray-600")}
+                          >
+                            복사
+                          </button>
+                        )}
+                        {!msg.image_url && (
+                          <button
+                            onClick={() => translateMessage(msg)}
+                            className={"text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-blue-500 hover:text-blue-700")}
+                          >
+                            {tLoad ? "번역중..." : tTxt ? (tVis ? "숨기기" : "번역보기") : "번역보기"}
+                          </button>
+                        )}
+                        {isMine && editingMessageId === msg.id && (
+                          <>
+                            <button onClick={() => saveEditedMessage(msg.id)} disabled={saveLoading}
+                              className="text-xs rounded-full bg-white bg-opacity-10 px-2 py-1 text-white hover:bg-opacity-20">
+                              {saveLoading ? "저장중" : "저장"}
+                            </button>
+                            <button onClick={cancelEditMessage} className="text-xs text-white hover:underline">취소</button>
+                          </>
+                        )}
+                        {isMine && editingMessageId !== msg.id && (
+                          <button
+                            onClick={() => deleteMessage(msg.id)}
+                            className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
+                  {tTxt && tVis && (
+                    <div className={"mt-1 rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2 text-xs text-gray-600 " + (isMine ? "text-right" : "")}>
+                      {tTxt}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
             </React.Fragment>
           );
         })}
@@ -350,28 +375,43 @@ export default function ChatPage() {
       </div>
 
       <div className="bg-white border-t border-gray-100 px-4 py-4 sticky bottom-0">
-        {/* 퀵 이모지 바 */}
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
-          {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map(emoji => (
-            <button key={emoji} onClick={() => handleEmojiClick(emoji)} className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-gray-100 text-sm transition-colors">
+          {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
+            <button key={emoji} onClick={() => handleEmojiClick(emoji)}
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-gray-100 text-sm transition-colors">
               {emoji}
             </button>
           ))}
         </div>
-
-        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-center relative">
+        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-center">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading}
             className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50">
-            {imageUploading ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" /> : <span>📷</span>}
+            {imageUploading
+              ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+              : <span>📷</span>}
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           <textarea ref={textareaRef} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
-            rows={1} className="input-field resize-none flex-1 text-sm py-3 h-11 min-h-[44px] max-h-[120px]" placeholder="메시지를 입력하세요..." />
+            rows={1} className="input-field resize-none flex-1 text-sm py-3 h-11 min-h-[44px] max-h-[120px]"
+            placeholder="메시지를 입력하세요..." />
           <button type="submit" disabled={sendLoading || !newMessage.trim()} className="btn-primary px-5 self-end h-10 disabled:opacity-50 flex-shrink-0">
-            {sendLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "보내기"}
+            {sendLoading
+              ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : "보내기"}
           </button>
         </form>
       </div>
+
+      {deleteConfirmId && (
+        <ConfirmModal
+          message="메시지를 삭제하시겠습니까?"
+          confirmLabel="삭제하기"
+          cancelLabel="취소"
+          danger
+          onConfirm={confirmDeleteMessage}
+          onCancel={() => setDeleteConfirmId(null)}
+        />
+      )}
     </div>
   );
 }
