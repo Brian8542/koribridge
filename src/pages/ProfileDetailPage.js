@@ -25,6 +25,16 @@ function formatRelativeTime(timestamp) {
   return `${days}일 전 활동`;
 }
 
+function getMatchPercentage(me, other) {
+  if (!me || !other) return 0;
+  let score = 20;
+  if (me.learning_language === other.native_language) score += 40;
+  if (me.native_language === other.learning_language) score += 20;
+  const commonInterests = (me.interests || []).filter((i) => (other.interests || []).includes(i));
+  score += Math.min(commonInterests.length * 10, 20);
+  return Math.min(score, 100);
+}
+
 export default function ProfileDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -196,10 +206,10 @@ export default function ProfileDetailPage() {
               <p className="text-xs text-gray-400 mb-2">관심사</p>
               <div className="flex flex-wrap gap-2">
                 {profile.interests.map((interest) => (
-                  <span key={interest} className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  <span key={interest} className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-colors ${
                     commonInterests.includes(interest) 
-                    ? "bg-red-600 text-white" 
-                    : "bg-red-50 text-red-700"
+                    ? "bg-red-600 text-white shadow-md shadow-red-100" 
+                    : "bg-gray-100 text-gray-600"
                   }`}>
                     #{interest}
                   </span>

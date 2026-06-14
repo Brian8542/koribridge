@@ -33,27 +33,26 @@ const formatTime = (value) => {
 
 // AI 파트너 추천 점수 계산
 function getMatchScore(me, other) {
-  let score = 0;
+  if (!me || !other) return { score: 0, percentage: 0, reason: "" };
+  let score = 20; // 기본 점수
   let reasons = [];
 
   // 언어 교환 매칭 (상대가 내 모국어를 배우고, 내가 상대 모국어를 배움)
   if (me.learning_language === other.native_language) {
-    score += 50;
+    score += 40;
     reasons.push(`${other.native_language} 원어민`);
   }
   if (me.native_language === other.learning_language) {
-    score += 30;
+    score += 20;
     reasons.push(`나의 ${me.native_language}를 배우고 싶어함`);
   }
 
   // 공통 관심사
   const commonInterests = (me.interests || []).filter((i) => (other.interests || []).includes(i));
-  if (commonInterests.length > 0) {
-    score += commonInterests.length * 10;
-    reasons.push(`공통 관심사: ${commonInterests.slice(0, 2).join(", ")}`);
-  }
+  score += Math.min(commonInterests.length * 10, 20); // 최대 20점
+  if (commonInterests.length > 0) reasons.push(`공통 관심사: ${commonInterests[0]}`);
 
-  return { score, reason: reasons[0] || "관심사가 비슷해요" };
+  return { score, percentage: Math.min(score, 100), reason: reasons[0] || "관심사가 비슷해요" };
 }
 
 export default function HomePage() {
@@ -76,6 +75,7 @@ export default function HomePage() {
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [convoLoading, setConvoLoading] = useState(true);
+  const [stats, setStats] = useState({ total: 0, today: 0 });
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
 
@@ -157,6 +157,17 @@ export default function HomePage() {
         setFavorites([]);
       }
       setFavoritesLoading(false);
+
+      // 앱 통계 가져오기
+      const { count: totalCount } = await supabase.from("profiles").select("*", { count: 'exact', head: true });
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const { count: todayCount } = await supabase
+        .from("profiles")
+        .select("*", { count: 'exact', head: true })
+        .gte("created_at", startOfToday.toISOString());
+      
+      setStats({ total: totalCount || 0, today: todayCount || 0 });
 
       // 파트너 목록
       const { data: allProfiles, error: profilesError } = await supabase
@@ -385,11 +396,16 @@ export default function HomePage() {
     const isOnline = onlineIds.has(profile.id);
     const isFavorite = favoriteIds.has(profile.id);
     const levelColor = { 고급: "bg-blue-50 text-blue-700", 중급: "bg-yellow-50 text-yellow-700", 초급: "bg-green-50 text-green-700" };
+    const match = getMatchScore(myProfile, profile);
+
     return (
-      //
       <div className="card p-6 transition hover:-translate-y-1 hover:shadow-lg">
         <div className="flex items-start gap-4">
           <div className="relative flex-shrink-0">
+            {/* 매칭 점수 배지 */}
+            <div className="absolute -top-2 -left-2 z-10 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-sm">
+              매칭 {match.percentage}%
+            </div>
             {profile.avatar_url ? (
               <img src={profile.avatar_url} alt={profile.display_name} className="w-16 h-16 rounded-full object-cover border border-gray-200" />
             ) : (
@@ -490,6 +506,23 @@ export default function HomePage() {
     </div>
   );
 
+  const renderStatsBanner = () => (
+    <div className="grid grid-cols-3 gap-3">
+      <div className="bg-red-600 rounded-3xl p-4 text-white text-center shadow-lg shadow-red-100">
+        <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider mb-1">Online</p>
+        <p className="text-xl font-black">{onlineIds.size}</p>
+      </div>
+      <div className="bg-white border border-gray-100 rounded-3xl p-4 text-center">
+        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Total</p>
+        <p className="text-xl font-black text-gray-900">{stats.total}</p>
+      </div>
+      <div className="bg-white border border-gray-100 rounded-3xl p-4 text-center">
+        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Today</p>
+        <p className="text-xl font-black text-red-600">+{stats.today}</p>
+      </div>
+    </div>
+  );
+
   const renderHomeContent = () => (
     <div className="space-y-8">
       {/* 내 프로필 요약 카드 */}
@@ -511,7 +544,9 @@ export default function HomePage() {
           <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm">프로필 수정</button>
         </div>
       )}
-      <AnnouncementBanner />
+
+      {renderStatsBanner()}
+
       {/* AI 추천 파트너 */}
       {recommendedProfiles.length > 0 && (
         <div>

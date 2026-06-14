@@ -32,6 +32,7 @@ export default function ChatPage() {
   const [saveLoading, setSaveLoading] = useState(false);
   const messageEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const addMessage = useCallback((msg) => {
     if (!msg?.id) return;
@@ -216,6 +217,19 @@ export default function ChatPage() {
 
   const isPartnerOnline = onlineIds.has(partner?.id);
 
+  // 자동 높이 조절
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + "px";
+    }
+  }, [newMessage]);
+
+  const handleEmojiClick = (emoji) => {
+    setNewMessage((prev) => prev + emoji);
+    textareaRef.current?.focus();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
@@ -335,15 +349,24 @@ export default function ChatPage() {
         <div ref={messageEndRef} />
       </div>
 
-      <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0">
-        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end relative">
+      <div className="bg-white border-t border-gray-100 px-4 py-4 sticky bottom-0">
+        {/* 퀵 이모지 바 */}
+        <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
+          {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map(emoji => (
+            <button key={emoji} onClick={() => handleEmojiClick(emoji)} className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-gray-100 text-sm transition-colors">
+              {emoji}
+            </button>
+          ))}
+        </div>
+
+        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-center relative">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading}
-            className="flex-shrink-0 w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50">
+            className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50">
             {imageUploading ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" /> : <span>📷</span>}
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
-          <textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
-            rows={2} className="input-field resize-none flex-1 text-sm" placeholder="메시지를 입력하세요..." />
+          <textarea ref={textareaRef} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
+            rows={1} className="input-field resize-none flex-1 text-sm py-3 h-11 min-h-[44px] max-h-[120px]" placeholder="메시지를 입력하세요..." />
           <button type="submit" disabled={sendLoading || !newMessage.trim()} className="btn-primary px-5 self-end h-10 disabled:opacity-50 flex-shrink-0">
             {sendLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "보내기"}
           </button>
