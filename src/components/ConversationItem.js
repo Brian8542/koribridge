@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { formatTime } from "../utils/formatters";
 
-export default function ConversationItem({ conv, userId, isOnline }) {
+function ConversationItem({ conv, userId, isOnline }) {
   const navigate = useNavigate();
 
   return (
@@ -13,6 +13,7 @@ export default function ConversationItem({ conv, userId, isOnline }) {
             <img
               src={conv.partner.avatar_url}
               alt={conv.partner.display_name}
+              loading="lazy"
               className="w-14 h-14 rounded-full object-cover border border-gray-200"
             />
           ) : (
@@ -63,3 +64,5 @@ export default function ConversationItem({ conv, userId, isOnline }) {
     </div>
   );
 }
+
+export default React.memo(ConversationItem);

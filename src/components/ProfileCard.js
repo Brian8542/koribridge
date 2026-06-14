@@ -8,7 +8,7 @@ const LEVEL_COLOR = {
   초급: "bg-green-50 text-green-700",
 };
 
-export default function ProfileCard({
+function ProfileCard({
   profile,
   showActions = true,
   myProfile,
@@ -35,6 +35,7 @@ export default function ProfileCard({
             <img
               src={profile.avatar_url}
               alt={profile.display_name}
+              loading="lazy"
               className="w-16 h-16 rounded-full object-cover border border-gray-200"
             />
           ) : (
@@ -121,3 +122,5 @@ export default function ProfileCard({
     </div>
   );
 }
+
+export default React.memo(ProfileCard);

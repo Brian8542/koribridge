@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-export default function ProfileFilters({
+function ProfileFilters({
   profiles,
   languages,
   nationalityFilter,
@@ -10,7 +10,10 @@ export default function ProfileFilters({
   onLanguage,
   onLevel,
 }) {
-  const nationalities = [...new Set(profiles.map((p) => p.nationality))];
+  const nationalities = useMemo(
+    () => [...new Set(profiles.map((p) => p.nationality))],
+    [profiles]
+  );
 
   return (
     <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
@@ -59,3 +62,5 @@ export default function ProfileFilters({
     </div>
   );
 }
+
+export default React.memo(ProfileFilters);

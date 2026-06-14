@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -340,7 +340,7 @@ export default function HomePage() {
     }
   };
 
-  const handleToggleFavorite = async (profile) => {
+  const handleToggleFavorite = useCallback(async (profile) => {
     if (!user?.id) return;
     const isFav = favoriteIds.has(profile.id);
     if (isFav) {
@@ -354,7 +354,11 @@ export default function HomePage() {
       setFavoriteIds((prev) => new Set(prev).add(profile.id));
       setFavorites((prev) => [...prev, profile]);
     }
-  };
+  }, [user?.id, favoriteIds, showToast]);
+
+  const handleReport = useCallback((profileId, displayName) => {
+    setReportModal({ profileId, displayName });
+  }, []);
 
   const blockUser = async () => {
     if (!blockConfirm) return;
@@ -430,7 +434,7 @@ export default function HomePage() {
                 isOnline={onlineIds.has(profile.id)}
                 isFavorite={favoriteIds.has(profile.id)}
                 onToggleFavorite={handleToggleFavorite}
-                onReport={(profileId, displayName) => setReportModal({ profileId, displayName })}
+                onReport={handleReport}
               />
             ))}
           </div>
@@ -502,7 +506,7 @@ export default function HomePage() {
                 isOnline={onlineIds.has(profile.id)}
                 isFavorite={favoriteIds.has(profile.id)}
                 onToggleFavorite={handleToggleFavorite}
-                onReport={(profileId, displayName) => setReportModal({ profileId, displayName })}
+                onReport={handleReport}
               />
             ))
           )}
@@ -551,7 +555,7 @@ export default function HomePage() {
               isOnline={onlineIds.has(profile.id)}
               isFavorite={favoriteIds.has(profile.id)}
               onToggleFavorite={handleToggleFavorite}
-              onReport={(profileId, displayName) => setReportModal({ profileId, displayName })}
+              onReport={handleReport}
             />
           ))}
         </div>

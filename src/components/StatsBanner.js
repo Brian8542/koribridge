@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function StatsBanner({ onlineCount, total, today }) {
+function StatsBanner({ onlineCount, total, today }) {
   return (
     <div className="grid grid-cols-3 gap-3">
       <div className="bg-red-600 rounded-3xl p-4 text-white text-center shadow-lg shadow-red-100">
@@ -18,3 +18,5 @@ export default function StatsBanner({ onlineCount, total, today }) {
     </div>
   );
 }
+
+export default React.memo(StatsBanner);

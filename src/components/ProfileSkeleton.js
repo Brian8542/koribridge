@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ProfileSkeleton() {
+function ProfileSkeleton() {
   return (
     <div className="card p-6 animate-pulse border-gray-100">
       <div className="flex gap-4">
@@ -18,3 +18,5 @@ export default function ProfileSkeleton() {
     </div>
   );
 }
+
+export default React.memo(ProfileSkeleton);
