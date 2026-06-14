@@ -8,38 +8,39 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(undefined);
   const [loading, setLoading] = useState(true);
 
-  const updateLastSeen = async (userId) => {
-    if (!userId) return;
-    try {
-      await supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", userId);
-    } catch (e) {}
-  };
-
-  const loadProfile = async (userId) => {
-    if (!userId) { setProfile(null); return; }
-    const { data } = await supabase.from("profiles").select("id").eq("id", userId).maybeSingle();
-    setProfile(data || null);
-  };
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      loadProfile(u?.id);
-      if (u?.id) updateLastSeen(u.id);
-      setLoading(false);
+      if (u?.id) {
+        supabase.from("profiles").select("id").eq("id", u.id).maybeSingle()
+          .then(({ data }) => {
+            setProfile(data || null);
+            setLoading(false);
+          });
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      loadProfile(u?.id);
-      if (u?.id) updateLastSeen(u.id);
-      if (event === "SIGNED_IN") {
-        setLoading(false);
-      }
       if (event === "SIGNED_OUT") {
         setProfile(null);
+        setLoading(false);
+        return;
+      }
+      if (u?.id) {
+        supabase.from("profiles").select("id").eq("id", u.id).maybeSingle()
+          .then(({ data }) => {
+            setProfile(data || null);
+            setLoading(false);
+          });
+      } else {
+        setProfile(null);
+        setLoading(false);
       }
     });
 
@@ -53,7 +54,6 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error && data?.user?.id) updateLastSeen(data.user.id);
     return { data, error };
   };
 
