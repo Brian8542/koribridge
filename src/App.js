@@ -30,7 +30,7 @@ function ProfileRequiredRoute({ children }) {
   const { user, loading, profile } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/auth" replace />;
-  if (profile === null) return <Navigate to="/setup" replace />;
+  if (profile === null && !loading) return <Navigate to="/setup" replace />;
   return children;
 }
 
