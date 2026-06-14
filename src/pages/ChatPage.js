@@ -38,6 +38,8 @@ export default function ChatPage() {
 
   const MSGS_LIMIT = 50;
   const MSGS_LOAD_MORE = 30;
+  const MAX_MSG_LENGTH = 1000;
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
   const messageEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -180,6 +182,7 @@ export default function ChatPage() {
 
   const saveEditedMessage = async (msgId) => {
     if (!editContent.trim() || !user?.id) return;
+    if (editContent.length > MAX_MSG_LENGTH) return;
     setSaveLoading(true);
     try {
       const { error } = await supabase.from("messages")
@@ -213,8 +216,14 @@ export default function ChatPage() {
   const handleImageSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      showToast("JPG, PNG, WebP 파일만 업로드할 수 있습니다.", "error");
+      e.target.value = "";
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       showToast("이미지는 5MB 이하여야 합니다.", "error");
+      e.target.value = "";
       return;
     }
     setImageUploading(true);
@@ -238,6 +247,7 @@ export default function ChatPage() {
   const sendMessage = async (e) => {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !user?.id || !partnerId) return;
+    if (newMessage.length > MAX_MSG_LENGTH) return;
     const msg = newMessage.trim();
     setNewMessage("");
     setSendLoading(true);
@@ -453,18 +463,26 @@ export default function ChatPage() {
             </button>
           ))}
         </div>
-        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-center">
+        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading}
-            className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50">
+            className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 mb-0.5">
             {imageUploading
               ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
               : <span>📷</span>}
           </button>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
-          <textarea ref={textareaRef} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
-            rows={1} className="input-field resize-none flex-1 text-sm py-3 h-11 min-h-[44px] max-h-[120px]"
-            placeholder="메시지를 입력하세요..." />
-          <button type="submit" disabled={sendLoading || !newMessage.trim()} className="btn-primary px-5 self-end h-10 disabled:opacity-50 flex-shrink-0">
+          <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleImageSelect} />
+          <div className="flex-1 flex flex-col gap-1">
+            <textarea ref={textareaRef} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
+              rows={1} className="input-field resize-none text-sm py-3 h-11 min-h-[44px] max-h-[120px]"
+              placeholder="메시지를 입력하세요..." />
+            {newMessage.length > 800 && (
+              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-red-500 font-semibold" : "text-gray-400"}`}>
+                {newMessage.length}/{MAX_MSG_LENGTH}
+              </p>
+            )}
+          </div>
+          <button type="submit" disabled={sendLoading || !newMessage.trim() || newMessage.length > MAX_MSG_LENGTH}
+            className="btn-primary px-5 h-10 disabled:opacity-50 flex-shrink-0 mb-0.5">
             {sendLoading
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : "보내기"}

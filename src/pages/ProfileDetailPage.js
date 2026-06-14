@@ -49,10 +49,12 @@ export default function ProfileDetailPage() {
   const confirmBlock = async () => {
     setBlockConfirm(false);
     if (isBlocked) {
-      await supabase.from("blocked_users").delete().eq("blocker_id", user.id).eq("blocked_id", id);
+      const { error } = await supabase.from("blocked_users").delete().eq("blocker_id", user.id).eq("blocked_id", id);
+      if (error) { setError("차단 해제에 실패했습니다."); return; }
       setIsBlocked(false);
     } else {
-      await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: id });
+      const { error } = await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: id });
+      if (error && error.code !== "23505") { setError("차단에 실패했습니다."); return; }
       setIsBlocked(true);
     }
   };
@@ -60,12 +62,13 @@ export default function ProfileDetailPage() {
   const handleReport = async () => {
     if (!reportReason.trim()) return;
     setReportLoading(true);
-    await supabase.from("reports").insert({
+    const { error } = await supabase.from("reports").insert({
       reporter_id: user.id,
       reported_id: id,
-      reason: reportReason.trim(),
+      reason: reportReason.trim().slice(0, 1000),
     });
     setReportLoading(false);
+    if (error) { setError("신고 접수에 실패했습니다."); return; }
     setReportDone(true);
     setReportReason("");
   };

@@ -273,12 +273,20 @@ export default function HomePage() {
     });
   };
 
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setProfileError("JPG, PNG, WebP 파일만 업로드할 수 있습니다.");
+      e.target.value = "";
+      return;
+    }
     if (file.size > 2 * 1024 * 1024) { setProfileError("사진 크기는 2MB 이하여야 합니다."); return; }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
+    setProfileError("");
   };
 
   const uploadAvatar = async () => {
@@ -297,9 +305,11 @@ export default function HomePage() {
     e.preventDefault();
     setProfileError("");
     if (!profileForm.display_name.trim()) return setProfileError("이름을 입력해 주세요.");
+    if (profileForm.display_name.trim().length > 50) return setProfileError("닉네임은 50자 이하여야 합니다.");
     if (!profileForm.nationality) return setProfileError("국적을 선택해 주세요.");
     if (!profileForm.native_language) return setProfileError("모국어를 선택해 주세요.");
     if (!profileForm.learning_language) return setProfileError("배우고 싶은 언어를 선택해 주세요.");
+    if (profileForm.bio.length > 500) return setProfileError("자기소개는 500자 이하여야 합니다.");
     setProfileLoading(true);
     try {
       const avatar_url = await uploadAvatar();
@@ -334,11 +344,13 @@ export default function HomePage() {
     if (!user?.id) return;
     const isFav = favoriteIds.has(profile.id);
     if (isFav) {
-      await supabase.from("favorites").delete().match({ user_id: user.id, partner_id: profile.id });
+      const { error } = await supabase.from("favorites").delete().match({ user_id: user.id, partner_id: profile.id });
+      if (error) { showToast("즐겨찾기 해제에 실패했습니다.", "error"); return; }
       setFavoriteIds((prev) => { const next = new Set(prev); next.delete(profile.id); return next; });
       setFavorites((prev) => prev.filter((item) => item.id !== profile.id));
     } else {
-      await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
+      const { error } = await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
+      if (error) { showToast("즐겨찾기 추가에 실패했습니다.", "error"); return; }
       setFavoriteIds((prev) => new Set(prev).add(profile.id));
       setFavorites((prev) => [...prev, profile]);
     }
@@ -347,7 +359,12 @@ export default function HomePage() {
   const blockUser = async () => {
     if (!blockConfirm) return;
     const { targetId, displayName } = blockConfirm;
-    await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: targetId });
+    const { error } = await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: targetId });
+    if (error && error.code !== "23505") {
+      showToast("차단에 실패했습니다.", "error");
+      setBlockConfirm(null);
+      return;
+    }
     setBlockedIds((prev) => [...prev, targetId]);
     setBlockConfirm(null);
     setReportModal(null);
@@ -357,12 +374,13 @@ export default function HomePage() {
   const submitReport = async () => {
     if (!reportModal || !reportReason.trim()) return;
     setReportLoading(true);
-    await supabase.from("reports").insert({
+    const { error } = await supabase.from("reports").insert({
       reporter_id: user.id,
       reported_id: reportModal.profileId,
-      reason: reportReason.trim(),
+      reason: reportReason.trim().slice(0, 1000),
     });
     setReportLoading(false);
+    if (error) { showToast("신고 접수에 실패했습니다.", "error"); return; }
     setReportModal(null);
     setReportReason("");
     showToast("신고가 접수되었습니다.", "success");
@@ -605,16 +623,16 @@ export default function HomePage() {
             )}
             <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center cursor-pointer shadow">
               <span className="text-white text-lg leading-none">+</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
             </label>
           </div>
-          <p className="text-xs text-gray-400">JPG/PNG, 최대 2MB</p>
+          <p className="text-xs text-gray-400">JPG/PNG/WebP, 최대 2MB</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">닉네임</label>
-            <input type="text" className="input-field" value={profileForm.display_name}
+            <input type="text" className="input-field" value={profileForm.display_name} maxLength={50}
               onChange={(e) => handleProfileChange("display_name", e.target.value)} />
           </div>
           <div>
@@ -676,8 +694,13 @@ export default function HomePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">자기소개</label>
-          <textarea rows={4} className="input-field resize-none" value={profileForm.bio}
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-semibold text-gray-700">자기소개</label>
+            <span className={`text-xs ${profileForm.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
+              {profileForm.bio.length}/500
+            </span>
+          </div>
+          <textarea rows={4} className="input-field resize-none" value={profileForm.bio} maxLength={500}
             onChange={(e) => handleProfileChange("bio", e.target.value)} placeholder="초급/중급/고급 수준을 포함해 주세요" />
         </div>
 

@@ -49,9 +49,16 @@ export default function ProfileSetupPage() {
     });
   };
 
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setError("JPG, PNG, WebP 파일만 업로드할 수 있습니다.");
+      e.target.value = "";
+      return;
+    }
     if (file.size > 2 * 1024 * 1024) {
       setError("사진 크기는 2MB 이하여야 합니다.");
       return;
@@ -85,10 +92,12 @@ export default function ProfileSetupPage() {
     setError("");
 
     if (!form.display_name.trim()) return setError("이름을 입력해 주세요.");
+    if (form.display_name.trim().length > 50) return setError("닉네임은 50자 이하여야 합니다.");
     if (!form.nationality) return setError("국적을 선택해 주세요.");
     if (!form.native_language) return setError("모국어를 선택해 주세요.");
     if (!form.learning_language) return setError("배우고 싶은 언어를 선택해 주세요.");
     if (!form.language_level) return setError("언어 수준을 선택해 주세요.");
+    if (form.bio.length > 500) return setError("자기소개는 500자 이하여야 합니다.");
 
     setLoading(true);
     try {
@@ -139,10 +148,10 @@ export default function ProfileSetupPage() {
               )}
               <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center cursor-pointer shadow">
                 <span className="text-white text-lg leading-none">+</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
-            <p className="text-xs text-gray-400">JPG/PNG, 최대 2MB</p>
+            <p className="text-xs text-gray-400">JPG/PNG/WebP, 최대 2MB</p>
           </div>
 
           {/* 닉네임 */}
@@ -152,6 +161,7 @@ export default function ProfileSetupPage() {
               type="text"
               className="input-field"
               value={form.display_name}
+              maxLength={50}
               onChange={(e) => handleChange("display_name", e.target.value)}
               placeholder="표시될 이름을 입력하세요"
             />
@@ -218,10 +228,16 @@ export default function ProfileSetupPage() {
           {/* 자기소개 */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">자기소개</label>
-            <textarea
+            <div className="flex items-center justify-between mb-1">
+            <span className={`text-xs ml-auto ${form.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
+              {form.bio.length}/500
+            </span>
+          </div>
+          <textarea
               rows={3}
               className="input-field resize-none"
               value={form.bio}
+              maxLength={500}
               onChange={(e) => handleChange("bio", e.target.value)}
               placeholder="간단히 자신을 소개해 주세요 (언어 수준: 초급/중급/고급 포함 가능)"
             />
