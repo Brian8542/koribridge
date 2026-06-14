@@ -11,12 +11,25 @@ const getLanguageLevel = (profile) => {
   return "초급";
 };
 
+function formatRelativeTime(timestamp) {
+  if (!timestamp) return "활동 정보 없음";
+  const now = new Date();
+  const diff = now - new Date(timestamp);
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (minutes < 1) return "방금 전 활동";
+  if (minutes < 60) return `${minutes}분 전 활동`;
+  if (hours < 24) return `${hours}시간 전 활동`;
+  return `${days}일 전 활동`;
+}
+
 export default function ProfileDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile: myProfile } = useAuth();
   const onlineIds = useOnlineUsers(user?.id);
-
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -114,6 +127,12 @@ export default function ProfileDetailPage() {
     초급: "bg-green-50 text-green-700",
   };
 
+  // 공통 관심사 계산
+  const commonInterests = (myProfile?.interests || []).filter(i => 
+    (profile.interests || []).includes(i)
+  );
+  const lastActive = formatRelativeTime(profile.updated_at || profile.created_at);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
       {/* 헤더 */}
@@ -153,8 +172,8 @@ export default function ProfileDetailPage() {
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${levelColor[level]}`}>{level}</span>
               </div>
               <p className="text-sm text-gray-500 mt-0.5">{profile.nationality}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {isOnline ? "지금 온라인" : "오프라인"}
+              <p className={`text-xs mt-1 font-medium ${isOnline ? "text-emerald-500" : "text-gray-400"}`}>
+                {isOnline ? "현재 온라인" : lastActive}
               </p>
             </div>
           </div>
@@ -177,11 +196,26 @@ export default function ProfileDetailPage() {
               <p className="text-xs text-gray-400 mb-2">관심사</p>
               <div className="flex flex-wrap gap-2">
                 {profile.interests.map((interest) => (
-                  <span key={interest} className="text-xs bg-red-50 text-red-700 px-3 py-1 rounded-full font-medium">
+                  <span key={interest} className={`text-xs px-3 py-1 rounded-full font-medium ${
+                    commonInterests.includes(interest) 
+                    ? "bg-red-600 text-white" 
+                    : "bg-red-50 text-red-700"
+                  }`}>
                     #{interest}
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* 공통 관심사 안내 */}
+          {commonInterests.length > 0 && (
+            <div className="mt-4 p-3 bg-red-50 rounded-2xl flex items-center gap-2">
+              <span className="text-lg">✨</span>
+              <p className="text-xs text-red-800 font-medium">
+                <span className="font-bold">{profile.display_name}</span> 님과 
+                <span className="text-red-600"> {commonInterests.length}개</span>의 공통 관심사가 있어요!
+              </p>
             </div>
           )}
 
@@ -199,9 +233,10 @@ export default function ProfileDetailPage() {
         {/* 액션 버튼 */}
         <button
           onClick={() => navigate(`/chat/${profile.id}`)}
-          className="btn-primary w-full py-3"
+          className="btn-primary w-full py-4 text-lg shadow-lg shadow-red-200 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
         >
-          채팅하기
+          <span>💬</span>
+          대화 시작하기
         </button>
 
         <button

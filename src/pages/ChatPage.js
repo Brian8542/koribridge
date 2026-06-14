@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
+import { useOnlineUsers } from "../hooks/useOnlineUsers";
 
 function formatTime(ts) {
   return new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(ts));
@@ -16,6 +17,7 @@ export default function ChatPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const onlineIds = useOnlineUsers(user?.id);
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -212,6 +214,8 @@ export default function ChatPage() {
     </div>
   );
 
+  const isPartnerOnline = onlineIds.has(partner?.id);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
@@ -226,7 +230,12 @@ export default function ChatPage() {
           )}
           <div className="min-w-0">
             <p className="font-bold text-gray-900 truncate">{partner.display_name}</p>
-            <p className="text-xs text-gray-400">{partner.nationality}</p>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${isPartnerOnline ? "bg-emerald-400" : "bg-gray-300"}`} />
+              <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
+                {isPartnerOnline ? "Online" : "Offline"}
+              </p>
+            </div>
           </div>
         </button>
       </div>
@@ -234,12 +243,25 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
         {messages.length === 0 ? (
           <div className="text-center text-gray-400 py-20 text-sm">첫 메시지를 보내보세요.</div>
-        ) : messages.map((msg) => {
+        ) : messages.map((msg, idx) => {
           const isMine = msg.sender_id === user.id;
           const tTxt = translations[msg.id];
           const tVis = visibleTranslation[msg.id];
           const tLoad = translationLoading[msg.id];
+          
+          const currentDate = new Date(msg.created_at).toLocaleDateString('ko-KR', {
+            year: 'numeric', month: 'long', day: 'numeric'
+          });
+          const prevDate = idx > 0 ? new Date(messages[idx-1].created_at).toLocaleDateString('ko-KR', {
+            year: 'numeric', month: 'long', day: 'numeric'
+          }) : null;
+          const showDateDivider = currentDate !== prevDate;
+
           return (
+            <React.Fragment key={msg.id}>
+              {showDateDivider && (
+                <div className="flex justify-center my-6"><span className="bg-gray-200/60 text-gray-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span></div>
+              )}
             <div key={msg.id} className={"flex " + (isMine ? "justify-end" : "justify-start") + " group"}>
               <div className="max-w-xs sm:max-w-sm">
                 <div 
@@ -307,13 +329,14 @@ export default function ChatPage() {
                 )}
               </div>
             </div>
+            </React.Fragment>
           );
         })}
         <div ref={messageEndRef} />
       </div>
 
       <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0">
-        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end">
+        <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end relative">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading}
             className="flex-shrink-0 w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50">
             {imageUploading ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" /> : <span>📷</span>}
@@ -322,7 +345,7 @@ export default function ChatPage() {
           <textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
             rows={2} className="input-field resize-none flex-1 text-sm" placeholder="메시지를 입력하세요..." />
           <button type="submit" disabled={sendLoading || !newMessage.trim()} className="btn-primary px-5 self-end h-10 disabled:opacity-50 flex-shrink-0">
-            {sendLoading ? "..." : "보내기"}
+            {sendLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "보내기"}
           </button>
         </form>
       </div>

@@ -472,6 +472,24 @@ export default function HomePage() {
     );
   };
 
+  // 스켈레톤 UI 컴포넌트
+  const ProfileSkeleton = () => (
+    <div className="card p-6 animate-pulse border-gray-100">
+      <div className="flex gap-4">
+        <div className="w-16 h-16 bg-gray-200 rounded-full" />
+        <div className="flex-1 space-y-3">
+          <div className="h-4 bg-gray-200 rounded w-1/3" />
+          <div className="h-3 bg-gray-100 rounded w-1/2" />
+          <div className="h-10 bg-gray-50 rounded-xl w-full mt-4" />
+        </div>
+      </div>
+      <div className="flex gap-3 mt-6">
+        <div className="h-10 bg-gray-200 rounded-2xl flex-1" />
+        <div className="h-10 bg-gray-200 rounded-2xl flex-1" />
+      </div>
+    </div>
+  );
+
   const renderHomeContent = () => (
     <div className="space-y-8">
       {/* 내 프로필 요약 카드 */}
@@ -544,10 +562,14 @@ export default function HomePage() {
         <p className="text-sm font-semibold text-gray-700 mb-4">전체 파트너 ({filteredProfiles.length}명)</p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
-            Array.from({ length: 6 }).map((_, i) => <div key={i} className="card animate-pulse h-60" />)
+            Array.from({ length: 6 }).map((_, i) => <ProfileSkeleton key={i} />)
           ) : filteredProfiles.length === 0 ? (
-            <div className="card text-center py-16 col-span-full">
-              <p className="text-gray-500">필터에 맞는 파트너가 없습니다.</p>
+            <div className="card text-center py-20 col-span-full border-dashed border-2">
+              <div className="text-4xl mb-4">🔍</div>
+              <p className="text-gray-500 font-medium">검색 결과가 없습니다.</p>
+              <p className="text-xs text-gray-400 mt-1">필터를 변경하거나 검색어를 다르게 입력해보세요.</p>
+              <button onClick={() => {setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter("");}} 
+                className="mt-6 text-red-600 text-sm font-bold hover:underline">필터 초기화하기</button>
             </div>
           ) : (
             filteredProfiles.map((profile) => <ProfileCard key={profile.id} profile={profile} />)
@@ -589,10 +611,10 @@ export default function HomePage() {
   const renderChatListContent = () => (
     <div className="space-y-4">
       {convoLoading ? (
-        Array.from({ length: 4 }).map((_, i) => <div key={i} className="card animate-pulse h-28" />)
+        Array.from({ length: 4 }).map((_, i) => <div key={i} className="card p-5 animate-pulse flex items-center gap-4"><div className="w-14 h-14 bg-gray-200 rounded-full"/><div className="flex-1 space-y-2"><div className="h-4 bg-gray-200 rounded w-1/4"/><div className="h-3 bg-gray-100 rounded w-3/4"/></div></div>)
       ) : conversations.length === 0 ? (
         <div className="card text-center py-16">
-          <p className="text-gray-500">아직 나눈 대화가 없습니다.</p>
+          <p className="text-gray-500 font-medium">아직 나눈 대화가 없습니다.</p>
           <button onClick={() => setTab("home")} className="mt-4 btn-primary px-6 py-2.5 text-sm">파트너 찾기</button>
         </div>
       ) : (
@@ -774,7 +796,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* 헤더 (Header) */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4">
+      <div className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-40">
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-xs text-gray-400">환영합니다, {user.email?.split("@")[0] || "사용자"}님</p>
@@ -788,13 +810,23 @@ export default function HomePage() {
           </div>
         </div>
         {/* 검색창 (Search Bar) */}
+        <div className="relative group">
         <input
           type="text"
-          className="input-field text-sm"
+          className="input-field text-sm pl-4 pr-10 h-11"
           placeholder="닉네임, 국적, 언어로 검색..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        {searchQuery && (
+          <button 
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center hover:bg-gray-200 transition-colors"
+          >
+            ✕
+          </button>
+        )}
+        </div>
         {/* 탭 (Tabs) */}
         <div className="flex gap-2 mt-3">
           {[{ key: "home", label: "홈" }, { key: "chatlist", label: "채팅", badge: totalUnread }, { key: "favorites", label: "즐겨찾기" }, { key: "profile", label: "내 프로필" }].map((item) => (
