@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -65,8 +66,11 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [blockConfirm, setBlockConfirm] = useState(null); // { targetId, displayName }
+  const [loadError, setLoadError] = useState(false);
+  const [loadRetryKey, setLoadRetryKey] = useState(0);
 
   const notifGranted = useRef(false);
+  const bottomNavRef = useRef(null);
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -82,6 +86,8 @@ export default function HomePage() {
     if (!user) return;
 
     const loadAll = async () => {
+      setLoadError(false);
+      try {
       const { data: me } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       if (me) {
         setMyProfile(me);
@@ -169,10 +175,16 @@ export default function HomePage() {
         }
       }
       setConvoLoading(false);
+      } catch {
+        setLoadError(true);
+        setProfilesLoading(false);
+        setFavoritesLoading(false);
+        setConvoLoading(false);
+      }
     };
 
     loadAll();
-  }, [user]);
+  }, [user, loadRetryKey]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -233,6 +245,24 @@ export default function HomePage() {
   useEffect(() => {
     setVisibleCount(12);
   }, [nationalityFilter, languageFilter, levelFilter, searchQuery]);
+
+  // 모바일 키보드가 올라올 때 하단 네비게이션을 키보드 위로 올림
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      if (bottomNavRef.current) {
+        bottomNavRef.current.style.bottom = `${offset}px`;
+      }
+    };
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, []);
 
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
 
@@ -405,18 +435,46 @@ export default function HomePage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
             Array.from({ length: 6 }).map((_, i) => <ProfileSkeleton key={i} />)
-          ) : filteredProfiles.length === 0 ? (
-            <div className="card text-center py-20 col-span-full border-dashed border-2">
-              <div className="text-4xl mb-4">🔍</div>
-              <p className="text-gray-500 font-medium">검색 결과가 없습니다.</p>
-              <p className="text-xs text-gray-400 mt-1">필터를 변경하거나 검색어를 다르게 입력해보세요.</p>
+          ) : loadError ? (
+            <div className="card text-center py-20 col-span-full">
+              <p className="text-4xl mb-4">📡</p>
+              <p className="text-gray-900 font-semibold">데이터를 불러오지 못했습니다</p>
+              <p className="text-sm text-gray-500 mt-1">네트워크 연결을 확인해 주세요.</p>
               <button
-                onClick={() => { setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter(""); }}
-                className="mt-6 text-red-600 text-sm font-bold hover:underline"
+                onClick={() => setLoadRetryKey((k) => k + 1)}
+                className="mt-5 btn-primary px-6 py-2.5 text-sm"
               >
-                필터 초기화하기
+                다시 시도
               </button>
             </div>
+          ) : filteredProfiles.length === 0 ? (
+            nationalityFilter || languageFilter || levelFilter || searchQuery.trim() ? (
+              <div className="card text-center py-20 col-span-full border-dashed border-2">
+                <div className="text-4xl mb-4">🔍</div>
+                <p className="text-gray-700 font-semibold">조건에 맞는 파트너가 없어요</p>
+                <p className="text-xs text-gray-400 mt-1">필터를 변경하거나 검색어를 다르게 입력해보세요.</p>
+                <button
+                  onClick={() => { setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter(""); }}
+                  className="mt-6 inline-flex items-center gap-1.5 text-red-600 text-sm font-bold hover:underline"
+                >
+                  필터 초기화하기
+                </button>
+              </div>
+            ) : (
+              <div className="card text-center py-20 col-span-full">
+                <div className="text-5xl mb-4">🌏</div>
+                <p className="text-gray-900 font-semibold text-lg">아직 등록된 파트너가 없어요</p>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                  프로필을 공개로 설정하면<br />더 많은 파트너를 만날 수 있어요.
+                </p>
+                <button
+                  onClick={() => setTab("profile")}
+                  className="mt-5 btn-primary px-6 py-2.5 text-sm"
+                >
+                  내 프로필 수정하기
+                </button>
+              </div>
+            )
           ) : (
             filteredProfiles.slice(0, visibleCount).map((profile) => (
               <ProfileCard
@@ -495,10 +553,26 @@ export default function HomePage() {
             </div>
           </div>
         ))
-      ) : conversations.length === 0 ? (
+      ) : loadError ? (
         <div className="card text-center py-16">
-          <p className="text-gray-500 font-medium">아직 나눈 대화가 없습니다.</p>
-          <button onClick={() => setTab("home")} className="mt-4 btn-primary px-6 py-2.5 text-sm">파트너 찾기</button>
+          <p className="text-3xl mb-3">📡</p>
+          <p className="text-gray-900 font-semibold">채팅 목록을 불러오지 못했습니다</p>
+          <p className="text-sm text-gray-500 mt-1">네트워크 연결을 확인해 주세요.</p>
+          <button
+            onClick={() => setLoadRetryKey((k) => k + 1)}
+            className="mt-5 btn-primary px-6 py-2.5 text-sm"
+          >
+            다시 시도
+          </button>
+        </div>
+      ) : conversations.length === 0 ? (
+        <div className="card text-center py-16 px-6">
+          <div className="text-5xl mb-4">💬</div>
+          <p className="text-gray-900 font-semibold text-lg">아직 나눈 대화가 없어요</p>
+          <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+            관심 있는 파트너의 프로필에서<br />"대화 시작하기"를 눌러 첫 메시지를 보내보세요!
+          </p>
+          <button onClick={() => setTab("home")} className="mt-5 btn-primary px-6 py-2.5 text-sm">파트너 찾아보기</button>
         </div>
       ) : (
         conversations.map((conv) => (
@@ -632,6 +706,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
+      <Helmet><title>KoriBridge - 파트너 찾기</title></Helmet>
       <div className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-40">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -691,7 +766,7 @@ export default function HomePage() {
         {tab === "profile" && renderProfileContent()}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
+      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
           {[
             { key: "home", label: "홈", icon: "🏠" },

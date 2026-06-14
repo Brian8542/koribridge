@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -105,6 +106,7 @@ export default function ProfileDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
+      <Helmet><title>KoriBridge - {profile.display_name || "프로필"}</title></Helmet>
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-800">← 뒤로</button>
         <h1 className="font-bold text-lg text-gray-900">프로필 상세</h1>

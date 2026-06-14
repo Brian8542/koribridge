@@ -1,10 +1,12 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 
 export default function TermsPage() {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
+      <Helmet><title>KoriBridge - 이용약관</title></Helmet>
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0">
         <button onClick={() => navigate(-1)} className="text-sm text-gray-500 hover:text-gray-800">← 뒤로</button>
         <h1 className="font-bold text-lg text-gray-900">이용약관</h1>

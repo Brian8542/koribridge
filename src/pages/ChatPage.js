@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -33,6 +34,7 @@ export default function ChatPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [hasOlderMsgs, setHasOlderMsgs] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const MSGS_LIMIT = 50;
   const MSGS_LOAD_MORE = 30;
@@ -55,20 +57,28 @@ export default function ChatPage() {
   useEffect(() => {
     if (!user || !partnerId) return;
     const load = async () => {
-      const pr = await supabase.from("profiles")
-        .select("id, display_name, nationality, native_language, learning_language, avatar_url")
-        .eq("id", partnerId).maybeSingle();
-      const mr = await supabase.from("messages")
-        .select("id, sender_id, receiver_id, content, image_url, created_at, read_at, edited_at")
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
-        .order("created_at", { ascending: false })
-        .limit(MSGS_LIMIT);
-      setPartner(pr.data || { id: partnerId, display_name: "알 수 없는 사용자", nationality: "" });
-      const sorted = mr.data ? sortMsgs(mr.data) : [];
-      setMessages(sorted);
-      setHasOlderMsgs((mr.data?.length || 0) === MSGS_LIMIT);
-      setChatLoading(false);
-      await markRead();
+      setLoadError(false);
+      setChatLoading(true);
+      try {
+        const pr = await supabase.from("profiles")
+          .select("id, display_name, nationality, native_language, learning_language, avatar_url")
+          .eq("id", partnerId).maybeSingle();
+        const mr = await supabase.from("messages")
+          .select("id, sender_id, receiver_id, content, image_url, created_at, read_at, edited_at")
+          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
+          .order("created_at", { ascending: false })
+          .limit(MSGS_LIMIT);
+        if (pr.error) throw pr.error;
+        setPartner(pr.data || { id: partnerId, display_name: "알 수 없는 사용자", nationality: "" });
+        const sorted = mr.data ? sortMsgs(mr.data) : [];
+        setMessages(sorted);
+        setHasOlderMsgs((mr.data?.length || 0) === MSGS_LIMIT);
+        await markRead();
+      } catch {
+        setLoadError(true);
+      } finally {
+        setChatLoading(false);
+      }
     };
     load();
   }, [user, partnerId, markRead]);
@@ -260,6 +270,27 @@ export default function ChatPage() {
     </div>
   );
 
+  if (loadError) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
+      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-sm border border-gray-100">
+        <p className="text-4xl mb-4">📡</p>
+        <p className="text-gray-900 font-semibold text-lg">채팅을 불러오지 못했습니다</p>
+        <p className="text-sm text-gray-500 mt-2">네트워크 연결을 확인한 후 다시 시도해 주세요.</p>
+        <div className="flex gap-3 mt-6">
+          <button onClick={() => navigate(-1)} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200">
+            뒤로 가기
+          </button>
+          <button
+            onClick={() => { setLoadError(false); setChatLoading(true); }}
+            className="flex-1 py-3 rounded-2xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (!user || !partner) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center">
@@ -273,6 +304,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Helmet><title>KoriBridge - {partner.display_name || "채팅"}</title></Helmet>
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <button onClick={() => navigate(-1)} className="text-sm text-gray-500 flex-shrink-0">← 뒤로</button>
         <button onClick={() => navigate("/profile/" + partner.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">

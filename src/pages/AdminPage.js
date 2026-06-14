@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
@@ -167,6 +168,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet><title>KoriBridge - 관리자 대시보드</title></Helmet>
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
         <button onClick={() => nav("/home")} className="text-sm text-gray-500 hover:text-gray-800">← 홈</button>
         <h1 className="font-bold text-lg text-gray-900 flex-1">관리자 대시보드</h1>
