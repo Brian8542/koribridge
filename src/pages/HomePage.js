@@ -43,6 +43,7 @@ export default function HomePage() {
   const [nationalityFilter, setNationalityFilter] = useState("");
   const [languageFilter, setLanguageFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
+  const [visibleCount, setVisibleCount] = useState(12);
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [convoLoading, setConvoLoading] = useState(true);
@@ -228,6 +229,11 @@ export default function HomePage() {
     });
   }, [profiles, nationalityFilter, languageFilter, levelFilter, blockedIds, searchQuery]);
 
+  // 필터 변경 시 visibleCount 초기화
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [nationalityFilter, languageFilter, levelFilter, searchQuery]);
+
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
 
   const toggleInterest = (interest) => {
@@ -412,7 +418,7 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            filteredProfiles.map((profile) => (
+            filteredProfiles.slice(0, visibleCount).map((profile) => (
               <ProfileCard
                 key={profile.id}
                 profile={profile}
@@ -425,6 +431,16 @@ export default function HomePage() {
             ))
           )}
         </div>
+        {filteredProfiles.length > visibleCount && (
+          <div className="text-center mt-6">
+            <button
+              onClick={() => setVisibleCount(c => c + 12)}
+              className="btn-secondary px-8 py-3 text-sm w-auto"
+            >
+              더 보기 ({filteredProfiles.length - visibleCount}명 더)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

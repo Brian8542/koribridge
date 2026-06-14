@@ -31,6 +31,11 @@ export default function ChatPage() {
   const [editContent, setEditContent] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [hasOlderMsgs, setHasOlderMsgs] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+
+  const MSGS_LIMIT = 50;
+  const MSGS_LOAD_MORE = 30;
 
   const messageEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -56,9 +61,12 @@ export default function ChatPage() {
       const mr = await supabase.from("messages")
         .select("id, sender_id, receiver_id, content, image_url, created_at, read_at, edited_at")
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: false })
+        .limit(MSGS_LIMIT);
       setPartner(pr.data || { id: partnerId, display_name: "알 수 없는 사용자", nationality: "" });
-      setMessages(mr.data ? sortMsgs(mr.data) : []);
+      const sorted = mr.data ? sortMsgs(mr.data) : [];
+      setMessages(sorted);
+      setHasOlderMsgs((mr.data?.length || 0) === MSGS_LIMIT);
       setChatLoading(false);
       await markRead();
     };
@@ -89,6 +97,26 @@ export default function ChatPage() {
     }
   }, [newMessage]);
 
+  const loadOlderMessages = async () => {
+    if (!messages.length || loadingOlder) return;
+    setLoadingOlder(true);
+    const oldestMsg = messages[0];
+    const { data } = await supabase.from("messages")
+      .select("id, sender_id, receiver_id, content, image_url, created_at, read_at, edited_at")
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${user.id})`)
+      .order("created_at", { ascending: false })
+      .lt("created_at", oldestMsg.created_at)
+      .limit(MSGS_LOAD_MORE);
+
+    if (data && data.length > 0) {
+      setMessages((prev) => sortMsgs([...data, ...prev]));
+      setHasOlderMsgs(data.length === MSGS_LOAD_MORE);
+    } else {
+      setHasOlderMsgs(false);
+    }
+    setLoadingOlder(false);
+  };
+
   const translateMessage = async (msg) => {
     if (!msg?.id) return;
     if (translations[msg.id]) {
@@ -99,13 +127,12 @@ export default function ChatPage() {
     const src = tgt === "ko" ? "en" : "ko";
     setTranslationLoading((p) => ({ ...p, [msg.id]: true }));
     try {
-      const res = await fetch("https://libretranslate.de/translate", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q: msg.content, source: src, target: tgt, format: "text" }),
-      });
+      const res = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(msg.content)}&langpair=${src}|${tgt}`
+      );
       const r = await res.json();
-      if (r.error) throw new Error(r.error);
-      setTranslations((p) => ({ ...p, [msg.id]: r.translatedText || "번역 불가" }));
+      if (r.responseStatus !== 200) throw new Error(r.responseDetails || "번역 실패");
+      setTranslations((p) => ({ ...p, [msg.id]: r.responseData?.translatedText || "번역 불가" }));
       setVisibleTranslation((p) => ({ ...p, [msg.id]: true }));
     } catch {
       setTranslations((p) => ({ ...p, [msg.id]: "번역 실패" }));
@@ -269,6 +296,17 @@ export default function ChatPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
+        {hasOlderMsgs && (
+          <div className="flex justify-center pt-2 pb-1">
+            <button
+              onClick={loadOlderMessages}
+              disabled={loadingOlder}
+              className="text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-semibold transition disabled:opacity-50"
+            >
+              {loadingOlder ? "불러오는 중..." : "이전 메시지 불러오기"}
+            </button>
+          </div>
+        )}
         {messages.length === 0 ? (
           <div className="text-center text-gray-400 py-20 text-sm">첫 메시지를 보내보세요.</div>
         ) : messages.map((msg, idx) => {

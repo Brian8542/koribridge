@@ -20,9 +20,18 @@
     }
   ],
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#e51c1c",
   "background_color": "#ffffff",
   "orientation": "portrait",
-  "lang": "ko"
+  "lang": "ko",
+  "categories": ["social", "education"],
+  "shortcuts": [
+    {
+      "name": "파트너 찾기",
+      "url": "/home",
+      "description": "언어 교환 파트너 찾기"
+    }
+  ]
 }
