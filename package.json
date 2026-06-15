@@ -2,6 +2,17 @@
   "name": "koribridge",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
+  "description": "Korean-culture language-exchange partner platform — find partners, chat in real-time, and grow your Korean skills.",
+  "keywords": [
+    "korean",
+    "language-exchange",
+    "language-learning",
+    "react",
+    "supabase",
+    "real-time-chat",
+    "pwa"
+  ],
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "react": "^18.2.0",
