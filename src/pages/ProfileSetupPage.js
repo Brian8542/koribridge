@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
@@ -14,6 +15,8 @@ const NATIONALITIES = [
 ];
 
 const INTERESTS = ["K-pop", "한국 음식", "여행", "드라마", "언어 교환", "게임", "영화", "스포츠"];
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function ProfileSetupPage() {
   const { user } = useAuth();
@@ -48,8 +51,6 @@ export default function ProfileSetupPage() {
       };
     });
   };
-
-  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -120,7 +121,7 @@ export default function ProfileSetupPage() {
 
       if (upsertError) throw upsertError;
       navigate("/home", { replace: true });
-    } catch (err) {
+    } catch {
       setError("저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
@@ -128,94 +129,119 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900">프로필 등록</h1>
-          <p className="mt-2 text-sm text-gray-500">파트너를 만나기 전에 나를 소개해 주세요.</p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <Helmet><title>KoriBridge - 프로필 등록</title></Helmet>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 space-y-6">
+      {/* 히어로 헤더 */}
+      <div className="relative bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 pt-12 pb-10 px-6 text-white text-center overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+        <div className="relative z-10">
+          <div className="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center mx-auto mb-3 shadow-lg">
+            <span className="text-white text-xl font-extrabold">K</span>
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight">프로필 등록</h1>
+          <p className="text-white/75 text-sm mt-1.5">파트너를 만나기 전에 나를 소개해 주세요.</p>
+        </div>
+      </div>
+
+      {/* 폼 */}
+      <div className="px-4 py-6 max-w-lg mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-5">
+
           {/* 프로필 사진 */}
-          <div className="flex flex-col items-center gap-3">
+          <div className="card flex flex-col items-center gap-3 py-6">
             <div className="relative">
               {avatarPreview ? (
-                <img src={avatarPreview} alt="미리보기" className="w-24 h-24 rounded-full object-cover border-2 border-red-100" />
+                <img src={avatarPreview} alt="미리보기" className="w-24 h-24 rounded-2xl object-cover ring-4 ring-red-100" />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-4xl border-2 border-red-100">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-4xl font-bold text-white shadow-md">
                   {form.display_name?.[0]?.toUpperCase() || "?"}
                 </div>
               )}
-              <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center cursor-pointer shadow">
-                <span className="text-white text-lg leading-none">+</span>
+              <label className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center cursor-pointer shadow-lg border-2 border-white">
+                <span className="text-white text-lg leading-none font-bold">+</span>
                 <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
-            <p className="text-xs text-gray-400">JPG/PNG/WebP, 최대 2MB</p>
+            <p className="text-xs text-gray-400">JPG/PNG/WebP · 최대 2MB</p>
           </div>
 
           {/* 닉네임 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">닉네임</label>
-            <input
-              type="text"
-              className="input-field"
-              value={form.display_name}
-              maxLength={50}
-              onChange={(e) => handleChange("display_name", e.target.value)}
-              placeholder="표시될 이름을 입력하세요"
-            />
-          </div>
-
-          {/* 국적 / 모국어 */}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="card space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">국적</label>
-              <select className="input-field" value={form.nationality} onChange={(e) => handleChange("nationality", e.target.value)}>
-                <option value="">선택</option>
-                {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">닉네임</label>
+              <input
+                type="text"
+                className="input-field"
+                value={form.display_name}
+                maxLength={50}
+                onChange={(e) => handleChange("display_name", e.target.value)}
+                placeholder="표시될 이름을 입력하세요"
+              />
             </div>
+
+            {/* 국적 / 모국어 */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">국적</label>
+                <select className="input-field" value={form.nationality} onChange={(e) => handleChange("nationality", e.target.value)}>
+                  <option value="">선택</option>
+                  {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">모국어</label>
+                <select className="input-field" value={form.native_language} onChange={(e) => handleChange("native_language", e.target.value)}>
+                  <option value="">선택</option>
+                  {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* 배우고 싶은 언어 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">모국어</label>
-              <select className="input-field" value={form.native_language} onChange={(e) => handleChange("native_language", e.target.value)}>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">배우고 싶은 언어</label>
+              <select className="input-field" value={form.learning_language} onChange={(e) => handleChange("learning_language", e.target.value)}>
                 <option value="">선택</option>
                 {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
-          </div>
 
-          {/* 배우고 싶은 언어 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">배우고 싶은 언어</label>
-            <select className="input-field" value={form.learning_language} onChange={(e) => handleChange("learning_language", e.target.value)}>
-              <option value="">선택</option>
-              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">언어 수준</label>
-            <select className="input-field" value={form.language_level} onChange={(e) => handleChange("language_level", e.target.value)}>
-              <option value="">선택</option>
-              {['초급', '중급', '고급'].map((level) => (
-                <option key={level} value={level}>{level}</option>
-              ))}
-            </select>
+            {/* 언어 수준 */}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">언어 수준</label>
+              <div className="flex gap-2">
+                {["초급", "중급", "고급"].map((level) => (
+                  <button
+                    type="button"
+                    key={level}
+                    onClick={() => handleChange("language_level", level)}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 ${
+                      form.language_level === level
+                        ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* 관심사 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">관심사</label>
+          <div className="card">
+            <label className="block text-sm font-bold text-gray-700 mb-3">관심사</label>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
                 <button
                   type="button"
                   key={interest}
                   onClick={() => toggleInterest(interest)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
                     form.interests.includes(interest)
-                      ? "bg-red-600 text-white"
+                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
@@ -226,14 +252,14 @@ export default function ProfileSetupPage() {
           </div>
 
           {/* 자기소개 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">자기소개</label>
-            <div className="flex items-center justify-between mb-1">
-            <span className={`text-xs ml-auto ${form.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
-              {form.bio.length}/500
-            </span>
-          </div>
-          <textarea
+          <div className="card">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-bold text-gray-700">자기소개</label>
+              <span className={`text-xs ${form.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
+                {form.bio.length}/500
+              </span>
+            </div>
+            <textarea
               rows={3}
               className="input-field resize-none"
               value={form.bio}
@@ -252,9 +278,9 @@ export default function ProfileSetupPage() {
           <button
             type="submit"
             disabled={loading || uploading}
-            className="btn-primary w-full py-3"
+            className="btn-primary w-full py-3.5 text-base"
           >
-            {uploading ? "사진 업로드 중..." : loading ? "저장 중..." : "프로필 저장"}
+            {uploading ? "사진 업로드 중..." : loading ? "저장 중..." : "프로필 저장하기"}
           </button>
         </form>
       </div>

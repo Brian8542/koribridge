@@ -138,18 +138,23 @@ export default function AdminPage() {
   };
 
   if (authLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
+        <p className="text-sm text-gray-400 font-medium">권한 확인 중...</p>
+      </div>
     </div>
   );
 
   if (!user || !isAdmin) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-3xl p-8 text-center max-w-sm w-full shadow-sm">
-        <p className="text-4xl mb-4">🔒</p>
-        <p className="text-red-600 font-semibold text-lg">접근 권한이 없습니다.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50 px-6">
+      <div className="bg-white rounded-3xl p-8 text-center max-w-sm w-full shadow-lg">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-100 to-rose-100 flex items-center justify-center mx-auto mb-4">
+          <span className="text-3xl">🔒</span>
+        </div>
+        <p className="text-red-600 font-extrabold text-lg">접근 권한이 없습니다.</p>
         <p className="text-sm text-gray-500 mt-2">관리자 계정으로 로그인해 주세요.</p>
-        <button onClick={() => nav("/home")} className="mt-6 btn-primary px-6 py-3 text-sm">홈으로</button>
+        <button onClick={() => nav("/home")} className="mt-6 btn-primary px-6 py-3 text-sm w-full">홈으로</button>
       </div>
     </div>
   );
@@ -169,10 +174,10 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Helmet><title>KoriBridge - 관리자 대시보드</title></Helmet>
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <button onClick={() => nav("/home")} className="text-sm text-gray-500 hover:text-gray-800">← 홈</button>
-        <h1 className="font-bold text-lg text-gray-900 flex-1">관리자 대시보드</h1>
-        <span className="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded-full font-bold">ADMIN</span>
+      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-6 py-4 flex items-center gap-4 sticky top-0 z-10 shadow-md">
+        <button onClick={() => nav("/home")} className="text-white/80 hover:text-white text-sm font-semibold transition">← 홈</button>
+        <h1 className="font-extrabold text-lg text-white flex-1">관리자 대시보드</h1>
+        <span className="text-xs bg-white/20 text-white border border-white/30 px-2.5 py-1 rounded-full font-bold">ADMIN</span>
       </div>
 
       {/* 탭 */}
@@ -210,19 +215,30 @@ export default function AdminPage() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: "전체 회원", value: stats.users.toLocaleString(), color: "text-gray-900", bg: "bg-white" },
-                  { label: "오늘 가입", value: `+${stats.todayUsers}`, color: "text-red-600", bg: "bg-white" },
-                  { label: "전체 메시지", value: stats.messages.toLocaleString(), color: "text-gray-900", bg: "bg-white" },
+                  {
+                    label: "전체 회원",
+                    value: stats.users.toLocaleString(),
+                    gradient: "from-blue-500 to-indigo-500",
+                  },
+                  {
+                    label: "오늘 가입",
+                    value: `+${stats.todayUsers}`,
+                    gradient: "from-red-600 to-rose-500",
+                  },
+                  {
+                    label: "전체 메시지",
+                    value: stats.messages.toLocaleString(),
+                    gradient: "from-violet-500 to-purple-500",
+                  },
                   {
                     label: "미처리 신고",
                     value: stats.pendingReports.toLocaleString(),
-                    color: stats.pendingReports > 0 ? "text-orange-600" : "text-gray-900",
-                    bg: stats.pendingReports > 0 ? "bg-orange-50" : "bg-white",
+                    gradient: stats.pendingReports > 0 ? "from-orange-500 to-amber-500" : "from-emerald-500 to-teal-500",
                   },
                 ].map(card => (
-                  <div key={card.label} className={`${card.bg} rounded-3xl border border-gray-100 p-5 shadow-sm`}>
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{card.label}</p>
-                    <p className={`text-3xl font-black mt-2 ${card.color}`}>{card.value}</p>
+                  <div key={card.label} className={`bg-gradient-to-br ${card.gradient} rounded-3xl p-5 shadow-md text-white`}>
+                    <p className="text-xs text-white/70 font-bold uppercase tracking-wider">{card.label}</p>
+                    <p className="text-3xl font-black mt-2">{card.value}</p>
                   </div>
                 ))}
               </div>

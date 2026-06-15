@@ -29,14 +29,24 @@ export default function AnnouncementBanner() {
     try { localStorage.setItem("dismissed_announcements", JSON.stringify(next)); } catch {}
   };
 
-  const bgColor = current.type === "warning" ? "bg-yellow-50 border-yellow-200 text-yellow-800"
-    : current.type === "error" ? "bg-red-50 border-red-200 text-red-800"
-    : "bg-blue-50 border-blue-200 text-blue-800";
+  const style =
+    current.type === "warning"
+      ? "bg-amber-50 border border-amber-200 text-amber-800"
+      : current.type === "error"
+      ? "bg-red-50 border border-red-200 text-red-800"
+      : "bg-gradient-to-r from-red-600 to-rose-500 text-white border border-transparent shadow-sm shadow-red-200";
 
   return (
-    <div className={`border rounded-2xl px-4 py-3 flex items-start justify-between gap-3 text-sm ${bgColor}`}>
-      <p className="flex-1 leading-relaxed">{current.text}</p>
-      <button onClick={dismiss} className="text-lg leading-none opacity-60 hover:opacity-100 flex-shrink-0">×</button>
+    <div className={`rounded-2xl px-4 py-3 flex items-start justify-between gap-3 text-sm ${style}`}>
+      <p className="flex-1 leading-relaxed font-medium">{current.text}</p>
+      <button
+        onClick={dismiss}
+        className={`text-lg leading-none flex-shrink-0 transition ${
+          current.type === "info" ? "text-white/60 hover:text-white" : "opacity-60 hover:opacity-100"
+        }`}
+      >
+        ×
+      </button>
     </div>
   );
 }
