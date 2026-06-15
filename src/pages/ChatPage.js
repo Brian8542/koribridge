@@ -272,27 +272,27 @@ export default function ChatPage() {
   };
 
   if (loading || chatLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-gray-400">채팅 불러오는 중...</p>
+        <div className="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
+        <p className="text-sm text-gray-400 font-medium">채팅 불러오는 중...</p>
       </div>
     </div>
   );
 
   if (loadError) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-sm border border-gray-100">
+      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-md border border-gray-100">
         <p className="text-4xl mb-4">📡</p>
-        <p className="text-gray-900 font-semibold text-lg">채팅을 불러오지 못했습니다</p>
+        <p className="text-gray-900 font-extrabold text-lg">채팅을 불러오지 못했습니다</p>
         <p className="text-sm text-gray-500 mt-2">네트워크 연결을 확인한 후 다시 시도해 주세요.</p>
         <div className="flex gap-3 mt-6">
-          <button onClick={() => navigate(-1)} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200">
+          <button onClick={() => navigate(-1)} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition">
             뒤로 가기
           </button>
           <button
             onClick={() => { setLoadError(false); setChatLoading(true); }}
-            className="flex-1 py-3 rounded-2xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+            className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-500 text-white text-sm font-bold hover:shadow-md transition-all"
           >
             다시 시도
           </button>
@@ -303,7 +303,7 @@ export default function ChatPage() {
 
   if (!user || !partner) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center">
+      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-md">
         <p className="text-red-600 font-semibold">채팅 상대를 찾을 수 없습니다.</p>
         <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">뒤로 가기</button>
       </div>
@@ -315,21 +315,25 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Helmet><title>KoriBridge - {partner.display_name || "채팅"}</title></Helmet>
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="text-sm text-gray-500 flex-shrink-0">← 뒤로</button>
+
+      {/* 헤더 */}
+      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-lg">
+        <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white text-sm font-semibold flex-shrink-0 transition">
+          ← 뒤로
+        </button>
         <button onClick={() => navigate("/profile/" + partner.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
           {partner.avatar_url ? (
-            <img src={partner.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border border-gray-200 flex-shrink-0" />
+            <img src={partner.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border-2 border-white/30 flex-shrink-0" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center text-sm font-bold text-red-600 flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
               {partner.display_name?.[0]?.toUpperCase() || "?"}
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-bold text-gray-900 truncate">{partner.display_name}</p>
+            <p className="font-bold text-white truncate">{partner.display_name}</p>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isPartnerOnline ? "bg-emerald-400" : "bg-gray-300"}`} />
-              <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
+              <span className={`w-2 h-2 rounded-full ${isPartnerOnline ? "bg-emerald-300" : "bg-white/40"}`} />
+              <p className="text-[10px] text-white/70 uppercase font-bold tracking-tight">
                 {isPartnerOnline ? "Online" : "Offline"}
               </p>
             </div>
@@ -337,13 +341,14 @@ export default function ChatPage() {
         </button>
       </div>
 
+      {/* 메시지 목록 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
         {hasOlderMsgs && (
           <div className="flex justify-center pt-2 pb-1">
             <button
               onClick={loadOlderMessages}
               disabled={loadingOlder}
-              className="text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-semibold transition disabled:opacity-50"
+              className="text-xs text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-full font-semibold transition shadow-sm disabled:opacity-50"
             >
               {loadingOlder ? "불러오는 중..." : "이전 메시지 불러오기"}
             </button>
@@ -369,14 +374,19 @@ export default function ChatPage() {
             <React.Fragment key={msg.id}>
               {showDateDivider && (
                 <div className="flex justify-center my-6">
-                  <span className="bg-gray-200/60 text-gray-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span>
+                  <span className="bg-gray-200/70 text-gray-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span>
                 </div>
               )}
               <div className={"flex " + (isMine ? "justify-end" : "justify-start") + " group"}>
                 <div className="max-w-xs sm:max-w-sm">
                   <div
                     onDoubleClick={() => isMine && !msg.image_url && startEditMessage(msg)}
-                    className={"rounded-3xl overflow-hidden text-sm cursor-default " + (isMine ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-900")}
+                    className={
+                      "rounded-3xl overflow-hidden text-sm cursor-default shadow-sm " +
+                      (isMine
+                        ? "bg-gradient-to-br from-red-600 to-rose-500 text-white"
+                        : "bg-white border border-gray-100 text-gray-900")
+                    }
                   >
                     {msg.image_url && (
                       <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
@@ -442,7 +452,7 @@ export default function ChatPage() {
                     </div>
                   </div>
                   {tTxt && tVis && (
-                    <div className={"mt-1 rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2 text-xs text-gray-600 " + (isMine ? "text-right" : "")}>
+                    <div className={"mt-1 rounded-2xl bg-white border border-gray-100 shadow-sm px-3 py-2 text-xs text-gray-600 " + (isMine ? "text-right" : "")}>
                       {tTxt}
                     </div>
                   )}
@@ -454,18 +464,19 @@ export default function ChatPage() {
         <div ref={messageEndRef} />
       </div>
 
-      <div className="bg-white border-t border-gray-100 px-4 py-4 sticky bottom-0">
+      {/* 입력창 */}
+      <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
           {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
             <button key={emoji} onClick={() => handleEmojiClick(emoji)}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-gray-100 text-sm transition-colors">
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-50 text-sm transition-colors">
               {emoji}
             </button>
           ))}
         </div>
         <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading}
-            className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 mb-0.5">
+            className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 mb-0.5 transition-colors">
             {imageUploading
               ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
               : <span>📷</span>}
@@ -481,11 +492,19 @@ export default function ChatPage() {
               </p>
             )}
           </div>
-          <button type="submit" disabled={sendLoading || !newMessage.trim() || newMessage.length > MAX_MSG_LENGTH}
-            className="btn-primary px-5 h-10 disabled:opacity-50 flex-shrink-0 mb-0.5">
-            {sendLoading
-              ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : "보내기"}
+          <button
+            type="submit"
+            disabled={sendLoading || !newMessage.trim() || newMessage.length > MAX_MSG_LENGTH}
+            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-2xl bg-gradient-to-br from-red-600 to-rose-500 text-white flex items-center justify-center hover:shadow-md active:scale-95 transition-all duration-150 disabled:opacity-50"
+          >
+            {sendLoading ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            )}
           </button>
         </form>
       </div>

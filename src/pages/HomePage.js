@@ -395,23 +395,23 @@ export default function HomePage() {
   const renderHomeContent = () => (
     <div className="space-y-8">
       {myProfile && (
-        <div className="card p-6 flex items-center justify-between">
+        <div className="card p-5 flex items-center justify-between bg-gradient-to-r from-red-50 to-rose-50 border-red-100/60">
           <div className="flex items-center gap-4">
             {myProfile.avatar_url ? (
-              <img src={myProfile.avatar_url} alt="내 프로필" className="w-12 h-12 rounded-full object-cover" />
+              <img src={myProfile.avatar_url} alt="내 프로필" className="w-12 h-12 rounded-2xl object-cover ring-2 ring-red-100" />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-xl font-bold text-red-600">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-xl font-bold text-white shadow-sm">
                 {myProfile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
             <div>
-              <p className="font-bold text-gray-900">{myProfile.display_name}</p>
-              <p className="text-sm text-gray-500">
-                {myProfile.nationality} | {myProfile.native_language} → {myProfile.learning_language}
+              <p className="font-extrabold text-gray-900">{myProfile.display_name}</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {myProfile.nationality} · {myProfile.native_language} → {myProfile.learning_language}
               </p>
             </div>
           </div>
-          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm">
+          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm w-auto">
             프로필 수정
           </button>
         </div>
@@ -422,8 +422,8 @@ export default function HomePage() {
       {recommendedProfiles.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-base font-bold text-gray-900">AI 추천 파트너</span>
-            <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-semibold">NEW</span>
+            <span className="text-lg font-extrabold text-gray-900">AI 추천 파트너</span>
+            <span className="text-xs bg-gradient-to-r from-red-600 to-rose-500 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm">✨ 추천</span>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {recommendedProfiles.map((profile) => (
@@ -453,7 +453,7 @@ export default function HomePage() {
       />
 
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-4">전체 파트너 ({filteredProfiles.length}명)</p>
+        <p className="text-base font-extrabold text-gray-900 mb-4">전체 파트너 <span className="text-rose-500">({filteredProfiles.length}명)</span></p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
             Array.from({ length: 6 }).map((_, i) => <ProfileSkeleton key={i} />)
@@ -734,23 +734,23 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <Helmet><title>KoriBridge - 파트너 찾기</title></Helmet>
-      <div className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-40">
+      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-5 py-4 sticky top-0 z-40 shadow-lg">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs text-gray-400">환영합니다, {user.email?.split("@")[0] || "사용자"}님</p>
-            <h1 className="text-2xl font-extrabold text-gray-900">KoriBridge</h1>
+            <p className="text-xs text-red-100/80 font-medium">환영합니다, {user.email?.split("@")[0] || "사용자"}님</p>
+            <h1 className="text-2xl font-extrabold text-white tracking-tight">KoriBridge</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={toggleDarkMode} className="text-sm text-gray-500 hover:text-gray-700">
-              {darkMode ? "🌙 다크" : "☀️ 라이트"}
+            <button type="button" onClick={toggleDarkMode} className="text-sm text-white/70 hover:text-white transition">
+              {darkMode ? "🌙" : "☀️"}
             </button>
-            <button type="button" onClick={signOut} className="text-sm text-gray-400 hover:text-gray-600">로그아웃</button>
+            <button type="button" onClick={signOut} className="text-sm text-white/70 hover:text-white transition font-medium">로그아웃</button>
           </div>
         </div>
         <div className="relative">
           <input
             type="text"
-            className="input-field text-sm pl-4 pr-10 h-11"
+            className="w-full pl-4 pr-10 h-11 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/60 text-sm font-medium focus:outline-none focus:bg-white/30 focus:ring-2 focus:ring-white/30 transition-all"
             placeholder="닉네임, 국적, 언어로 검색..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -758,7 +758,7 @@ export default function HomePage() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/30 text-white text-xs flex items-center justify-center hover:bg-white/40 transition-colors"
             >
               ✕
             </button>
@@ -772,12 +772,12 @@ export default function HomePage() {
             { key: "profile", label: "내 프로필" },
           ].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
-              className={`relative rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                tab === item.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              className={`relative rounded-xl px-4 py-2 text-sm font-bold transition-all duration-150 ${
+                tab === item.key ? "bg-white text-red-600 shadow-md" : "bg-white/20 text-white hover:bg-white/30"
               }`}>
               {item.label}
               {item.badge > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 border-2 border-white text-[9px] text-white flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white border-2 border-red-500 text-[9px] text-red-600 flex items-center justify-center font-bold">
                   {item.badge > 9 ? "9+" : item.badge}
                 </span>
               )}
@@ -793,8 +793,8 @@ export default function HomePage() {
         {tab === "profile" && renderProfileContent()}
       </div>
 
-      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white px-6 py-3 shadow-[0_-1px_15px_rgba(15,23,42,0.08)]">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-2">
+      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 border-t border-gray-100 bg-white/95 backdrop-blur-sm px-4 py-2 shadow-[0_-4px_24px_rgba(15,23,42,0.10)]">
+        <nav className="mx-auto flex max-w-6xl items-center justify-around">
           {[
             { key: "home", label: "홈", icon: "🏠" },
             { key: "chatlist", label: "채팅", icon: "💬", badge: totalUnread },
@@ -802,13 +802,13 @@ export default function HomePage() {
             { key: "profile", label: "프로필", icon: "👤" },
           ].map((item) => (
             <button key={item.key} type="button" onClick={() => setTab(item.key)}
-              className={`relative flex-1 flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${
-                tab === item.key ? "bg-red-600 text-white" : "text-gray-500 hover:bg-gray-100"
+              className={`relative flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl text-xs font-semibold transition-all duration-150 ${
+                tab === item.key ? "text-red-600" : "text-gray-400 hover:text-gray-600"
               }`}>
-              <span className="text-base">{item.icon}</span>
-              {item.label}
+              <span className={`text-xl transition-transform duration-150 ${tab === item.key ? "scale-110" : ""}`}>{item.icon}</span>
+              <span>{item.label}</span>
               {item.badge > 0 && (
-                <span className="absolute top-1 right-3 w-4 h-4 rounded-full bg-white border border-red-600 text-[9px] text-red-600 flex items-center justify-center font-bold">
+                <span className="absolute top-0.5 right-2.5 w-4 h-4 rounded-full bg-red-600 text-[9px] text-white flex items-center justify-center font-bold">
                   {item.badge > 9 ? "9+" : item.badge}
                 </span>
               )}

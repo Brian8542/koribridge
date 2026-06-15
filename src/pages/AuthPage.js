@@ -51,7 +51,6 @@ export default function AuthPage() {
     setMessage("");
     window.localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
 
-    // 비밀번호 재설정
     if (mode === "reset") {
       if (!email) return setError("이메일을 입력해 주세요.");
       setLoading(true);
@@ -67,7 +66,6 @@ export default function AuthPage() {
       return;
     }
 
-    // 회원가입
     if (mode === "signup") {
       if (password !== confirmPassword) return setError("비밀번호가 일치하지 않습니다.");
       if (password.length < 6) return setError("비밀번호는 6자 이상이어야 합니다.");
@@ -82,7 +80,6 @@ export default function AuthPage() {
       return;
     }
 
-    // 로그인
     if (password.length < 6) return setError("비밀번호는 6자 이상이어야 합니다.");
     setLoading(true);
     const { error: err } = await signIn(email, password);
@@ -94,15 +91,14 @@ export default function AuthPage() {
     }
   };
 
-  // 회원가입 완료 화면
   if (signupDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4 text-3xl">
-            ✉️
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 px-6">
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 max-w-sm w-full text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-white text-2xl font-bold">✓</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">이메일을 확인해 주세요</h2>
+          <h2 className="text-xl font-extrabold text-gray-900">이메일을 확인해 주세요</h2>
           <p className="mt-3 text-sm text-gray-500 leading-relaxed">
             <span className="font-semibold text-gray-700">{email}</span> 로<br />
             가입 확인 링크를 보냈습니다.<br />
@@ -133,24 +129,30 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-red-600 pt-16 pb-10 px-6 text-white text-center">
-        <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-3 text-2xl font-extrabold">
-          K
+      {/* 히어로 헤더 */}
+      <div className="relative bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 pt-16 pb-14 px-6 text-white text-center overflow-hidden">
+        <div className="absolute top-0 right-0 w-56 h-56 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+        <div className="relative z-10">
+          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mx-auto mb-4 shadow-xl">
+            <span className="text-white text-2xl font-extrabold">K</span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight">KoriBridge</h1>
+          <p className="text-white/80 text-sm mt-1.5 font-medium">세계를 잇는 언어의 다리</p>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">KoriBridge</h1>
-        <p className="text-red-100 text-sm mt-1">한국어·문화 교류 파트너 찾기</p>
       </div>
 
-      {/* 탭 (reset 모드일 때는 숨김) */}
+      {/* 탭 */}
       {mode !== "reset" && (
-        <div className="flex bg-white border-b border-gray-200">
+        <div className="flex bg-white border-b border-gray-100 shadow-sm">
           {["login", "signup"].map((m) => (
             <button
               key={m}
               onClick={() => switchMode(m)}
-              className={`flex-1 py-3 text-sm font-semibold transition-colors ${
-                mode === m ? "text-red-600 border-b-2 border-red-600" : "text-gray-400"
+              className={`flex-1 py-3.5 text-sm font-bold transition-colors ${
+                mode === m
+                  ? "text-red-600 border-b-2 border-red-600"
+                  : "text-gray-400 hover:text-gray-600"
               }`}
             >
               {m === "login" ? "로그인" : "회원가입"}
@@ -161,16 +163,16 @@ export default function AuthPage() {
 
       {/* 비밀번호 재설정 헤더 */}
       {mode === "reset" && (
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3">
-          <button onClick={() => switchMode("login")} className="text-sm text-gray-500 hover:text-gray-800">
+        <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-3 shadow-sm">
+          <button onClick={() => switchMode("login")} className="text-sm text-gray-500 hover:text-gray-800 transition">
             ← 돌아가기
           </button>
-          <span className="text-sm font-semibold text-gray-700">비밀번호 재설정</span>
+          <span className="text-sm font-bold text-gray-700">비밀번호 재설정</span>
         </div>
       )}
 
       {/* 폼 */}
-      <div className="flex-1 px-6 py-8">
+      <div className="flex-1 px-5 py-7">
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
           {mode === "reset" && (
             <p className="text-sm text-gray-500 mb-2">
@@ -179,7 +181,7 @@ export default function AuthPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">이메일</label>
             <input
               type="email"
               className="input-field"
@@ -193,7 +195,7 @@ export default function AuthPage() {
 
           {mode !== "reset" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">비밀번호</label>
               <input
                 type="password"
                 className="input-field"
@@ -208,7 +210,7 @@ export default function AuthPage() {
 
           {mode === "signup" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호 확인</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">비밀번호 확인</label>
               <input
                 type="password"
                 className="input-field"
@@ -233,7 +235,7 @@ export default function AuthPage() {
             </div>
           )}
 
-          <button type="submit" className="btn-primary w-full py-3"  disabled={loading}>
+          <button type="submit" className="btn-primary w-full py-3.5" disabled={loading}>
             {loading
               ? "처리 중..."
               : mode === "login"
@@ -258,7 +260,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => switchMode("reset")}
-                  className="text-sm text-gray-400 hover:text-red-600 underline"
+                  className="text-sm text-gray-400 hover:text-red-600 underline transition"
                 >
                   비밀번호를 잊으셨나요?
                 </button>
@@ -270,15 +272,15 @@ export default function AuthPage() {
             <>
               <div className="relative flex items-center gap-3 my-2">
                 <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs text-gray-400">또는</span>
+                <span className="text-xs text-gray-400 font-medium">또는</span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                className="w-full py-3 px-4 bg-white border border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-3"
+                className="w-full py-3.5 px-4 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-bold hover:border-red-300 hover:bg-red-50 transition-all duration-150 flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18">
+                <svg width="20" height="20" viewBox="0 0 18 18">
                   <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
                   <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
                   <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
@@ -289,7 +291,6 @@ export default function AuthPage() {
             </>
           )}
 
-          {/* 약관 링크 */}
           <div className="flex items-center justify-center gap-3 pt-2 text-xs text-gray-400">
             <a href="/terms" className="hover:text-gray-600 underline">이용약관</a>
             <span>·</span>
