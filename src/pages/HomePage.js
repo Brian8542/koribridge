@@ -15,6 +15,7 @@ import ConversationItem from "../components/ConversationItem";
 import StatsBanner from "../components/StatsBanner";
 import ConfirmModal from "../components/ConfirmModal";
 import { getMatchScore } from "../utils/matching";
+import { pageView } from "../utils/analytics";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -83,6 +84,10 @@ export default function HomePage() {
     } else if (Notification.permission === "granted") {
       notifGranted.current = true;
     }
+  }, []);
+
+  useEffect(() => {
+    pageView("홈");
   }, []);
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
 import { useToast } from "../components/Toast";
 import { useLocale } from "../hooks/useLocale";
+import { login, signUp as gaSignUp } from "../utils/analytics";
 
 const LEFT_FEATURES = [
   { icon: "🎯", titleKey: "f1Title", descKey: "f1Desc" },
@@ -61,7 +62,11 @@ export default function AuthPage() {
         redirectTo: `${window.location.origin}/home`,
       },
     });
-    if (err) setError(t.errEmailAuth);
+    if (err) {
+      setError(t.errEmailAuth);
+    } else {
+      login("google");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -94,6 +99,7 @@ export default function AuthPage() {
       if (err) {
         setError(err.message);
       } else {
+        gaSignUp("email");
         setSignupDone(true);
       }
       return;
@@ -106,6 +112,7 @@ export default function AuthPage() {
     if (err) {
       setError(t.errLoginFail);
     } else {
+      login("email");
       navigate("/home");
     }
   };

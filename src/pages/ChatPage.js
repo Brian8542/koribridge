@@ -8,6 +8,7 @@ import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
 import ConfirmModal from "../components/ConfirmModal";
 import { formatTime } from "../utils/formatters";
+import { startChat } from "../utils/analytics";
 
 function sortMsgs(msgs) {
   return [...msgs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -77,6 +78,7 @@ export default function ChatPage() {
         const sorted = mr.data ? sortMsgs(mr.data) : [];
         setMessages(sorted);
         setHasOlderMsgs((mr.data?.length || 0) === MSGS_LIMIT);
+        startChat(partnerId);
         await markRead();
       } catch {
         setLoadError(true);
