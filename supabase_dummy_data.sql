@@ -161,7 +161,21 @@ ON CONFLICT (id) DO NOTHING;
 
 
 -- -----------------------------------------------------------------------------
--- 2. profiles 더미 데이터 삽입
+-- 2. profiles 테이블 컬럼 보장
+--    (업데이트 스크립트 미실행 환경에서도 동작하도록 먼저 컬럼을 추가)
+-- -----------------------------------------------------------------------------
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS language_level text DEFAULT '초급';
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS is_public boolean DEFAULT true;
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS is_admin boolean DEFAULT false;
+
+
+-- -----------------------------------------------------------------------------
+-- 3. profiles 더미 데이터 삽입
 -- -----------------------------------------------------------------------------
 INSERT INTO profiles (
   id,
@@ -313,7 +327,7 @@ ON CONFLICT (id) DO NOTHING;
 
 
 -- -----------------------------------------------------------------------------
--- 삽입 확인 쿼리 (실행 후 결과 확인용)
+-- 4. 삽입 확인 쿼리 (실행 후 결과 확인용)
 -- -----------------------------------------------------------------------------
 SELECT
   p.display_name,
