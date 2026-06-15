@@ -10,9 +10,9 @@ import { getMatchPercentage } from "../utils/matching";
 import { formatRelativeTime } from "../utils/formatters";
 
 const LEVEL_STYLE = {
-  고급: "bg-blue-100/80 text-blue-200",
-  중급: "bg-amber-100/80 text-amber-200",
-  초급: "bg-emerald-100/80 text-emerald-200",
+  고급: "bg-blue-500 text-white",
+  중급: "bg-amber-500 text-white",
+  초급: "bg-emerald-500 text-white",
 };
 
 export default function ProfileDetailPage() {

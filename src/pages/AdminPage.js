@@ -181,18 +181,20 @@ export default function AdminPage() {
       </div>
 
       {/* 탭 */}
-      <div className="bg-white border-b border-gray-100 px-6">
-        <div className="flex gap-1 max-w-5xl mx-auto">
+      <div className="bg-white border-b border-gray-100 px-4 py-3">
+        <div className="flex gap-1.5 max-w-5xl mx-auto bg-gray-100 rounded-2xl p-1">
           {[
             { key: "overview", label: "개요" },
-            { key: "reports", label: `신고 관리${stats.pendingReports > 0 ? ` (${stats.pendingReports})` : ""}` },
-            { key: "users", label: "사용자 관리" },
+            { key: "reports", label: `신고${stats.pendingReports > 0 ? ` ${stats.pendingReports}` : ""}` },
+            { key: "users", label: "사용자" },
           ].map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-4 py-3 text-sm font-semibold border-b-2 transition ${
-                tab === t.key ? "border-red-600 text-red-600" : "border-transparent text-gray-500 hover:text-gray-700"
+              className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${
+                tab === t.key
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {t.label}
@@ -219,26 +221,33 @@ export default function AdminPage() {
                     label: "전체 회원",
                     value: stats.users.toLocaleString(),
                     gradient: "from-blue-500 to-indigo-500",
+                    icon: "👥",
                   },
                   {
                     label: "오늘 가입",
                     value: `+${stats.todayUsers}`,
                     gradient: "from-red-600 to-rose-500",
+                    icon: "✨",
                   },
                   {
                     label: "전체 메시지",
                     value: stats.messages.toLocaleString(),
                     gradient: "from-violet-500 to-purple-500",
+                    icon: "💬",
                   },
                   {
                     label: "미처리 신고",
                     value: stats.pendingReports.toLocaleString(),
                     gradient: stats.pendingReports > 0 ? "from-orange-500 to-amber-500" : "from-emerald-500 to-teal-500",
+                    icon: stats.pendingReports > 0 ? "⚠️" : "✅",
                   },
                 ].map(card => (
                   <div key={card.label} className={`bg-gradient-to-br ${card.gradient} rounded-3xl p-5 shadow-md text-white`}>
-                    <p className="text-xs text-white/70 font-bold uppercase tracking-wider">{card.label}</p>
-                    <p className="text-3xl font-black mt-2">{card.value}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-white/70 font-bold uppercase tracking-wider">{card.label}</p>
+                      <span className="text-lg">{card.icon}</span>
+                    </div>
+                    <p className="text-3xl font-black">{card.value}</p>
                   </div>
                 ))}
               </div>

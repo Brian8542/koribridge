@@ -150,21 +150,24 @@ export default function ProfileSetupPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
 
           {/* 프로필 사진 */}
-          <div className="card flex flex-col items-center gap-3 py-6">
+          <div className="card flex flex-col items-center gap-3 py-7">
             <div className="relative">
               {avatarPreview ? (
-                <img src={avatarPreview} alt="미리보기" className="w-24 h-24 rounded-2xl object-cover ring-4 ring-red-100" />
+                <img src={avatarPreview} alt="미리보기" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-200 shadow-lg" />
               ) : (
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-4xl font-bold text-white shadow-md">
-                  {form.display_name?.[0]?.toUpperCase() || "?"}
+                <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-5xl font-bold text-white shadow-lg">
+                  {form.display_name?.[0]?.toUpperCase() || "📷"}
                 </div>
               )}
-              <label className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center cursor-pointer shadow-lg border-2 border-white">
+              <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center cursor-pointer shadow-xl border-2 border-white">
                 <span className="text-white text-lg leading-none font-bold">+</span>
                 <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
-            <p className="text-xs text-gray-400">JPG/PNG/WebP · 최대 2MB</p>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-gray-700">프로필 사진</p>
+              <p className="text-xs text-gray-400 mt-0.5">JPG/PNG/WebP · 최대 2MB</p>
+            </div>
           </div>
 
           {/* 닉네임 */}

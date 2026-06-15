@@ -36,9 +36,15 @@ export default function AnnouncementBanner() {
       ? "bg-red-50 border border-red-200 text-red-800"
       : "bg-gradient-to-r from-red-600 to-rose-500 text-white border border-transparent shadow-sm shadow-red-200";
 
+  const icon =
+    current.type === "warning" ? "⚠️" : current.type === "error" ? "🚨" : "📢";
+
   return (
     <div className={`rounded-2xl px-4 py-3 flex items-start justify-between gap-3 text-sm ${style}`}>
-      <p className="flex-1 leading-relaxed font-medium">{current.text}</p>
+      <div className="flex items-start gap-2 flex-1 min-w-0">
+        <span className="text-base leading-snug flex-shrink-0">{icon}</span>
+        <p className="leading-relaxed font-medium">{current.text}</p>
+      </div>
       <button
         onClick={dismiss}
         className={`text-lg leading-none flex-shrink-0 transition ${
