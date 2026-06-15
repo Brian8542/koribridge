@@ -171,6 +171,7 @@ export default function SplashScreen() {
   const goToAuth = useCallback(() => navigate("/auth"), [navigate]);
   const goToTerms = useCallback(() => navigate("/terms"), [navigate]);
   const goToPrivacy = useCallback(() => navigate("/privacy"), [navigate]);
+  const goToPricing = useCallback(() => navigate("/pricing"), [navigate]);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   const FEATURES = [
@@ -271,6 +272,9 @@ export default function SplashScreen() {
             {NAV_LINKS.map((label) => (
               <button key={label} className="hover:text-white transition-colors duration-200">{label}</button>
             ))}
+            <button onClick={goToPricing} className="hover:text-white transition-colors duration-200">
+              {locale === "ko" ? "요금제" : "Pricing"}
+            </button>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -308,6 +312,9 @@ export default function SplashScreen() {
                 {item}
               </button>
             ))}
+            <button onClick={() => { closeMobile(); goToPricing(); }} className="w-full text-left py-2.5 text-sm text-zinc-400 hover:text-white transition-colors">
+              {locale === "ko" ? "요금제" : "Pricing"}
+            </button>
             <div className="pt-2">
               <button onClick={() => { closeMobile(); goToAuth(); }} className="w-full text-left py-2.5 text-sm text-zinc-400 hover:text-white transition-colors">
                 {t.login}

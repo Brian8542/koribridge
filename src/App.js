@@ -13,6 +13,7 @@ import ProfileSetupPage from "./pages/ProfileSetupPage";
 import SplashScreen from "./pages/SplashScreen";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import PricingPage from "./pages/PricingPage";
 import AdminPage from "./pages/AdminPage";
 
 function LoadingScreen() {
@@ -52,6 +53,7 @@ function AppRoutes() {
       <Route path="/chat/:partnerId" element={<ProfileRequiredRoute><ChatPage /></ProfileRequiredRoute>} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       <Route path="/admin" element={<ProfileRequiredRoute><AdminPage /></ProfileRequiredRoute>} />
       <Route path="/404" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />
