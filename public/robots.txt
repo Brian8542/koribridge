@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /home
+Disallow: /setup
+Disallow: /chat/
+Disallow: /profile/
+Disallow: /admin
+
+Sitemap: https://koribridge.vercel.app/sitemap.xml

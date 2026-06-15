@@ -8,7 +8,12 @@ export default function TermsPage() {
   const { t } = useLocale();
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <Helmet><title>KoriBridge - {t.termsTitle}</title></Helmet>
+      <Helmet>
+        <title>KoriBridge - {t.termsTitle}</title>
+        <meta name="description" content="KoriBridge 이용약관입니다. KoriBridge 서비스 이용에 관한 규정을 확인하세요." />
+        <meta property="og:title" content="KoriBridge - 이용약관" />
+        <meta property="og:url" content="https://koribridge.vercel.app/terms" />
+      </Helmet>
 
       <div className="relative bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 px-6 pt-12 pb-8 text-white overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />

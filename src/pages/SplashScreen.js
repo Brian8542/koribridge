@@ -256,6 +256,15 @@ export default function SplashScreen() {
     <div className="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
       <Helmet>
         <title>KoriBridge - {locale === 'ko' ? '한국어·문화 교류 파트너 플랫폼' : 'Korean Language & Culture Exchange'}</title>
+        <meta name="description" content={locale === 'ko' ? '전 세계 127개국 파트너와 실시간으로 한국어를 연습하고 문화를 교류하세요. AI 스마트 매칭, 완전 무료.' : 'Practice Korean in real-time with partners from 127 countries. AI-powered matching, completely free.'} />
+        <meta property="og:title" content="KoriBridge - 한국어·문화 교류 파트너 플랫폼" />
+        <meta property="og:description" content="전 세계 127개국 파트너와 실시간으로 한국어를 연습하고 문화를 교류하세요. AI 매칭, 완전 무료." />
+        <meta property="og:url" content="https://koribridge.vercel.app" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://koribridge.vercel.app/logo512.png" />
+        <meta name="twitter:title" content="KoriBridge - 한국어·문화 교류 파트너 플랫폼" />
+        <meta name="twitter:description" content="전 세계 127개국 파트너와 실시간으로 한국어를 연습하고 문화를 교류하세요." />
+        <meta name="twitter:url" content="https://koribridge.vercel.app" />
       </Helmet>
 
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${

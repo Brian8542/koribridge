@@ -8,7 +8,12 @@ export default function PrivacyPage() {
   const { t } = useLocale();
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <Helmet><title>KoriBridge - {t.privacyTitle}</title></Helmet>
+      <Helmet>
+        <title>KoriBridge - {t.privacyTitle}</title>
+        <meta name="description" content="KoriBridge 개인정보처리방침입니다. 회원님의 개인정보를 안전하게 보호합니다." />
+        <meta property="og:title" content="KoriBridge - 개인정보처리방침" />
+        <meta property="og:url" content="https://koribridge.vercel.app/privacy" />
+      </Helmet>
 
       <div className="relative bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 px-6 pt-12 pb-8 text-white overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />

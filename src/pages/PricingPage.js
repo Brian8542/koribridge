@@ -43,7 +43,18 @@ export default function PricingPage() {
 
   return (
     <div className="bg-zinc-950 text-white min-h-screen">
-      <Helmet><title>KoriBridge - 요금제</title></Helmet>
+      <Helmet>
+        <title>KoriBridge - 요금제 | 여성 완전 무료</title>
+        <meta name="description" content="KoriBridge 요금제 안내. 여성 회원은 모든 기능을 영구 무료로 이용하세요. Pro 플랜 월 4,900원 (론칭 특가)." />
+        <meta property="og:title" content="KoriBridge - 요금제 | 여성 완전 무료" />
+        <meta property="og:description" content="여성 회원은 모든 기능을 영구 무료. Pro 플랜 월 4,900원 론칭 특가." />
+        <meta property="og:url" content="https://koribridge.vercel.app/pricing" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://koribridge.vercel.app/logo512.png" />
+        <meta name="twitter:title" content="KoriBridge - 요금제 | 여성 완전 무료" />
+        <meta name="twitter:description" content="여성 회원은 모든 기능을 영구 무료. Pro 플랜 월 4,900원 론칭 특가." />
+        <meta name="twitter:url" content="https://koribridge.vercel.app/pricing" />
+      </Helmet>
 
       {/* Launch special banner */}
       <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 text-center py-2.5 px-5 text-sm font-semibold">
