@@ -1,21 +1,23 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
+import { useLocale } from "../hooks/useLocale";
 
 export default function PrivacyPage() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <Helmet><title>KoriBridge - 개인정보처리방침</title></Helmet>
+      <Helmet><title>KoriBridge - {t.privacyTitle}</title></Helmet>
 
       <div className="relative bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 px-6 pt-12 pb-8 text-white overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white text-sm font-semibold transition mb-6 block">← 뒤로</button>
+        <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white text-sm font-semibold transition mb-6 block">{t.legalBackBtn}</button>
         <div className="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center mb-3 shadow-lg">
           <span className="text-xl">🔒</span>
         </div>
-        <h1 className="text-2xl font-extrabold tracking-tight">개인정보처리방침</h1>
-        <p className="text-white/70 text-sm mt-1">회원님의 개인정보를 소중히 다루겠습니다.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t.privacyTitle}</h1>
+        <p className="text-white/70 text-sm mt-1">{t.privacySubtitle}</p>
       </div>
 
       <div className="px-6 py-8 max-w-2xl mx-auto space-y-6 text-sm text-gray-700 leading-relaxed">

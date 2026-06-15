@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+import { useLocale } from "../hooks/useLocale";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -21,6 +22,7 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export default function ProfileSetupPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, levelLabel } = useLocale();
 
   const [form, setForm] = useState({
     display_name: "",
@@ -56,12 +58,12 @@ export default function ProfileSetupPage() {
     const file = e.target.files[0];
     if (!file) return;
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      setError("JPG, PNG, WebP 파일만 업로드할 수 있습니다.");
+      setError(t.errAvatarType);
       e.target.value = "";
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError("사진 크기는 2MB 이하여야 합니다.");
+      setError(t.errAvatarSize);
       return;
     }
     setAvatarFile(file);
@@ -92,13 +94,13 @@ export default function ProfileSetupPage() {
     e.preventDefault();
     setError("");
 
-    if (!form.display_name.trim()) return setError("이름을 입력해 주세요.");
-    if (form.display_name.trim().length > 50) return setError("닉네임은 50자 이하여야 합니다.");
-    if (!form.nationality) return setError("국적을 선택해 주세요.");
-    if (!form.native_language) return setError("모국어를 선택해 주세요.");
-    if (!form.learning_language) return setError("배우고 싶은 언어를 선택해 주세요.");
-    if (!form.language_level) return setError("언어 수준을 선택해 주세요.");
-    if (form.bio.length > 500) return setError("자기소개는 500자 이하여야 합니다.");
+    if (!form.display_name.trim()) return setError(t.errName);
+    if (form.display_name.trim().length > 50) return setError(t.errNameLen);
+    if (!form.nationality) return setError(t.errNationality);
+    if (!form.native_language) return setError(t.errNativeLang);
+    if (!form.learning_language) return setError(t.errLearningLang);
+    if (!form.language_level) return setError(t.errLangLevel);
+    if (form.bio.length > 500) return setError(t.errBioLen);
 
     setLoading(true);
     try {
@@ -122,7 +124,7 @@ export default function ProfileSetupPage() {
       if (upsertError) throw upsertError;
       navigate("/home", { replace: true });
     } catch {
-      setError("저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setError(t.setupError);
     } finally {
       setLoading(false);
     }
@@ -130,9 +132,8 @@ export default function ProfileSetupPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Helmet><title>KoriBridge - 프로필 등록</title></Helmet>
+      <Helmet><title>KoriBridge - {t.setupTitle}</title></Helmet>
 
-      {/* 히어로 헤더 */}
       <div className="relative bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 pt-12 pb-10 px-6 text-white text-center overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4 pointer-events-none" />
@@ -140,20 +141,18 @@ export default function ProfileSetupPage() {
           <div className="w-12 h-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center mx-auto mb-3 shadow-lg">
             <span className="text-white text-xl font-extrabold">K</span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">프로필 등록</h1>
-          <p className="text-white/75 text-sm mt-1.5">파트너를 만나기 전에 나를 소개해 주세요.</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">{t.setupTitle}</h1>
+          <p className="text-white/75 text-sm mt-1.5">{t.setupDesc}</p>
         </div>
       </div>
 
-      {/* 폼 */}
       <div className="px-4 py-6 max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          {/* 프로필 사진 */}
           <div className="card flex flex-col items-center gap-3 py-7">
             <div className="relative">
               {avatarPreview ? (
-                <img src={avatarPreview} alt="미리보기" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-200 shadow-lg" />
+                <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-200 shadow-lg" />
               ) : (
                 <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-5xl font-bold text-white shadow-lg">
                   {form.display_name?.[0]?.toUpperCase() || "📷"}
@@ -165,55 +164,51 @@ export default function ProfileSetupPage() {
               </label>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-gray-700">프로필 사진</p>
-              <p className="text-xs text-gray-400 mt-0.5">JPG/PNG/WebP · 최대 2MB</p>
+              <p className="text-sm font-semibold text-gray-700">{t.avatarLabel}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{t.avatarLimit}</p>
             </div>
           </div>
 
-          {/* 닉네임 */}
           <div className="card space-y-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">닉네임</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nickname}</label>
               <input
                 type="text"
                 className="input-field"
                 value={form.display_name}
                 maxLength={50}
                 onChange={(e) => handleChange("display_name", e.target.value)}
-                placeholder="표시될 이름을 입력하세요"
+                placeholder={t.nickname}
               />
             </div>
 
-            {/* 국적 / 모국어 */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">국적</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nationality}</label>
                 <select className="input-field" value={form.nationality} onChange={(e) => handleChange("nationality", e.target.value)}>
-                  <option value="">선택</option>
+                  <option value="">{t.select}</option>
                   {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">모국어</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nativeLanguage}</label>
                 <select className="input-field" value={form.native_language} onChange={(e) => handleChange("native_language", e.target.value)}>
-                  <option value="">선택</option>
+                  <option value="">{t.select}</option>
                   {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* 배우고 싶은 언어 */}
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">배우고 싶은 언어</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.learningLanguage}</label>
               <select className="input-field" value={form.learning_language} onChange={(e) => handleChange("learning_language", e.target.value)}>
-                <option value="">선택</option>
+                <option value="">{t.select}</option>
                 {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
 
-            {/* 언어 수준 */}
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">언어 수준</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.languageLevel}</label>
               <div className="flex gap-2">
                 {["초급", "중급", "고급"].map((level) => (
                   <button
@@ -226,16 +221,15 @@ export default function ProfileSetupPage() {
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                   >
-                    {level}
+                    {levelLabel(level)}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* 관심사 */}
           <div className="card">
-            <label className="block text-sm font-bold text-gray-700 mb-3">관심사</label>
+            <label className="block text-sm font-bold text-gray-700 mb-3">{t.interests}</label>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
                 <button
@@ -254,10 +248,9 @@ export default function ProfileSetupPage() {
             </div>
           </div>
 
-          {/* 자기소개 */}
           <div className="card">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-bold text-gray-700">자기소개</label>
+              <label className="block text-sm font-bold text-gray-700">{t.bio}</label>
               <span className={`text-xs ${form.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
                 {form.bio.length}/500
               </span>
@@ -268,7 +261,7 @@ export default function ProfileSetupPage() {
               value={form.bio}
               maxLength={500}
               onChange={(e) => handleChange("bio", e.target.value)}
-              placeholder="간단히 자신을 소개해 주세요 (언어 수준: 초급/중급/고급 포함 가능)"
+              placeholder={t.bioSetupPlaceholder}
             />
           </div>
 
@@ -283,7 +276,7 @@ export default function ProfileSetupPage() {
             disabled={loading || uploading}
             className="btn-primary w-full py-3.5 text-base"
           >
-            {uploading ? "사진 업로드 중..." : loading ? "저장 중..." : "프로필 저장하기"}
+            {uploading ? t.avatarUploading : loading ? t.saving : t.saveProfileBtn}
           </button>
         </form>
       </div>

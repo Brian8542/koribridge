@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { formatTime } from "../utils/formatters";
+import { useLocale } from "../hooks/useLocale";
 
 function ConversationItem({ conv, userId, isOnline }) {
   const navigate = useNavigate();
+  const { t } = useLocale();
 
   return (
     <div className="card p-5 transition hover:-translate-y-1 hover:shadow-lg">
@@ -59,7 +61,7 @@ function ConversationItem({ conv, userId, isOnline }) {
         onClick={() => navigate(`/chat/${conv.partnerId}`)}
         className="mt-4 btn-primary w-full py-2.5 text-sm"
       >
-        대화 이어가기
+        {t.continueChat}
       </button>
     </div>
   );

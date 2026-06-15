@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getMatchScore } from "../utils/matching";
+import { useLocale } from "../hooks/useLocale";
 
 const LEVEL_STYLE = {
   고급: "bg-blue-100 text-blue-700",
@@ -18,6 +19,7 @@ function ProfileCard({
   onReport,
 }) {
   const navigate = useNavigate();
+  const { t, levelLabel } = useLocale();
   const level = profile.language_level || "초급";
   const match = getMatchScore(myProfile, profile);
   const commonInterests = (myProfile?.interests || []).filter((i) =>
@@ -65,7 +67,7 @@ function ProfileCard({
                       ? "text-red-500 bg-red-50"
                       : "text-gray-300 hover:text-red-400 hover:bg-red-50"
                   }`}
-                  title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+                  title={isFavorite ? t.favRemove : t.favAdd}
                 >
                   {isFavorite ? "♥" : "♡"}
                 </button>
@@ -74,7 +76,7 @@ function ProfileCard({
                     type="button"
                     onClick={() => onReport?.(profile.id, profile.display_name)}
                     className="text-gray-300 hover:text-gray-500 text-lg leading-none px-0.5"
-                    title="신고/차단"
+                    title={t.reportBlockTitle}
                   >
                     ⋯
                   </button>
@@ -84,10 +86,10 @@ function ProfileCard({
 
             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
               <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${LEVEL_STYLE[level] || LEVEL_STYLE["초급"]}`}>
-                {level}
+                {levelLabel(level)}
               </span>
               <span className="text-xs bg-gradient-to-r from-red-600 to-rose-500 text-white font-bold px-2.5 py-0.5 rounded-full shadow-sm">
-                매칭 {match.percentage}%
+                {t.matchingLabel} {match.percentage}%
               </span>
             </div>
           </div>
@@ -95,11 +97,11 @@ function ProfileCard({
 
         <div className="mt-4 space-y-1.5">
           <div className="flex gap-3 text-xs">
-            <span className="text-gray-400 w-14 flex-shrink-0">모국어</span>
+            <span className="text-gray-400 w-14 flex-shrink-0">{t.nativeLangShort}</span>
             <span className="font-semibold text-gray-800">{profile.native_language}</span>
           </div>
           <div className="flex gap-3 text-xs">
-            <span className="text-gray-400 w-14 flex-shrink-0">학습언어</span>
+            <span className="text-gray-400 w-14 flex-shrink-0">{t.learningLangShort}</span>
             <span className="font-semibold text-gray-800">{profile.learning_language}</span>
           </div>
         </div>
@@ -131,14 +133,14 @@ function ProfileCard({
           onClick={() => navigate(`/profile/${profile.id}`)}
           className="btn-secondary flex-1 py-2.5 text-sm"
         >
-          프로필 보기
+          {t.viewProfile}
         </button>
         <button
           type="button"
           onClick={() => navigate(`/chat/${profile.id}`)}
           className="btn-primary flex-1 py-2.5 text-sm"
         >
-          채팅하기
+          {t.chatBtn}
         </button>
       </div>
     </div>

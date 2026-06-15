@@ -1,73 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-
-const FEATURES = [
-  { icon: "🎯", title: "스마트 매칭", desc: "국적·언어 수준·관심사를 AI가 분석해 최적의 파트너를 자동 연결합니다." },
-  { icon: "🎤", title: "AI 발음 교정", desc: "실시간 AI가 발음을 분석하고 즉각적인 교정 피드백을 제공합니다." },
-  { icon: "📹", title: "영상 통화", desc: "얼굴을 보며 더 자연스럽게 대화하고 비언어적 표현력을 키워보세요." },
-  { icon: "📚", title: "AI 학습 플랜", desc: "AI가 학습 패턴을 분석해 맞춤형 학습 로드맵을 자동으로 설계합니다." },
-  { icon: "🌸", title: "문화 콘텐츠", desc: "K-pop, 드라마, 음식, 여행 등 한국 문화를 파트너와 함께 탐구합니다." },
-  { icon: "🏆", title: "게임화 학습", desc: "스트릭, 뱃지, 리더보드로 꾸준한 학습 동기부여를 유지합니다." },
-];
-
-const PARTNERS = [
-  {
-    initial: "L", gradient: "from-violet-500 to-purple-500",
-    name: "Linh Nguyen", country: "🇻🇳 베트남", level: "초급",
-    levelColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-    interests: ["K-pop", "드라마"], online: true,
-  },
-  {
-    initial: "J", gradient: "from-blue-500 to-cyan-500",
-    name: "James Park", country: "🇺🇸 미국", level: "중급",
-    levelColor: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-    interests: ["음식", "여행"], online: true,
-  },
-  {
-    initial: "Y", gradient: "from-amber-500 to-orange-500",
-    name: "Yuki Tanaka", country: "🇯🇵 일본", level: "고급",
-    levelColor: "bg-red-500/10 text-red-400 border border-red-500/20",
-    interests: ["문학", "영화"], online: false,
-  },
-  {
-    initial: "M", gradient: "from-emerald-500 to-teal-500",
-    name: "Maria Silva", country: "🇧🇷 브라질", level: "초급",
-    levelColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
-    interests: ["K-drama", "뷰티"], online: true,
-  },
-];
-
-const STATS = [
-  { end: 48, suffix: "K+", label: "활성 학습자" },
-  { end: 127, suffix: "개", label: "참여 국가" },
-  { end: 4.9, suffix: "★", label: "평균 평점", decimal: 1 },
-  { end: 92, suffix: "%", label: "목표 달성률" },
-];
-
-const TESTIMONIALS = [
-  {
-    initial: "S", gradient: "from-pink-500 to-rose-500",
-    name: "Sofia K.", country: "스페인", rating: 5,
-    text: "3개월 만에 한국어로 자유롭게 대화할 수 있게 됐어요. KoriBridge 없었으면 불가능했을 거예요!",
-  },
-  {
-    initial: "T", gradient: "from-sky-500 to-blue-500",
-    name: "Takeshi M.", country: "일본", rating: 5,
-    text: "매칭 알고리즘이 정말 놀라워요. 첫 파트너와 지금까지 6개월째 대화 중입니다.",
-  },
-  {
-    initial: "A", gradient: "from-emerald-500 to-green-500",
-    name: "Aisha R.", country: "인도", rating: 5,
-    text: "AI 발음 교정 덕분에 한국 친구들이 제 발음이 좋아졌다고 해요. 정말 효과적입니다.",
-  },
-];
-
-const FOOTER_COLS = [
-  { title: "플랫폼", links: ["파트너 찾기", "커뮤니티", "학습 도구", "프리미엄"] },
-  { title: "회사",   links: ["소개", "블로그", "채용", "보도자료"] },
-  { title: "지원",   links: ["도움말", "이용약관", "개인정보", "문의하기"] },
-];
+import { useLocale } from "../hooks/useLocale";
 
 const IconX = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -167,7 +101,7 @@ const FeatureCard = React.memo(({ icon, title, desc }) => (
   </div>
 ));
 
-const PartnerCard = React.memo(({ partner, onChat }) => (
+const PartnerCard = React.memo(({ partner, onChat, chatLabel, onlineLabel, offlineLabel }) => (
   <div className="group bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-600 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/60 transition-all duration-300 h-full flex flex-col">
     <div className="flex items-start justify-between mb-4">
       <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${partner.gradient} flex items-center justify-center text-xl font-black text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
@@ -176,7 +110,7 @@ const PartnerCard = React.memo(({ partner, onChat }) => (
       <div className="flex items-center gap-1.5 mt-1">
         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${partner.online ? "bg-emerald-400 animate-pulse" : "bg-zinc-600"}`} />
         <span className={`text-[10px] font-medium ${partner.online ? "text-emerald-400" : "text-zinc-600"}`}>
-          {partner.online ? "온라인" : "오프라인"}
+          {partner.online ? onlineLabel : offlineLabel}
         </span>
       </div>
     </div>
@@ -196,7 +130,7 @@ const PartnerCard = React.memo(({ partner, onChat }) => (
       onClick={onChat}
       className="group/btn mt-auto pt-4 w-full py-2.5 text-xs font-bold bg-gradient-to-r from-red-600 to-rose-500 text-white rounded-xl hover:from-red-500 hover:to-rose-400 hover:shadow-lg hover:shadow-red-500/40 transition-all duration-200 active:scale-95"
     >
-      채팅하기
+      {chatLabel}
       <span className="inline-block ml-1 transition-transform duration-200 group-hover/btn:translate-x-0.5">→</span>
     </button>
   </div>
@@ -226,6 +160,7 @@ export default function SplashScreen() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { locale, t, toggleLocale, levelLabel } = useLocale();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -238,13 +173,89 @@ export default function SplashScreen() {
   const goToPrivacy = useCallback(() => navigate("/privacy"), [navigate]);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
+  const FEATURES = [
+    { icon: "🎯", title: t.f1Title, desc: t.f1Desc },
+    { icon: "🎤", title: t.f2Title, desc: t.f2Desc },
+    { icon: "📹", title: t.f3Title, desc: t.f3Desc },
+    { icon: "📚", title: t.f4Title, desc: t.f4Desc },
+    { icon: "🌸", title: t.f5Title, desc: t.f5Desc },
+    { icon: "🏆", title: t.f6Title, desc: t.f6Desc },
+  ];
+
+  const PARTNERS = [
+    {
+      initial: "L", gradient: "from-violet-500 to-purple-500",
+      name: "Linh Nguyen",
+      country: locale === 'ko' ? "🇻🇳 베트남" : "🇻🇳 Vietnam",
+      level: levelLabel("초급"),
+      levelColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+      interests: locale === 'ko' ? ["K-pop", "드라마"] : ["K-pop", "Drama"], online: true,
+    },
+    {
+      initial: "J", gradient: "from-blue-500 to-cyan-500",
+      name: "James Park",
+      country: locale === 'ko' ? "🇺🇸 미국" : "🇺🇸 USA",
+      level: levelLabel("중급"),
+      levelColor: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+      interests: locale === 'ko' ? ["음식", "여행"] : ["Food", "Travel"], online: true,
+    },
+    {
+      initial: "Y", gradient: "from-amber-500 to-orange-500",
+      name: "Yuki Tanaka",
+      country: locale === 'ko' ? "🇯🇵 일본" : "🇯🇵 Japan",
+      level: levelLabel("고급"),
+      levelColor: "bg-red-500/10 text-red-400 border border-red-500/20",
+      interests: locale === 'ko' ? ["문학", "영화"] : ["Literature", "Film"], online: false,
+    },
+    {
+      initial: "M", gradient: "from-emerald-500 to-teal-500",
+      name: "Maria Silva",
+      country: locale === 'ko' ? "🇧🇷 브라질" : "🇧🇷 Brazil",
+      level: levelLabel("초급"),
+      levelColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+      interests: ["K-drama", locale === 'ko' ? "뷰티" : "Beauty"], online: true,
+    },
+  ];
+
+  const STATS = [
+    { end: 48, suffix: "K+", label: t.stat1Label },
+    { end: 127, suffix: t.stat2Suffix, label: t.stat2Label },
+    { end: 4.9, suffix: "★", label: t.stat3Label, decimal: 1 },
+    { end: 92, suffix: "%", label: t.stat4Label },
+  ];
+
+  const TESTIMONIALS = [
+    {
+      initial: "S", gradient: "from-pink-500 to-rose-500",
+      name: "Sofia K.", country: t.r1Country, rating: 5,
+      text: t.r1Text,
+    },
+    {
+      initial: "T", gradient: "from-sky-500 to-blue-500",
+      name: "Takeshi M.", country: t.r2Country, rating: 5,
+      text: t.r2Text,
+    },
+    {
+      initial: "A", gradient: "from-emerald-500 to-green-500",
+      name: "Aisha R.", country: t.r3Country, rating: 5,
+      text: t.r3Text,
+    },
+  ];
+
+  const FOOTER_COLS = [
+    { title: t.footerCol1, links: t.footerLinks1 },
+    { title: t.footerCol2, links: t.footerLinks2 },
+    { title: t.footerCol3, links: t.footerLinks3 },
+  ];
+
+  const NAV_LINKS = [t.findPartner, t.community, t.learningTools];
+
   return (
     <div className="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
       <Helmet>
-        <title>KoriBridge - 한국어·문화 교류 파트너 플랫폼</title>
+        <title>KoriBridge - {locale === 'ko' ? '한국어·문화 교류 파트너 플랫폼' : 'Korean Language & Culture Exchange'}</title>
       </Helmet>
 
-      {/* ── 고정 네비게이션 ── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? "border-b border-white/[0.08] bg-zinc-950/95 backdrop-blur-xl shadow-lg shadow-black/20"
@@ -257,25 +268,31 @@ export default function SplashScreen() {
           </div>
 
           <div className="hidden md:flex items-center gap-7 text-sm text-zinc-500">
-            <button className="hover:text-white transition-colors duration-200">파트너 찾기</button>
-            <button className="hover:text-white transition-colors duration-200">커뮤니티</button>
-            <button className="hover:text-white transition-colors duration-200">학습도구</button>
+            {NAV_LINKS.map((label) => (
+              <button key={label} className="hover:text-white transition-colors duration-200">{label}</button>
+            ))}
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={toggleLocale}
+              className="text-xs font-bold px-2.5 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition text-zinc-300"
+            >
+              {locale === "ko" ? "EN" : "한"}
+            </button>
             <button onClick={goToAuth} className="hidden sm:block px-4 py-2 text-sm font-semibold text-zinc-400 hover:text-white transition-colors duration-200">
-              로그인
+              {t.login}
             </button>
             <button
               onClick={goToAuth}
               className="px-4 py-2 text-sm font-bold bg-gradient-to-r from-red-600 to-rose-500 rounded-xl shadow-lg shadow-red-900/30 hover:from-red-500 hover:to-rose-400 hover:-translate-y-px transition-all duration-200 active:scale-95"
             >
-              무료 시작하기
+              {t.startFree}
             </button>
             <button
               onClick={() => setMobileOpen((o) => !o)}
               className="md:hidden ml-1 w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-lg hover:bg-zinc-800 transition-colors duration-200"
-              aria-label="메뉴"
+              aria-label="Menu"
             >
               <span className={`block w-5 h-0.5 bg-zinc-400 rounded-full transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
               <span className={`block w-5 h-0.5 bg-zinc-400 rounded-full transition-all duration-300 ${mobileOpen ? "opacity-0 scale-x-0" : ""}`} />
@@ -284,24 +301,22 @@ export default function SplashScreen() {
           </div>
         </div>
 
-        {/* 모바일 드롭다운 */}
         <div className={`md:hidden overflow-hidden transition-all duration-300 ${mobileOpen ? "max-h-72 opacity-100" : "max-h-0 opacity-0"}`}>
           <div className="border-t border-zinc-800/60 px-5 py-4 space-y-1">
-            {["파트너 찾기", "커뮤니티", "학습도구"].map((item) => (
+            {NAV_LINKS.map((item) => (
               <button key={item} onClick={closeMobile} className="w-full text-left py-2.5 text-sm text-zinc-400 hover:text-white transition-colors">
                 {item}
               </button>
             ))}
             <div className="pt-2">
               <button onClick={() => { closeMobile(); goToAuth(); }} className="w-full text-left py-2.5 text-sm text-zinc-400 hover:text-white transition-colors">
-                로그인
+                {t.login}
               </button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* ── 히어로 섹션 ── */}
       <section className="relative pt-40 pb-32 px-5 overflow-hidden">
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-red-600/10 blur-[120px] pointer-events-none" />
         <div className="absolute top-40 right-1/4 w-64 h-64 rounded-full bg-rose-500/8 blur-3xl pointer-events-none" />
@@ -309,28 +324,26 @@ export default function SplashScreen() {
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto text-center">
-          {/* 활성 배지 */}
           <div
             className="inline-flex items-center gap-2 border border-white/10 bg-white/[0.04] backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-zinc-400 mb-10"
             style={{ animation: "fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both" }}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-            지금 <span className="text-white font-semibold">1,247명</span>이 한국어로 대화 중
+            {t.splashOnlineBadge} <span className="text-white font-semibold">1,247{locale === 'ko' ? '명' : ''}</span>{t.splashOnlineMid}
           </div>
 
-          {/* 메인 헤드라인 */}
           <h1 className="font-black tracking-[-0.03em] leading-[1.02]" style={{ fontSize: "clamp(3rem, 8vw, 5.5rem)" }}>
             <span className="text-white block" style={{ animation: "fadeInUp 0.65s cubic-bezier(0.16,1,0.3,1) 0.2s both" }}>
-              말이 통하면
+              {t.heroLine1}
             </span>
             <span
               className="bg-gradient-to-r from-red-500 via-rose-400 to-pink-400 bg-clip-text text-transparent block"
               style={{ animation: "fadeInUp 0.65s cubic-bezier(0.16,1,0.3,1) 0.32s both" }}
             >
-              한국어가
+              {t.heroLine2}
             </span>
             <span className="text-white block" style={{ animation: "fadeInUp 0.65s cubic-bezier(0.16,1,0.3,1) 0.44s both" }}>
-              이어집니다
+              {t.heroLine3}
             </span>
           </h1>
 
@@ -338,12 +351,9 @@ export default function SplashScreen() {
             className="mt-8 text-lg md:text-xl text-zinc-500 max-w-lg mx-auto leading-relaxed tracking-[-0.01em]"
             style={{ animation: "fadeInUp 0.65s cubic-bezier(0.16,1,0.3,1) 0.54s both" }}
           >
-            전 세계 127개국 파트너와 실시간으로 한국어를 연습하고,
-            <br className="hidden sm:block" />
-            문화를 교류하며 진짜 언어 실력을 키워보세요.
+            {t.heroSub}
           </p>
 
-          {/* CTA 버튼 */}
           <div
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
             style={{ animation: "fadeInUp 0.65s cubic-bezier(0.16,1,0.3,1) 0.62s both" }}
@@ -352,18 +362,17 @@ export default function SplashScreen() {
               onClick={goToAuth}
               className="group px-8 py-4 bg-gradient-to-r from-red-600 to-rose-500 font-bold rounded-2xl shadow-2xl shadow-red-900/40 hover:from-red-500 hover:to-rose-400 hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.98] text-[15px] w-full sm:w-auto"
             >
-              지금 무료로 시작하기
+              {t.ctaPrimary}
               <span className="inline-block ml-1.5 transition-transform duration-200 group-hover:translate-x-1">→</span>
             </button>
             <button
               onClick={goToAuth}
               className="px-8 py-4 border border-zinc-700 font-semibold rounded-2xl hover:bg-white/5 hover:border-zinc-600 transition-all duration-200 text-[15px] w-full sm:w-auto text-zinc-400 hover:text-white"
             >
-              파트너 둘러보기
+              {t.ctaSecondary}
             </button>
           </div>
 
-          {/* 통계 배지 */}
           <div
             className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8"
             style={{ animation: "fadeInUp 0.65s cubic-bezier(0.16,1,0.3,1) 0.72s both" }}
@@ -377,18 +386,17 @@ export default function SplashScreen() {
                 ))}
               </div>
               <div className="text-left">
-                <p className="text-sm font-bold text-white">48,000+ 명</p>
-                <p className="text-xs text-zinc-500">활성 학습자</p>
+                <p className="text-sm font-bold text-white">{t.heroStat1}</p>
+                <p className="text-xs text-zinc-500">{t.heroStat1Sub}</p>
               </div>
             </div>
             <div className="w-px h-8 bg-zinc-800 hidden sm:block" />
             <div className="text-center sm:text-left">
-              <p className="text-sm font-bold text-white">매일 12만+ 대화</p>
-              <p className="text-xs text-zinc-500">127개국 파트너 연결</p>
+              <p className="text-sm font-bold text-white">{t.heroStat2}</p>
+              <p className="text-xs text-zinc-500">{t.heroStat2Sub}</p>
             </div>
           </div>
 
-          {/* 채팅 미리보기 카드 */}
           <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
             <div
               className="bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-2xl p-4 space-y-2.5 hover:border-zinc-700 transition-colors duration-300 shadow-xl shadow-black/40"
@@ -398,13 +406,19 @@ export default function SplashScreen() {
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-[11px] font-bold flex-shrink-0">L</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-white leading-none truncate">Linh Nguyen</p>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">🇻🇳 베트남 · 한국어 초급</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{locale === 'ko' ? '🇻🇳 베트남 · 한국어 초급' : '🇻🇳 Vietnam · Korean Beginner'}</p>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse" />
               </div>
-              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">안녕하세요! 한국어 공부하고 싶어요 😊</div>
-              <div className="bg-gradient-to-r from-red-600/20 to-rose-500/20 border border-red-500/10 rounded-xl rounded-tr-sm px-3 py-2 text-sm text-zinc-300 ml-6">반가워요! 베트남어도 배우고 싶어요</div>
-              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">정말요? 같이 교환해요! ✨</div>
+              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">
+                {locale === 'ko' ? '안녕하세요! 한국어 공부하고 싶어요 😊' : 'Hello! I want to study Korean 😊'}
+              </div>
+              <div className="bg-gradient-to-r from-red-600/20 to-rose-500/20 border border-red-500/10 rounded-xl rounded-tr-sm px-3 py-2 text-sm text-zinc-300 ml-6">
+                {locale === 'ko' ? '반가워요! 베트남어도 배우고 싶어요' : 'Nice to meet you! I want to learn Vietnamese too'}
+              </div>
+              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">
+                {locale === 'ko' ? '정말요? 같이 교환해요! ✨' : "Really? Let's exchange! ✨"}
+              </div>
             </div>
 
             <div
@@ -415,29 +429,30 @@ export default function SplashScreen() {
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-[11px] font-bold flex-shrink-0">J</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-white leading-none truncate">James Park</p>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">🇺🇸 미국 · 한국어 중급</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{locale === 'ko' ? '🇺🇸 미국 · 한국어 중급' : '🇺🇸 USA · Korean Intermediate'}</p>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse" />
               </div>
-              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">K-pop 좋아하세요? 저는 너무 좋아요!</div>
-              <div className="bg-gradient-to-r from-red-600/20 to-rose-500/20 border border-red-500/10 rounded-xl rounded-tr-sm px-3 py-2 text-sm text-zinc-300 ml-6">저도요! 가사 공부 같이 어때요? 🎵</div>
-              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">완전 좋아요! 오늘부터 시작해요</div>
+              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">
+                {locale === 'ko' ? 'K-pop 좋아하세요? 저는 너무 좋아요!' : 'Do you like K-pop? I love it!'}
+              </div>
+              <div className="bg-gradient-to-r from-red-600/20 to-rose-500/20 border border-red-500/10 rounded-xl rounded-tr-sm px-3 py-2 text-sm text-zinc-300 ml-6">
+                {locale === 'ko' ? '저도요! 가사 공부 같이 어때요? 🎵' : 'Me too! Want to study lyrics together? 🎵'}
+              </div>
+              <div className="bg-zinc-800 rounded-xl rounded-tl-sm px-3 py-2 text-sm text-zinc-300">
+                {locale === 'ko' ? '완전 좋아요! 오늘부터 시작해요' : "Sounds great! Let's start today"}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 기능 섹션 ── */}
       <section className="py-28 px-5 border-t border-zinc-900">
         <div className="max-w-5xl mx-auto">
           <FadeInSection className="text-center mb-16">
-            <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-4">핵심 기능</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-tight">
-              언어 학습을 다시<br className="hidden sm:block" /> 설계했습니다
-            </h2>
-            <p className="mt-5 text-zinc-500 text-base max-w-md mx-auto leading-relaxed">
-              단순한 채팅 앱이 아닙니다. AI와 사람이 함께 만드는 완전히 새로운 언어 교류 경험.
-            </p>
+            <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-4">{t.featuresSectionTag}</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-tight">{t.featuresSectionTitle}</h2>
+            <p className="mt-5 text-zinc-500 text-base max-w-md mx-auto leading-relaxed">{t.featuresSectionSub}</p>
           </FadeInSection>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -449,22 +464,23 @@ export default function SplashScreen() {
         </div>
       </section>
 
-      {/* ── 파트너 섹션 ── */}
       <section className="py-28 px-5 border-t border-zinc-900">
         <div className="max-w-5xl mx-auto">
           <FadeInSection className="text-center mb-16">
-            <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-4">파트너 찾기</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-tight">
-              지금 연결 가능한<br className="hidden sm:block" /> 파트너들
-            </h2>
-            <p className="mt-5 text-zinc-500 text-base max-w-sm mx-auto">
-              전 세계 127개국에서 당신의 첫 대화를 기다리고 있어요.
-            </p>
+            <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-4">{t.partnersSectionTag}</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-tight">{t.partnersSectionTitle}</h2>
+            <p className="mt-5 text-zinc-500 text-base max-w-sm mx-auto">{t.partnersSectionSub}</p>
           </FadeInSection>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {PARTNERS.map((p, i) => (
               <FadeInSection key={p.name} delay={i * 80}>
-                <PartnerCard partner={p} onChat={goToAuth} />
+                <PartnerCard
+                  partner={p}
+                  onChat={goToAuth}
+                  chatLabel={t.chatBtn}
+                  onlineLabel={t.splashOnline}
+                  offlineLabel={t.splashOffline}
+                />
               </FadeInSection>
             ))}
           </div>
@@ -473,22 +489,21 @@ export default function SplashScreen() {
               onClick={goToAuth}
               className="group inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white border border-zinc-800 hover:border-zinc-700 px-6 py-2.5 rounded-xl transition-all duration-200"
             >
-              모든 파트너 보기
+              {t.allPartnersBtn}
               <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </button>
           </FadeInSection>
         </div>
       </section>
 
-      {/* ── 통계 섹션 ── */}
       <section className="py-24 px-5 bg-gradient-to-br from-red-700 via-red-600 to-rose-600 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
         <div className="absolute top-0 left-0 right-0 h-px bg-white/10" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-black/20" />
         <div className="relative max-w-5xl mx-auto">
           <FadeInSection className="text-center mb-14">
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] text-white">숫자로 보는 KoriBridge</h2>
-            <p className="mt-3 text-red-200/70 text-base">전 세계가 선택한 한국어 교류 플랫폼</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] text-white">{t.statsTitle}</h2>
+            <p className="mt-3 text-red-200/70 text-base">{t.statsSub}</p>
           </FadeInSection>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {STATS.map((s) => (
@@ -498,57 +513,48 @@ export default function SplashScreen() {
         </div>
       </section>
 
-      {/* ── 후기 섹션 ── */}
       <section className="py-28 px-5 border-t border-zinc-900">
         <div className="max-w-5xl mx-auto">
           <FadeInSection className="text-center mb-16">
-            <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-4">사용자 후기</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-tight">직접 들어보세요</h2>
-            <p className="mt-5 text-zinc-500 text-base max-w-sm mx-auto">
-              전 세계 48,000명 학습자들의 진짜 이야기입니다.
-            </p>
+            <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-4">{t.reviewsSectionTag}</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-tight">{t.reviewsSectionTitle}</h2>
+            <p className="mt-5 text-zinc-500 text-base max-w-sm mx-auto">{t.reviewsSectionSub}</p>
           </FadeInSection>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {TESTIMONIALS.map((t, i) => (
-              <FadeInSection key={t.name} delay={i * 80}>
-                <TestimonialCard item={t} />
+            {TESTIMONIALS.map((item, i) => (
+              <FadeInSection key={item.name} delay={i * 80}>
+                <TestimonialCard item={item} />
               </FadeInSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA 섹션 ── */}
       <section className="py-32 px-5 bg-gradient-to-br from-red-900/50 via-zinc-950 to-zinc-950 relative overflow-hidden border-t border-zinc-900">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-red-600/15 blur-[100px] pointer-events-none" />
         <FadeInSection className="relative z-10 max-w-2xl mx-auto text-center">
-          <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-5">지금 시작하세요</p>
+          <p className="text-xs font-bold tracking-[0.18em] text-red-400 uppercase mb-5">{t.ctaTag}</p>
           <h2 className="text-5xl md:text-6xl font-black tracking-[-0.02em] leading-[1.06] mb-5">
-            오늘 첫 대화를
+            {t.ctaTitle1}
             <br />
             <span className="bg-gradient-to-r from-red-500 via-rose-400 to-pink-400 bg-clip-text text-transparent">
-              시작해보세요
+              {t.ctaTitle2}
             </span>
           </h2>
-          <p className="text-zinc-500 text-base mb-10 max-w-md mx-auto leading-relaxed">
-            가입 즉시 스마트 매칭이 시작됩니다.
-            <br />
-            완전 무료, 광고 없음, 신용카드 불필요.
-          </p>
+          <p className="text-zinc-500 text-base mb-10 max-w-md mx-auto leading-relaxed">{t.ctaDesc}</p>
           <button
             onClick={goToAuth}
             className="group inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-red-600 to-rose-500 font-bold rounded-2xl shadow-2xl shadow-red-900/50 hover:from-red-500 hover:to-rose-400 hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.98] text-base"
           >
-            무료 가입하기
+            {t.ctaMainBtn}
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </button>
           <p className="mt-6 text-xs text-zinc-600">
-            이미 <span className="text-zinc-400 font-semibold">48,000+</span>명이 KoriBridge와 함께합니다
+            {t.ctaSubText} <span className="text-zinc-400 font-semibold">{t.ctaSubBold}</span>{t.ctaSubEnd}
           </p>
         </FadeInSection>
       </section>
 
-      {/* ── 푸터 ── */}
       <footer className="bg-zinc-950 border-t border-zinc-900 pt-16 pb-10 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
@@ -557,10 +563,7 @@ export default function SplashScreen() {
                 <div className="w-7 h-7 rounded-md bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center text-xs font-black">K</div>
                 <span className="font-bold text-sm">KoriBridge</span>
               </div>
-              <p className="text-xs text-zinc-600 leading-relaxed mb-5">
-                전 세계 한국어 학습자를 연결하는
-                <br />AI 기반 언어 교류 플랫폼
-              </p>
+              <p className="text-xs text-zinc-600 leading-relaxed mb-5">{t.footerDesc}</p>
               <div className="flex items-center gap-3">
                 {[IconX, IconInstagram, IconYoutube, IconTiktok].map((Icon, i) => (
                   <button key={i} className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white hover:border-zinc-700 transition-all duration-200">
@@ -573,10 +576,16 @@ export default function SplashScreen() {
               <div key={col.title}>
                 <p className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-4">{col.title}</p>
                 <ul className="space-y-2.5">
-                  {col.links.map((link) => (
-                    <li key={link}>
+                  {col.links.map((link, li) => (
+                    <li key={li}>
                       <button
-                        onClick={link === "이용약관" ? goToTerms : link === "개인정보" ? goToPrivacy : undefined}
+                        onClick={
+                          (locale === 'ko' ? link === "이용약관" : link === "Terms" || link === "Terms of Service")
+                            ? goToTerms
+                            : (locale === 'ko' ? link === "개인정보" : link === "Privacy")
+                            ? goToPrivacy
+                            : undefined
+                        }
                         className="text-xs text-zinc-600 hover:text-zinc-300 transition-colors duration-200"
                       >
                         {link}
@@ -588,8 +597,8 @@ export default function SplashScreen() {
             ))}
           </div>
           <div className="pt-8 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-zinc-700">© 2026 KoriBridge. All rights reserved.</p>
-            <p className="text-xs text-zinc-800">Made with ❤️ for Korean culture lovers worldwide</p>
+            <p className="text-xs text-zinc-700">{t.footerCopy}</p>
+            <p className="text-xs text-zinc-800">{t.footerMade}</p>
           </div>
         </div>
       </footer>

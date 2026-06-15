@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
+import { useLocale } from "../hooks/useLocale";
 import ConfirmModal from "../components/ConfirmModal";
 import { formatTime } from "../utils/formatters";
 
@@ -18,6 +19,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
+  const { t } = useLocale();
 
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -71,7 +73,7 @@ export default function ChatPage() {
           .order("created_at", { ascending: false })
           .limit(MSGS_LIMIT);
         if (pr.error) throw pr.error;
-        setPartner(pr.data || { id: partnerId, display_name: "알 수 없는 사용자", nationality: "" });
+        setPartner(pr.data || { id: partnerId, display_name: t.unknownUser, nationality: "" });
         const sorted = mr.data ? sortMsgs(mr.data) : [];
         setMessages(sorted);
         setHasOlderMsgs((mr.data?.length || 0) === MSGS_LIMIT);
@@ -83,7 +85,7 @@ export default function ChatPage() {
       }
     };
     load();
-  }, [user, partnerId, markRead]);
+  }, [user, partnerId, markRead, t.unknownUser]);
 
   useEffect(() => {
     if (!user?.id || !partnerId) return;
@@ -143,11 +145,11 @@ export default function ChatPage() {
         `https://api.mymemory.translated.net/get?q=${encodeURIComponent(msg.content)}&langpair=${src}|${tgt}`
       );
       const r = await res.json();
-      if (r.responseStatus !== 200) throw new Error(r.responseDetails || "번역 실패");
-      setTranslations((p) => ({ ...p, [msg.id]: r.responseData?.translatedText || "번역 불가" }));
+      if (r.responseStatus !== 200) throw new Error(r.responseDetails || "translate failed");
+      setTranslations((p) => ({ ...p, [msg.id]: r.responseData?.translatedText || "N/A" }));
       setVisibleTranslation((p) => ({ ...p, [msg.id]: true }));
     } catch {
-      setTranslations((p) => ({ ...p, [msg.id]: "번역 실패" }));
+      setTranslations((p) => ({ ...p, [msg.id]: "N/A" }));
       setVisibleTranslation((p) => ({ ...p, [msg.id]: true }));
     } finally {
       setTranslationLoading((p) => ({ ...p, [msg.id]: false }));
@@ -164,9 +166,9 @@ export default function ChatPage() {
     const { error } = await supabase.from("messages").delete().eq("id", id).eq("sender_id", user.id);
     if (!error) {
       setMessages((prev) => prev.filter((m) => m.id !== id));
-      showToast("메시지가 삭제되었습니다.", "success");
+      showToast(t.msgDeleted, "success");
     } else {
-      showToast("메시지 삭제에 실패했습니다.", "error");
+      showToast(t.msgDeleteFailed, "error");
     }
   };
 
@@ -194,9 +196,9 @@ export default function ChatPage() {
         msg.id === msgId ? { ...msg, content: editContent.trim(), edited_at: new Date().toISOString() } : msg
       ));
       cancelEditMessage();
-      showToast("메시지가 수정되었습니다.", "success");
+      showToast(t.msgEdited, "success");
     } catch {
-      showToast("메시지 수정에 실패했습니다.", "error");
+      showToast(t.msgEditFailed, "error");
     } finally {
       setSaveLoading(false);
     }
@@ -204,7 +206,7 @@ export default function ChatPage() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      showToast("복사됨", "success", 2000);
+      showToast(t.copied, "success", 2000);
     });
   };
 
@@ -217,12 +219,12 @@ export default function ChatPage() {
     const file = e.target.files[0];
     if (!file) return;
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      showToast("JPG, PNG, WebP 파일만 업로드할 수 있습니다.", "error");
+      showToast(t.errAvatarType, "error");
       e.target.value = "";
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      showToast("이미지는 5MB 이하여야 합니다.", "error");
+      showToast(t.imgTooBig, "error");
       e.target.value = "";
       return;
     }
@@ -237,7 +239,7 @@ export default function ChatPage() {
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: "이미지", image_url: data.publicUrl }]).select();
       if (!me && md?.length > 0) addMessage(md[0]);
     } catch {
-      showToast("이미지 전송에 실패했습니다.", "error");
+      showToast(t.imgSendFailed, "error");
     } finally {
       setImageUploading(false);
       e.target.value = "";
@@ -256,7 +258,7 @@ export default function ChatPage() {
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: msg }]).select();
       if (!error && data?.length > 0) addMessage(data[0]);
     } catch {
-      showToast("메시지 전송에 실패했습니다.", "error");
+      showToast(t.msgSendFailed, "error");
     } finally {
       setSendLoading(false);
     }
@@ -275,7 +277,7 @@ export default function ChatPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50">
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
-        <p className="text-sm text-gray-400 font-medium">채팅 불러오는 중...</p>
+        <p className="text-sm text-gray-400 font-medium">{t.chatLoading}</p>
       </div>
     </div>
   );
@@ -284,17 +286,17 @@ export default function ChatPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-md border border-gray-100">
         <p className="text-4xl mb-4">📡</p>
-        <p className="text-gray-900 font-extrabold text-lg">채팅을 불러오지 못했습니다</p>
-        <p className="text-sm text-gray-500 mt-2">네트워크 연결을 확인한 후 다시 시도해 주세요.</p>
+        <p className="text-gray-900 font-extrabold text-lg">{t.chatError}</p>
+        <p className="text-sm text-gray-500 mt-2">{t.chatErrorDesc}</p>
         <div className="flex gap-3 mt-6">
           <button onClick={() => navigate(-1)} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition">
-            뒤로 가기
+            {t.goBack}
           </button>
           <button
             onClick={() => { setLoadError(false); setChatLoading(true); }}
             className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-500 text-white text-sm font-bold hover:shadow-md transition-all"
           >
-            다시 시도
+            {t.retry}
           </button>
         </div>
       </div>
@@ -304,8 +306,8 @@ export default function ChatPage() {
   if (!user || !partner) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
       <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-md">
-        <p className="text-red-600 font-semibold">채팅 상대를 찾을 수 없습니다.</p>
-        <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">뒤로 가기</button>
+        <p className="text-red-600 font-semibold">{t.chatNotFound}</p>
+        <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">{t.goBack}</button>
       </div>
     </div>
   );
@@ -314,12 +316,11 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Helmet><title>KoriBridge - {partner.display_name || "채팅"}</title></Helmet>
+      <Helmet><title>KoriBridge - {partner.display_name || t.tabChat}</title></Helmet>
 
-      {/* 헤더 */}
       <div className="bg-gradient-to-r from-red-600 to-rose-500 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-lg">
         <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white text-sm font-semibold flex-shrink-0 transition">
-          ← 뒤로
+          {t.backBtn}
         </button>
         <button onClick={() => navigate("/profile/" + partner.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
           {partner.avatar_url ? (
@@ -341,7 +342,6 @@ export default function ChatPage() {
         </button>
       </div>
 
-      {/* 메시지 목록 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
         {hasOlderMsgs && (
           <div className="flex justify-center pt-2 pb-1">
@@ -350,12 +350,12 @@ export default function ChatPage() {
               disabled={loadingOlder}
               className="text-xs text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-full font-semibold transition shadow-sm disabled:opacity-50"
             >
-              {loadingOlder ? "불러오는 중..." : "이전 메시지 불러오기"}
+              {loadingOlder ? t.loadingOlder : t.loadOlder}
             </button>
           </div>
         )}
         {messages.length === 0 ? (
-          <div className="text-center text-gray-400 py-20 text-sm">첫 메시지를 보내보세요.</div>
+          <div className="text-center text-gray-400 py-20 text-sm">{t.firstMessage}</div>
         ) : messages.map((msg, idx) => {
           const isMine = msg.sender_id === user.id;
           const tTxt = translations[msg.id];
@@ -390,7 +390,7 @@ export default function ChatPage() {
                   >
                     {msg.image_url && (
                       <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
-                        <img src={msg.image_url} alt="이미지" className="max-w-full max-h-64 object-cover" />
+                        <img src={msg.image_url} alt="img" className="max-w-full max-h-64 object-cover" />
                       </a>
                     )}
                     {!msg.image_url && (
@@ -411,7 +411,7 @@ export default function ChatPage() {
                     <div className={"px-4 pb-3 flex items-center justify-between gap-2 text-xs " + (isMine ? "text-red-200" : "text-gray-400")}>
                       <span>
                         {formatTime(msg.created_at)}
-                        {msg.edited_at && <span className="ml-2 text-[10px] text-current opacity-80">(수정됨)</span>}
+                        {msg.edited_at && <span className="ml-2 text-[10px] text-current opacity-80">{t.edited}</span>}
                       </span>
                       <div className="flex items-center gap-2">
                         {isMine && <span className={msg.read_at ? "text-blue-300" : ""}>{msg.read_at ? "✓✓" : "✓"}</span>}
@@ -420,7 +420,7 @@ export default function ChatPage() {
                             onClick={() => copyToClipboard(msg.content)}
                             className={"opacity-0 group-hover:opacity-100 transition-opacity text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-gray-400 hover:text-gray-600")}
                           >
-                            복사
+                            {t.copy}
                           </button>
                         )}
                         {!msg.image_url && (
@@ -428,16 +428,16 @@ export default function ChatPage() {
                             onClick={() => translateMessage(msg)}
                             className={"text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-blue-500 hover:text-blue-700")}
                           >
-                            {tLoad ? "번역중..." : tTxt ? (tVis ? "숨기기" : "번역보기") : "번역보기"}
+                            {tLoad ? t.translating : tTxt ? (tVis ? t.hideTranslation : t.translateBtn) : t.translateBtn}
                           </button>
                         )}
                         {isMine && editingMessageId === msg.id && (
                           <>
                             <button onClick={() => saveEditedMessage(msg.id)} disabled={saveLoading}
                               className="text-xs rounded-full bg-white bg-opacity-10 px-2 py-1 text-white hover:bg-opacity-20">
-                              {saveLoading ? "저장중" : "저장"}
+                              {saveLoading ? t.savingEdit : t.saveEdit}
                             </button>
-                            <button onClick={cancelEditMessage} className="text-xs text-white hover:underline">취소</button>
+                            <button onClick={cancelEditMessage} className="text-xs text-white hover:underline">{t.cancelEdit}</button>
                           </>
                         )}
                         {isMine && editingMessageId !== msg.id && (
@@ -445,7 +445,7 @@ export default function ChatPage() {
                             onClick={() => deleteMessage(msg.id)}
                             className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white"
                           >
-                            삭제
+                            {t.deleteMsg}
                           </button>
                         )}
                       </div>
@@ -464,7 +464,6 @@ export default function ChatPage() {
         <div ref={messageEndRef} />
       </div>
 
-      {/* 입력창 */}
       <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
           {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
@@ -485,7 +484,7 @@ export default function ChatPage() {
           <div className="flex-1 flex flex-col gap-1">
             <textarea ref={textareaRef} value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={handleKeyDown}
               rows={1} className="input-field resize-none text-sm py-3 h-11 min-h-[44px] max-h-[120px]"
-              placeholder="메시지를 입력하세요..." />
+              placeholder={t.messagePlaceholder} />
             {newMessage.length > 800 && (
               <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-red-500 font-semibold" : "text-gray-400"}`}>
                 {newMessage.length}/{MAX_MSG_LENGTH}
@@ -511,9 +510,9 @@ export default function ChatPage() {
 
       {deleteConfirmId && (
         <ConfirmModal
-          message="메시지를 삭제하시겠습니까?"
-          confirmLabel="삭제하기"
-          cancelLabel="취소"
+          message={t.deleteMsgConfirm}
+          confirmLabel={t.deleteMsgLabel}
+          cancelLabel={t.cancel}
           danger
           onConfirm={confirmDeleteMessage}
           onCancel={() => setDeleteConfirmId(null)}

@@ -1,14 +1,10 @@
 import React, { useState } from "react";
+import { useLocale } from "../hooks/useLocale";
 
-const ANNOUNCEMENTS = [
-  {
-    id: "2026-06",
-    text: "KoriBridge에 오신 것을 환영합니다! 프로필을 등록하고 언어 파트너를 찾아보세요.",
-    type: "info",
-  },
-];
+const ANNOUNCEMENT_ID = "2026-06";
 
 export default function AnnouncementBanner() {
+  const { t } = useLocale();
   const [dismissed, setDismissed] = useState(() => {
     try {
       const saved = localStorage.getItem("dismissed_announcements");
@@ -18,38 +14,23 @@ export default function AnnouncementBanner() {
     }
   });
 
-  const visible = ANNOUNCEMENTS.filter((a) => !dismissed.includes(a.id));
-  if (visible.length === 0) return null;
-
-  const current = visible[0];
+  if (dismissed.includes(ANNOUNCEMENT_ID)) return null;
 
   const dismiss = () => {
-    const next = [...dismissed, current.id];
+    const next = [...dismissed, ANNOUNCEMENT_ID];
     setDismissed(next);
     try { localStorage.setItem("dismissed_announcements", JSON.stringify(next)); } catch {}
   };
 
-  const style =
-    current.type === "warning"
-      ? "bg-amber-50 border border-amber-200 text-amber-800"
-      : current.type === "error"
-      ? "bg-red-50 border border-red-200 text-red-800"
-      : "bg-gradient-to-r from-red-600 to-rose-500 text-white border border-transparent shadow-sm shadow-red-200";
-
-  const icon =
-    current.type === "warning" ? "⚠️" : current.type === "error" ? "🚨" : "📢";
-
   return (
-    <div className={`rounded-2xl px-4 py-3 flex items-start justify-between gap-3 text-sm ${style}`}>
+    <div className="rounded-2xl px-4 py-3 flex items-start justify-between gap-3 text-sm bg-gradient-to-r from-red-600 to-rose-500 text-white border border-transparent shadow-sm shadow-red-200">
       <div className="flex items-start gap-2 flex-1 min-w-0">
-        <span className="text-base leading-snug flex-shrink-0">{icon}</span>
-        <p className="leading-relaxed font-medium">{current.text}</p>
+        <span className="text-base leading-snug flex-shrink-0">📢</span>
+        <p className="leading-relaxed font-medium">{t.announcementText}</p>
       </div>
       <button
         onClick={dismiss}
-        className={`text-lg leading-none flex-shrink-0 transition ${
-          current.type === "info" ? "text-white/60 hover:text-white" : "opacity-60 hover:opacity-100"
-        }`}
+        className="text-lg leading-none flex-shrink-0 transition text-white/60 hover:text-white"
       >
         ×
       </button>
