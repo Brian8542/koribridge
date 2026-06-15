@@ -240,3 +240,11 @@ npm test         # Run test suite
 ```
 
 Always run `npm run build` and confirm `Compiled successfully` (zero warnings) before committing.
+
+---
+
+## 로그인 관련 절대 규칙
+
+- `signInWithOAuth` 호출 시 반드시 `redirectTo: window.location.origin + "/home"` 를 포함할 것 — 누락 시 Google OAuth 완료 후 SplashScreen(`/`)으로 복귀해 로그인 화면으로 튕기는 버그 재발.
+- `src/context/AuthContext.js` 와 `src/App.js` 는 절대 수정 금지.
+- `profile === null && !loading` 조건 절대 변경 금지 — 이 조건이 프로필 미완성 유저를 `/setup` 으로 보내는 유일한 게이트임.
