@@ -37,7 +37,10 @@ export default function AuthPage() {
     window.localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { scopes: "email profile" },
+      options: {
+        scopes: "email profile",
+        redirectTo: `${window.location.origin}/home`,
+      },
     });
     if (error) setError("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
   };
