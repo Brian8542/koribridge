@@ -8,6 +8,7 @@ import { useLocale } from "../hooks/useLocale";
 import ConfirmModal from "../components/ConfirmModal";
 import { getLanguageLevel } from "../utils/languageLevel";
 import { getMatchPercentage } from "../utils/matching";
+import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { formatRelativeTime } from "../utils/formatters";
 
 const LEVEL_STYLE = {
@@ -132,14 +133,14 @@ export default function ProfileDetailPage() {
 
         <div className="relative z-10">
           <div className="relative inline-block">
-            {profile.avatar_url ? (
+            {isRealAvatar(profile.avatar_url) ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.display_name}
                 className="w-28 h-28 rounded-3xl object-cover border-4 border-white/30 shadow-2xl"
               />
             ) : (
-              <div className="w-28 h-28 rounded-3xl bg-white/20 border-4 border-white/30 flex items-center justify-center text-5xl font-bold text-white shadow-2xl">
+              <div className={`w-28 h-28 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)} border-4 border-white/30 flex items-center justify-center text-5xl font-bold text-white shadow-2xl`}>
                 {profile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}

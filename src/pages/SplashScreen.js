@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useLocale } from "../hooks/useLocale";
+import LanguageSelector from "../components/LanguageSelector";
 
 const IconX = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -160,7 +161,7 @@ export default function SplashScreen() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { locale, t, toggleLocale, levelLabel } = useLocale();
+  const { locale, t, levelLabel } = useLocale();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -278,12 +279,7 @@ export default function SplashScreen() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={toggleLocale}
-              className="text-xs font-bold px-2.5 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition text-zinc-300"
-            >
-              {locale === "ko" ? "EN" : "한"}
-            </button>
+            <LanguageSelector dark />
             <button onClick={goToAuth} className="hidden sm:block px-4 py-2 text-sm font-semibold text-zinc-400 hover:text-white transition-colors duration-200">
               {t.login}
             </button>

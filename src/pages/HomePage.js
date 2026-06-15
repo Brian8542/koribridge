@@ -7,6 +7,8 @@ import { supabase } from "../lib/supabase";
 import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
+import LanguageSelector from "../components/LanguageSelector";
+import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import ProfileCard from "../components/ProfileCard";
 import ProfileSkeleton from "../components/ProfileSkeleton";
@@ -36,7 +38,7 @@ export default function HomePage() {
   const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
   const { darkMode, toggleDarkMode } = useTheme();
-  const { locale, t, toggleLocale, levelLabel } = useLocale();
+  const { locale, t, levelLabel } = useLocale();
 
   const [myProfile, setMyProfile] = useState(null);
   const [profiles, setProfiles] = useState([]);
@@ -392,10 +394,10 @@ export default function HomePage() {
       {myProfile && (
         <div className="card p-5 flex items-center justify-between bg-gradient-to-r from-red-50 to-rose-50 border-red-100/60">
           <div className="flex items-center gap-4">
-            {myProfile.avatar_url ? (
+            {isRealAvatar(myProfile.avatar_url) ? (
               <img src={myProfile.avatar_url} alt={t.tabProfile} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-red-100" />
             ) : (
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-xl font-bold text-white shadow-sm">
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-xl font-bold text-white shadow-sm`}>
                 {myProfile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
@@ -600,10 +602,12 @@ export default function HomePage() {
       <form onSubmit={saveProfile} className="space-y-5">
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
-            {avatarPreview || profileForm.avatar_url ? (
-              <img src={avatarPreview || profileForm.avatar_url} alt={t.tabProfile} className="w-24 h-24 rounded-full object-cover border-2 border-red-100" />
+            {avatarPreview ? (
+              <img src={avatarPreview} alt={t.tabProfile} className="w-24 h-24 rounded-full object-cover border-2 border-red-100" />
+            ) : isRealAvatar(profileForm.avatar_url) ? (
+              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-24 h-24 rounded-full object-cover border-2 border-red-100" />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-red-50 flex items-center justify-center text-4xl font-bold text-red-400 border-2 border-red-100">
+              <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${getAvatarGradient(profileForm.avatar_url, profileForm.display_name)} flex items-center justify-center text-4xl font-bold text-white border-2 border-red-100`}>
                 {profileForm.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
@@ -726,13 +730,7 @@ export default function HomePage() {
             <h1 className="text-2xl font-extrabold text-white tracking-tight">{t.homeTitle}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleLocale}
-              className="text-xs font-bold px-2.5 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition text-white"
-            >
-              {locale === "ko" ? "EN" : "한"}
-            </button>
+            <LanguageSelector dark />
             <button type="button" onClick={toggleDarkMode} className="text-sm text-white/70 hover:text-white transition">
               {darkMode ? "🌙" : "☀️"}
             </button>

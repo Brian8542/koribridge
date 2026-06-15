@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const LOCALE_EVENT = 'koribridge-locale';
-const LEVEL_MAP_EN = { '초급': 'Beginner', '중급': 'Intermediate', '고급': 'Advanced' };
 
 const KO = {
   // common
@@ -487,6 +486,289 @@ const EN = {
   footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
 };
 
+function partial(overrides) { return { ...EN, ...overrides }; }
+
+const JA = partial({
+  confirm: '確認', cancel: 'キャンセル', back: '戻る', save: '保存',
+  loading: '読み込み中...', saving: '保存中...', uploading: 'アップロード中...',
+  retry: '再試行', refresh: '更新', select: '選択', all: 'すべて',
+  close: '閉じる', copy: 'コピー', copied: 'コピーしました',
+  findPartner: 'パートナーを探す', community: 'コミュニティ', learningTools: '学習ツール',
+  login: 'ログイン', logout: 'ログアウト', startFree: '無料で始める',
+  email: 'メールアドレス', password: 'パスワード', confirmPassword: 'パスワード確認',
+  rememberMe: 'ログインを維持', forgotPassword: 'パスワードをお忘れの方',
+  signIn: 'ログイン', signUp: '会員登録', googleSignIn: 'Googleで続ける',
+  tabHome: 'ホーム', tabChat: 'チャット', tabFavorites: 'お気に入り',
+  tabProfile: 'マイプロフィール', tabProfileShort: 'プロフィール',
+  welcome: 'ようこそ、', welcomeUser: 'さん',
+  editProfile: 'プロフィール編集',
+  searchPlaceholder: 'ニックネーム、国籍、言語で検索...',
+  chatBtn: 'チャット', viewProfile: 'プロフィール',
+  nativeLangShort: '母語', learningLangShort: '学習語',
+  matchingLabel: 'マッチ',
+  beginner: '初級', intermediate: '中級', advanced: '上級',
+  heroLine1: '言葉が通じれば', heroLine2: '韓国語が', heroLine3: 'つながります',
+  heroSub: '127カ国のパートナーとリアルタイムで韓国語を練習しましょう。',
+  ctaPrimary: '無料で始める', ctaSecondary: 'パートナーを見る',
+  setupTitle: 'プロフィール登録', setupDesc: 'パートナーと出会う前に自己紹介してください。',
+  avatarLabel: 'プロフィール写真', saveProfileBtn: 'プロフィールを保存',
+  bioSetupPlaceholder: '簡単に自己紹介してください（レベル：初級/中級/上級を含めて）',
+  noChatTitle: 'まだ会話がありません', startChat: '会話を始める',
+  noPartners: 'まだパートナーがいません',
+  splashOnline: 'オンライン', splashOffline: 'オフライン',
+  splashOnlineBadge: '今', splashOnlineMid: '人が韓国語で話し中',
+  r1Country: 'スペイン', r2Country: '日本', r3Country: 'インド',
+  stat1Label: '学習者', stat2Label: '参加国', stat3Label: '平均評価', stat4Label: '達成率',
+  stat2Suffix: 'か国',
+  findPartnerBtn: 'パートナーを探す', browsePartners: 'パートナーを見る',
+  noFavorites: 'お気に入りはまだありません。', morePartners: 'もっとパートナーを見る',
+  noChatDesc: 'パートナーのプロフィールから「会話を始める」を押してください！',
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+const ZH = partial({
+  confirm: '确认', cancel: '取消', back: '返回', save: '保存',
+  loading: '加载中...', saving: '保存中...', uploading: '上传中...',
+  retry: '重试', refresh: '刷新', select: '选择', all: '全部',
+  close: '关闭', copy: '复制', copied: '已复制',
+  findPartner: '寻找伙伴', community: '社区', learningTools: '学习工具',
+  login: '登录', logout: '退出', startFree: '免费开始',
+  email: '邮箱', password: '密码', confirmPassword: '确认密码',
+  rememberMe: '保持登录', forgotPassword: '忘记密码？',
+  signIn: '登录', signUp: '注册', googleSignIn: '使用Google继续',
+  tabHome: '首页', tabChat: '聊天', tabFavorites: '收藏',
+  tabProfile: '我的资料', tabProfileShort: '资料',
+  welcome: '欢迎，', welcomeUser: '',
+  editProfile: '编辑资料',
+  searchPlaceholder: '搜索昵称、国籍、语言...',
+  chatBtn: '聊天', viewProfile: '查看资料',
+  nativeLangShort: '母语', learningLangShort: '学习语',
+  matchingLabel: '匹配',
+  beginner: '初级', intermediate: '中级', advanced: '高级',
+  heroLine1: '语言相通', heroLine2: '韩语', heroLine3: '将我们相连',
+  heroSub: '与127个国家的伙伴实时练习韩语，享受文化交流。',
+  ctaPrimary: '免费开始', ctaSecondary: '浏览伙伴',
+  setupTitle: '注册资料', setupDesc: '在遇见伙伴之前，请先介绍一下自己。',
+  avatarLabel: '头像', saveProfileBtn: '保存资料',
+  bioSetupPlaceholder: '请简单介绍自己（可包含水平：初级/中级/高级）',
+  noChatTitle: '还没有对话', startChat: '开始对话',
+  noPartners: '还没有伙伴',
+  splashOnline: '在线', splashOffline: '离线',
+  splashOnlineBadge: '现在', splashOnlineMid: '人正在用韩语交流',
+  r1Country: '西班牙', r2Country: '日本', r3Country: '印度',
+  stat1Label: '活跃学习者', stat2Label: '国家', stat3Label: '平均评分', stat4Label: '成功率',
+  stat2Suffix: '个',
+  findPartnerBtn: '寻找伙伴', browsePartners: '浏览伙伴',
+  noFavorites: '还没有收藏。', morePartners: '查看更多伙伴',
+  noChatDesc: '前往伙伴的主页，点击"开始对话"发送第一条消息！',
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+const VI = partial({
+  confirm: 'Xác nhận', cancel: 'Hủy', back: 'Quay lại', save: 'Lưu',
+  loading: 'Đang tải...', saving: 'Đang lưu...', uploading: 'Đang tải lên...',
+  retry: 'Thử lại', refresh: 'Làm mới', select: 'Chọn', all: 'Tất cả',
+  close: 'Đóng', copy: 'Sao chép', copied: 'Đã sao chép',
+  findPartner: 'Tìm bạn học', community: 'Cộng đồng', learningTools: 'Công cụ học',
+  login: 'Đăng nhập', logout: 'Đăng xuất', startFree: 'Bắt đầu miễn phí',
+  email: 'Email', password: 'Mật khẩu', confirmPassword: 'Xác nhận mật khẩu',
+  rememberMe: 'Duy trì đăng nhập', forgotPassword: 'Quên mật khẩu?',
+  signIn: 'Đăng nhập', signUp: 'Đăng ký', googleSignIn: 'Tiếp tục với Google',
+  tabHome: 'Trang chủ', tabChat: 'Chat', tabFavorites: 'Yêu thích',
+  tabProfile: 'Hồ sơ của tôi', tabProfileShort: 'Hồ sơ',
+  welcome: 'Chào,', welcomeUser: '',
+  editProfile: 'Sửa hồ sơ',
+  searchPlaceholder: 'Tìm theo tên, quốc tịch, ngôn ngữ...',
+  chatBtn: 'Chat', viewProfile: 'Xem hồ sơ',
+  nativeLangShort: 'Tiếng mẹ đẻ', learningLangShort: 'Đang học',
+  matchingLabel: 'Phù hợp',
+  beginner: 'Sơ cấp', intermediate: 'Trung cấp', advanced: 'Cao cấp',
+  heroLine1: 'Khi ngôn ngữ kết nối,', heroLine2: 'Tiếng Hàn', heroLine3: 'Gắn kết chúng ta',
+  heroSub: 'Luyện tiếng Hàn thời gian thực với bạn từ 127 quốc gia.',
+  ctaPrimary: 'Bắt đầu miễn phí', ctaSecondary: 'Xem bạn học',
+  setupTitle: 'Tạo hồ sơ', setupDesc: 'Hãy giới thiệu bản thân trước khi gặp bạn học.',
+  avatarLabel: 'Ảnh đại diện', saveProfileBtn: 'Lưu hồ sơ',
+  bioSetupPlaceholder: 'Giới thiệu ngắn gọn (gồm trình độ: Sơ cấp/Trung cấp/Cao cấp)',
+  noChatTitle: 'Chưa có cuộc trò chuyện', startChat: 'Bắt đầu trò chuyện',
+  noPartners: 'Chưa có bạn học',
+  splashOnline: 'Trực tuyến', splashOffline: 'Ngoại tuyến',
+  splashOnlineBadge: 'Ngay bây giờ', splashOnlineMid: ' người đang học tiếng Hàn',
+  r1Country: 'Tây Ban Nha', r2Country: 'Nhật Bản', r3Country: 'Ấn Độ',
+  stat1Label: 'Người học', stat2Label: 'Quốc gia', stat3Label: 'Đánh giá TB', stat4Label: 'Tỷ lệ thành công',
+  stat2Suffix: '',
+  findPartnerBtn: 'Tìm bạn học', browsePartners: 'Xem các bạn học',
+  noFavorites: 'Chưa có mục yêu thích.', morePartners: 'Xem thêm bạn học',
+  noChatDesc: 'Vào hồ sơ bạn học và nhấn "Bắt đầu trò chuyện"!',
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+const TH = partial({
+  confirm: 'ยืนยัน', cancel: 'ยกเลิก', back: 'กลับ', save: 'บันทึก',
+  loading: 'กำลังโหลด...', saving: 'กำลังบันทึก...', uploading: 'กำลังอัปโหลด...',
+  retry: 'ลองใหม่', refresh: 'รีเฟรช', select: 'เลือก', all: 'ทั้งหมด',
+  close: 'ปิด', copy: 'คัดลอก', copied: 'คัดลอกแล้ว',
+  findPartner: 'หาพาร์ทเนอร์', community: 'ชุมชน', learningTools: 'เครื่องมือเรียน',
+  login: 'เข้าสู่ระบบ', logout: 'ออกจากระบบ', startFree: 'เริ่มฟรี',
+  email: 'อีเมล', password: 'รหัสผ่าน', confirmPassword: 'ยืนยันรหัสผ่าน',
+  rememberMe: 'จดจำการเข้าสู่ระบบ', forgotPassword: 'ลืมรหัสผ่าน?',
+  signIn: 'เข้าสู่ระบบ', signUp: 'สมัครสมาชิก', googleSignIn: 'ดำเนินการต่อด้วย Google',
+  tabHome: 'หน้าหลัก', tabChat: 'แชท', tabFavorites: 'รายการโปรด',
+  tabProfile: 'โปรไฟล์ของฉัน', tabProfileShort: 'โปรไฟล์',
+  welcome: 'สวัสดี,', welcomeUser: '',
+  editProfile: 'แก้ไขโปรไฟล์',
+  searchPlaceholder: 'ค้นหาตามชื่อ สัญชาติ ภาษา...',
+  chatBtn: 'แชท', viewProfile: 'ดูโปรไฟล์',
+  nativeLangShort: 'ภาษาแม่', learningLangShort: 'กำลังเรียน',
+  matchingLabel: 'จับคู่',
+  beginner: 'ต้น', intermediate: 'กลาง', advanced: 'สูง',
+  heroLine1: 'เมื่อภาษาเชื่อมต่อ,', heroLine2: 'ภาษาเกาหลี', heroLine3: 'เชื่อมเราไว้',
+  heroSub: 'ฝึกภาษาเกาหลีแบบเรียลไทม์กับพาร์ทเนอร์จาก 127 ประเทศ',
+  ctaPrimary: 'เริ่มฟรีเลย', ctaSecondary: 'ดูพาร์ทเนอร์',
+  setupTitle: 'สร้างโปรไฟล์', setupDesc: 'แนะนำตัวเองก่อนพบพาร์ทเนอร์',
+  avatarLabel: 'รูปโปรไฟล์', saveProfileBtn: 'บันทึกโปรไฟล์',
+  bioSetupPlaceholder: 'แนะนำตัวเองสั้นๆ (รวมระดับ: ต้น/กลาง/สูง)',
+  noChatTitle: 'ยังไม่มีการสนทนา', startChat: 'เริ่มสนทนา',
+  noPartners: 'ยังไม่มีพาร์ทเนอร์',
+  splashOnline: 'ออนไลน์', splashOffline: 'ออฟไลน์',
+  splashOnlineBadge: 'ตอนนี้', splashOnlineMid: ' คนกำลังเรียนภาษาเกาหลี',
+  r1Country: 'สเปน', r2Country: 'ญี่ปุ่น', r3Country: 'อินเดีย',
+  stat1Label: 'ผู้เรียน', stat2Label: 'ประเทศ', stat3Label: 'คะแนนเฉลี่ย', stat4Label: 'อัตราสำเร็จ',
+  stat2Suffix: '',
+  findPartnerBtn: 'หาพาร์ทเนอร์', browsePartners: 'ดูพาร์ทเนอร์',
+  noFavorites: 'ยังไม่มีรายการโปรด', morePartners: 'ดูพาร์ทเนอร์เพิ่มเติม',
+  noChatDesc: 'ไปที่โปรไฟล์ของพาร์ทเนอร์และกด "เริ่มสนทนา"!',
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+const ES = partial({
+  confirm: 'Confirmar', cancel: 'Cancelar', back: 'Volver', save: 'Guardar',
+  loading: 'Cargando...', saving: 'Guardando...', uploading: 'Subiendo...',
+  retry: 'Reintentar', refresh: 'Actualizar', select: 'Seleccionar', all: 'Todo',
+  close: 'Cerrar', copy: 'Copiar', copied: 'Copiado',
+  findPartner: 'Buscar pareja', community: 'Comunidad', learningTools: 'Herramientas',
+  login: 'Iniciar sesión', logout: 'Cerrar sesión', startFree: 'Comenzar gratis',
+  email: 'Correo electrónico', password: 'Contraseña', confirmPassword: 'Confirmar contraseña',
+  rememberMe: 'Mantener sesión', forgotPassword: '¿Olvidaste tu contraseña?',
+  signIn: 'Iniciar sesión', signUp: 'Registrarse', googleSignIn: 'Continuar con Google',
+  tabHome: 'Inicio', tabChat: 'Chat', tabFavorites: 'Favoritos',
+  tabProfile: 'Mi perfil', tabProfileShort: 'Perfil',
+  welcome: 'Bienvenido,', welcomeUser: '',
+  editProfile: 'Editar perfil',
+  searchPlaceholder: 'Buscar por nombre, nacionalidad, idioma...',
+  chatBtn: 'Chatear', viewProfile: 'Ver perfil',
+  nativeLangShort: 'Nativo', learningLangShort: 'Aprendiendo',
+  matchingLabel: 'Compat.',
+  beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado',
+  heroLine1: 'Cuando las palabras', heroLine2: 'el coreano', heroLine3: 'nos une',
+  heroSub: 'Practica coreano en tiempo real con compañeros de 127 países.',
+  ctaPrimary: 'Comenzar gratis', ctaSecondary: 'Ver compañeros',
+  setupTitle: 'Crear perfil', setupDesc: 'Preséntate antes de conocer a tus compañeros.',
+  avatarLabel: 'Foto de perfil', saveProfileBtn: 'Guardar perfil',
+  bioSetupPlaceholder: 'Preséntate (incluye nivel: Principiante/Intermedio/Avanzado)',
+  noChatTitle: 'Sin conversaciones aún', startChat: 'Iniciar conversación',
+  noPartners: 'Sin compañeros aún',
+  splashOnline: 'En línea', splashOffline: 'Desconectado',
+  splashOnlineBadge: 'Ahora mismo', splashOnlineMid: ' personas aprenden coreano',
+  r1Country: 'España', r2Country: 'Japón', r3Country: 'India',
+  stat1Label: 'Estudiantes', stat2Label: 'Países', stat3Label: 'Calificación', stat4Label: 'Éxito',
+  stat2Suffix: '',
+  findPartnerBtn: 'Buscar compañeros', browsePartners: 'Ver compañeros',
+  noFavorites: 'Sin favoritos aún.', morePartners: 'Ver más compañeros',
+  noChatDesc: 'Visita el perfil de un compañero y toca "Iniciar conversación"!',
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+const PT = partial({
+  confirm: 'Confirmar', cancel: 'Cancelar', back: 'Voltar', save: 'Salvar',
+  loading: 'Carregando...', saving: 'Salvando...', uploading: 'Enviando...',
+  retry: 'Tentar novamente', refresh: 'Atualizar', select: 'Selecionar', all: 'Tudo',
+  close: 'Fechar', copy: 'Copiar', copied: 'Copiado',
+  findPartner: 'Buscar parceiro', community: 'Comunidade', learningTools: 'Ferramentas',
+  login: 'Entrar', logout: 'Sair', startFree: 'Começar grátis',
+  email: 'E-mail', password: 'Senha', confirmPassword: 'Confirmar senha',
+  rememberMe: 'Manter conectado', forgotPassword: 'Esqueceu a senha?',
+  signIn: 'Entrar', signUp: 'Cadastrar', googleSignIn: 'Continuar com Google',
+  tabHome: 'Início', tabChat: 'Chat', tabFavorites: 'Favoritos',
+  tabProfile: 'Meu perfil', tabProfileShort: 'Perfil',
+  welcome: 'Bem-vindo,', welcomeUser: '',
+  editProfile: 'Editar perfil',
+  searchPlaceholder: 'Buscar por nome, nacionalidade, idioma...',
+  chatBtn: 'Conversar', viewProfile: 'Ver perfil',
+  nativeLangShort: 'Nativo', learningLangShort: 'Aprendendo',
+  matchingLabel: 'Compat.',
+  beginner: 'Iniciante', intermediate: 'Intermediário', advanced: 'Avançado',
+  heroLine1: 'Quando as palavras', heroLine2: 'o coreano', heroLine3: 'nos conecta',
+  heroSub: 'Pratique coreano em tempo real com parceiros de 127 países.',
+  ctaPrimary: 'Começar grátis', ctaSecondary: 'Ver parceiros',
+  setupTitle: 'Criar perfil', setupDesc: 'Apresente-se antes de conhecer parceiros.',
+  avatarLabel: 'Foto de perfil', saveProfileBtn: 'Salvar perfil',
+  bioSetupPlaceholder: 'Apresente-se (inclua nível: Iniciante/Intermediário/Avançado)',
+  noChatTitle: 'Nenhuma conversa ainda', startChat: 'Iniciar conversa',
+  noPartners: 'Nenhum parceiro ainda',
+  splashOnline: 'Online', splashOffline: 'Offline',
+  splashOnlineBadge: 'Agora mesmo', splashOnlineMid: ' pessoas aprendendo coreano',
+  r1Country: 'Espanha', r2Country: 'Japão', r3Country: 'Índia',
+  stat1Label: 'Estudantes', stat2Label: 'Países', stat3Label: 'Avaliação', stat4Label: 'Sucesso',
+  stat2Suffix: '',
+  findPartnerBtn: 'Buscar parceiros', browsePartners: 'Ver parceiros',
+  noFavorites: 'Sem favoritos ainda.', morePartners: 'Ver mais parceiros',
+  noChatDesc: 'Visite o perfil de um parceiro e toque em "Iniciar conversa"!',
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+const FR = partial({
+  confirm: 'Confirmer', cancel: 'Annuler', back: 'Retour', save: 'Enregistrer',
+  loading: 'Chargement...', saving: 'Enregistrement...', uploading: 'Téléchargement...',
+  retry: 'Réessayer', refresh: 'Actualiser', select: 'Sélectionner', all: 'Tout',
+  close: 'Fermer', copy: 'Copier', copied: 'Copié',
+  findPartner: 'Trouver un partenaire', community: 'Communauté', learningTools: 'Outils',
+  login: 'Connexion', logout: 'Déconnexion', startFree: 'Commencer gratuitement',
+  email: 'E-mail', password: 'Mot de passe', confirmPassword: 'Confirmer le mot de passe',
+  rememberMe: 'Rester connecté', forgotPassword: 'Mot de passe oublié ?',
+  signIn: 'Se connecter', signUp: "S'inscrire", googleSignIn: 'Continuer avec Google',
+  tabHome: 'Accueil', tabChat: 'Chat', tabFavorites: 'Favoris',
+  tabProfile: 'Mon profil', tabProfileShort: 'Profil',
+  welcome: 'Bienvenue,', welcomeUser: '',
+  editProfile: 'Modifier le profil',
+  searchPlaceholder: 'Rechercher par nom, nationalité, langue...',
+  chatBtn: 'Discuter', viewProfile: 'Voir le profil',
+  nativeLangShort: 'Natif', learningLangShort: 'Apprentissage',
+  matchingLabel: 'Compat.',
+  beginner: 'Débutant', intermediate: 'Intermédiaire', advanced: 'Avancé',
+  heroLine1: 'Quand les mots', heroLine2: 'le coréen', heroLine3: 'nous relie',
+  heroSub: 'Pratiquez le coréen en temps réel avec des partenaires de 127 pays.',
+  ctaPrimary: 'Commencer gratuitement', ctaSecondary: 'Voir les partenaires',
+  setupTitle: 'Créer un profil', setupDesc: 'Présentez-vous avant de rencontrer des partenaires.',
+  avatarLabel: 'Photo de profil', saveProfileBtn: 'Enregistrer le profil',
+  bioSetupPlaceholder: 'Présentez-vous (niveau: Débutant/Intermédiaire/Avancé)',
+  noChatTitle: 'Pas encore de conversations', startChat: 'Commencer une conversation',
+  noPartners: 'Pas encore de partenaires',
+  splashOnline: 'En ligne', splashOffline: 'Hors ligne',
+  splashOnlineBadge: 'En ce moment', splashOnlineMid: ' personnes apprennent le coréen',
+  r1Country: 'Espagne', r2Country: 'Japon', r3Country: 'Inde',
+  stat1Label: 'Apprenants', stat2Label: 'Pays', stat3Label: 'Note moyenne', stat4Label: 'Réussite',
+  stat2Suffix: '',
+  findPartnerBtn: 'Trouver des partenaires', browsePartners: 'Voir les partenaires',
+  noFavorites: 'Pas encore de favoris.', morePartners: 'Voir plus de partenaires',
+  noChatDesc: "Visitez le profil d'un partenaire et appuyez sur \"Commencer une conversation\"!",
+  footerMade: 'Made with ❤️ for Korean culture lovers worldwide',
+});
+
+function getTranslation(code) {
+  switch (code) {
+    case 'ko': return KO;
+    case 'en': return EN;
+    case 'ja': return JA;
+    case 'zh': return ZH;
+    case 'vi': return VI;
+    case 'th': return TH;
+    case 'es': return ES;
+    case 'pt': return PT;
+    case 'fr': return FR;
+    default: return EN;
+  }
+}
+
 export function useLocale() {
   const [locale, setLocale] = useState(() => {
     try { return localStorage.getItem('locale') || 'ko'; } catch { return 'ko'; }
@@ -498,19 +780,30 @@ export function useLocale() {
     return () => window.removeEventListener(LOCALE_EVENT, handler);
   }, []);
 
-  const toggleLocale = () => {
-    const next = locale === 'ko' ? 'en' : 'ko';
-    setLocale(next);
-    try { localStorage.setItem('locale', next); } catch {}
-    window.dispatchEvent(new CustomEvent(LOCALE_EVENT, { detail: next }));
-  };
+  const changeLocale = useCallback((code) => {
+    setLocale(code);
+    try { localStorage.setItem('locale', code); } catch {}
+    window.dispatchEvent(new CustomEvent(LOCALE_EVENT, { detail: code }));
+  }, []);
 
-  const t = locale === 'ko' ? KO : EN;
+  const toggleLocale = useCallback(() => {
+    setLocale((prev) => {
+      const next = prev === 'ko' ? 'en' : 'ko';
+      try { localStorage.setItem('locale', next); } catch {}
+      window.dispatchEvent(new CustomEvent(LOCALE_EVENT, { detail: next }));
+      return next;
+    });
+  }, []);
 
-  const levelLabel = (level) => {
-    if (locale === 'ko') return level;
-    return LEVEL_MAP_EN[level] || level;
-  };
+  const t = getTranslation(locale);
 
-  return { locale, t, toggleLocale, levelLabel };
+  const levelLabel = useCallback((level) => {
+    const trans = getTranslation(locale);
+    if (level === '초급') return trans.beginner;
+    if (level === '중급') return trans.intermediate;
+    if (level === '고급') return trans.advanced;
+    return level;
+  }, [locale]);
+
+  return { locale, t, toggleLocale, changeLocale, levelLabel };
 }

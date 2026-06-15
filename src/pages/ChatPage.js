@@ -9,6 +9,7 @@ import { useLocale } from "../hooks/useLocale";
 import ConfirmModal from "../components/ConfirmModal";
 import { formatTime } from "../utils/formatters";
 import { startChat } from "../utils/analytics";
+import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 
 function sortMsgs(msgs) {
   return [...msgs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -325,10 +326,10 @@ export default function ChatPage() {
           {t.backBtn}
         </button>
         <button onClick={() => navigate("/profile/" + partner.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-          {partner.avatar_url ? (
+          {isRealAvatar(partner.avatar_url) ? (
             <img src={partner.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border-2 border-white/30 flex-shrink-0" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
+            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarGradient(partner.avatar_url, partner.id)} flex items-center justify-center text-sm font-bold text-white flex-shrink-0`}>
               {partner.display_name?.[0]?.toUpperCase() || "?"}
             </div>
           )}

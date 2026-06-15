@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../hooks/useLocale";
+import { AVATAR_GRADIENTS, getAvatarGradient } from "../utils/avatarUtils";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -39,6 +40,7 @@ export default function ProfileSetupPage() {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef(null);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -68,7 +70,15 @@ export default function ProfileSetupPage() {
     }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
+    setForm((prev) => ({ ...prev, avatar_url: "" }));
     setError("");
+  };
+
+  const handleGradientSelect = (idx) => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setForm((prev) => ({ ...prev, avatar_url: `gradient:${idx}` }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const uploadAvatar = async () => {
@@ -149,23 +159,41 @@ export default function ProfileSetupPage() {
       <div className="px-4 py-6 max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          <div className="card flex flex-col items-center gap-3 py-7">
+          <div className="card flex flex-col items-center gap-4 py-8">
             <div className="relative">
               {avatarPreview ? (
-                <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-200 shadow-lg" />
+                <img src={avatarPreview} alt="preview" className="w-32 h-32 rounded-3xl object-cover ring-4 ring-red-200 shadow-xl" />
+              ) : form.avatar_url.startsWith("gradient:") ? (
+                <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${getAvatarGradient(form.avatar_url)} flex items-center justify-center text-6xl font-black text-white shadow-xl`}>
+                  {form.display_name?.[0]?.toUpperCase() || "?"}
+                </div>
               ) : (
-                <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-5xl font-bold text-white shadow-lg">
-                  {form.display_name?.[0]?.toUpperCase() || "📷"}
+                <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-zinc-200 to-zinc-300 flex items-center justify-center shadow-lg">
+                  <span className="text-4xl opacity-60">📷</span>
                 </div>
               )}
               <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center cursor-pointer shadow-xl border-2 border-white">
                 <span className="text-white text-lg leading-none font-bold">+</span>
-                <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
+                <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-gray-700">{t.avatarLabel}</p>
               <p className="text-xs text-gray-400 mt-0.5">{t.avatarLimit}</p>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center" style={{ maxWidth: 288 }}>
+              {AVATAR_GRADIENTS.map((gradient, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleGradientSelect(idx)}
+                  className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
+                    form.avatar_url === `gradient:${idx}` && !avatarPreview
+                      ? "ring-2 ring-offset-2 ring-red-500 scale-110 shadow-md"
+                      : "opacity-70 hover:opacity-100 hover:scale-110"
+                  }`}
+                />
+              ))}
             </div>
           </div>
 

@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { getMatchScore } from "../utils/matching";
 import { useLocale } from "../hooks/useLocale";
+import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 
 const LEVEL_STYLE = {
   고급: "bg-blue-100 text-blue-700",
@@ -33,15 +34,15 @@ function ProfileCard({
       <div className="p-5">
         <div className="flex items-start gap-4">
           <div className="relative flex-shrink-0">
-            {profile.avatar_url ? (
+            {isRealAvatar(profile.avatar_url) ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.display_name}
                 loading="lazy"
-                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-gray-100 group-hover:ring-red-100 transition-all"
+                className="w-20 h-20 rounded-2xl object-cover ring-2 ring-gray-100 group-hover:ring-red-100 transition-all"
               />
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center text-2xl text-white font-bold shadow-sm">
+              <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-3xl text-white font-black shadow-md`}>
                 {profile.display_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
