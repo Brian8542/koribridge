@@ -20,6 +20,8 @@ import ConfirmModal from "../components/ConfirmModal";
 import EmptyState from "../components/EmptyState";
 import { getMatchScore } from "../utils/matching";
 import { pageView } from "../utils/analytics";
+import { usePushNotifications } from "../hooks/usePushNotifications";
+import { sendPushNotification } from "../utils/pushNotifications";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -105,6 +107,7 @@ export default function HomePage() {
   const [loadError, setLoadError] = useState(false);
   const [loadRetryKey, setLoadRetryKey] = useState(0);
 
+  const { permission: pushPermission, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications(user?.id);
   const notifGranted = useRef(false);
   const bottomNavRef = useRef(null);
 
@@ -404,6 +407,21 @@ export default function HomePage() {
       if (!error) {
         setFavoriteIds((prev) => new Set(prev).add(targetId));
         showToast(t.liked, "success");
+        const { data: mutual } = await supabase
+          .from("favorites")
+          .select("id")
+          .eq("user_id", targetId)
+          .eq("partner_id", user.id)
+          .maybeSingle();
+        if (mutual) {
+          const senderName = myProfile?.display_name || "";
+          sendPushNotification({
+            receiverId: targetId,
+            title: t.pushMatchTitle,
+            body: `${senderName}${t.pushMatchBody}`,
+            url: `/chat/${user.id}`,
+          });
+        }
       }
     }
     setProfiles((prev) => prev.filter((p) => p.id !== targetId));
@@ -763,6 +781,34 @@ export default function HomePage() {
                 profileForm.is_public ? "translate-x-5" : "translate-x-0"
               }`} />
             </button>
+          </div>
+        </div>
+
+        <div className="card">
+          <p className="text-sm font-bold text-gray-700 mb-3">{t.pushNotifications}</p>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-700">{t.pushMessages}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{
+                pushPermission === "denied" ? t.pushDenied : t.pushMessagesDesc
+              }</p>
+            </div>
+            {pushPermission !== "denied" && (
+              <button
+                type="button"
+                role="switch"
+                aria-checked={pushSubscribed}
+                disabled={pushLoading}
+                onClick={pushSubscribed ? unsubscribePush : subscribePush}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
+                  pushSubscribed ? "bg-red-600" : "bg-gray-200"
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  pushSubscribed ? "translate-x-5" : "translate-x-0"
+                }`} />
+              </button>
+            )}
           </div>
         </div>
 

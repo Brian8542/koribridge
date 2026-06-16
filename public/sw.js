@@ -17,6 +17,31 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+self.addEventListener("push", (event) => {
+  const data = event.data?.json() || {};
+  const { title, body, url, icon } = data;
+  event.waitUntil(
+    self.registration.showNotification(title || "KoriBridge", {
+      body: body || "",
+      icon: icon || "/logo192.png",
+      badge: "/favicon.ico",
+      data: { url: url || "/home" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/home";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      const match = windowClients.find((c) => c.url.includes(url));
+      if (match) return match.focus();
+      return clients.openWindow(url);
+    })
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   // Supabase API, 번역 API는 캐시하지 않음
   const url = new URL(event.request.url);

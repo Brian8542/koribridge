@@ -11,6 +11,7 @@ import ReportModal from "../components/ReportModal";
 import { formatTime } from "../utils/formatters";
 import { startChat } from "../utils/analytics";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
+import { sendPushNotification } from "../utils/pushNotifications";
 
 const MSG_SELECT =
   "id, sender_id, receiver_id, content, image_url, voice_url, message_type, created_at, read_at, edited_at";
@@ -456,7 +457,15 @@ export default function ChatPage() {
     try {
       const { data, error } = await supabase.from("messages")
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: msg }]).select();
-      if (!error && data?.length > 0) addMessage(data[0]);
+      if (!error && data?.length > 0) {
+        addMessage(data[0]);
+        sendPushNotification({
+          receiverId: partnerId,
+          title: t.pushMsgTitle,
+          body: `${partner?.display_name || ""}: ${msg.slice(0, 80)}`,
+          url: `/chat/${user.id}`,
+        });
+      }
     } catch {
       showToast(t.msgSendFailed, "error");
     } finally {

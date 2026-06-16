@@ -140,6 +140,16 @@ const KO = {
   correctDone: '교정 제안이 전달됐습니다.', correctFailed: '교정 제안 전송에 실패했습니다.',
   correctBadge: '교정 제안이 있어요', correctHide: '교정 숨기기',
   correctOriginal: '원문', correctSuggested: '교정',
+  // push notifications
+  pushNotifications: '푸시 알림',
+  pushMessages: '새 메시지 알림',
+  pushMessagesDesc: '새 메시지가 도착하면 알림을 받습니다.',
+  pushEnabled: '알림 켜짐',
+  pushDisabled: '알림 꺼짐',
+  pushDenied: '브라우저에서 알림을 차단했습니다. 브라우저 설정에서 허용해 주세요.',
+  pushMatchTitle: 'KoriBridge — 새 매칭! 💘',
+  pushMatchBody: '님이 서로 관심을 보이고 있어요. 대화를 시작해보세요!',
+  pushMsgTitle: 'KoriBridge — 새 메시지',
   // profile setup
   setupTitle: '프로필 등록', setupDesc: '파트너를 만나기 전에 나를 소개해 주세요.',
   avatarLabel: '프로필 사진',
@@ -399,6 +409,16 @@ const EN = {
   correctDone: 'Correction sent!', correctFailed: 'Failed to send correction.',
   correctBadge: 'Correction available', correctHide: 'Hide correction',
   correctOriginal: 'Original', correctSuggested: 'Suggested',
+  // push notifications
+  pushNotifications: 'Push Notifications',
+  pushMessages: 'New message alerts',
+  pushMessagesDesc: 'Get notified when a new message arrives.',
+  pushEnabled: 'Notifications on',
+  pushDisabled: 'Notifications off',
+  pushDenied: 'Notifications are blocked in your browser. Please enable them in browser settings.',
+  pushMatchTitle: 'KoriBridge — New Match! 💘',
+  pushMatchBody: ' is also interested in you. Start a conversation!',
+  pushMsgTitle: 'KoriBridge — New Message',
   // profile setup
   setupTitle: 'Create Profile', setupDesc: 'Tell us about yourself before meeting partners.',
   avatarLabel: 'Profile Photo',
