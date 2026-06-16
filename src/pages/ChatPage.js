@@ -7,6 +7,7 @@ import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
 import ConfirmModal from "../components/ConfirmModal";
+import ReportModal from "../components/ReportModal";
 import { formatTime } from "../utils/formatters";
 import { startChat } from "../utils/analytics";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
@@ -36,6 +37,7 @@ export default function ChatPage() {
   const [editContent, setEditContent] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [reportOpen, setReportOpen] = useState(false);
   const [hasOlderMsgs, setHasOlderMsgs] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -343,6 +345,15 @@ export default function ChatPage() {
             </div>
           </div>
         </button>
+        <button
+          onClick={() => setReportOpen(true)}
+          className="text-white/60 hover:text-white flex-shrink-0 p-2 transition"
+          title={t.reportUser}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+          </svg>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
@@ -519,6 +530,12 @@ export default function ChatPage() {
           danger
           onConfirm={confirmDeleteMessage}
           onCancel={() => setDeleteConfirmId(null)}
+        />
+      )}
+      {reportOpen && partner && (
+        <ReportModal
+          targetId={partner.id}
+          onClose={() => setReportOpen(false)}
         />
       )}
     </div>

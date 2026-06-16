@@ -10,6 +10,7 @@ import { useLocale } from "../hooks/useLocale";
 import LanguageSelector from "../components/LanguageSelector";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import DeleteAccountModal from "../components/DeleteAccountModal";
+import SwipeCard from "../components/SwipeCard";
 import ProfileCard from "../components/ProfileCard";
 import ProfileSkeleton from "../components/ProfileSkeleton";
 import ProfileFilters from "../components/ProfileFilters";
@@ -387,6 +388,15 @@ export default function HomePage() {
     showToast(t.reportDone, "success");
   };
 
+  const handleSwipe = async (targetId, direction) => {
+    if (direction === "right") {
+      const { error } = await supabase.from("likes").insert({ from_id: user.id, to_id: targetId });
+      if (!error) showToast(t.liked, "success");
+    }
+    // Remove from UI list temporarily
+    setProfiles(prev => prev.filter(p => p.id !== targetId));
+  };
+
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   const renderHomeContent = () => (
@@ -507,6 +517,40 @@ export default function HomePage() {
           <div className="text-center mt-6">
             <button onClick={() => setVisibleCount(c => c + 12)} className="btn-secondary px-8 py-3 text-sm w-auto">
               {t.loadMore} ({filteredProfiles.length - visibleCount}{locale === 'ko' ? t.moreSuffix : t.moreSuffix})
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderSwipeContent = () => (
+    <div className="relative h-[70vh] flex flex-col items-center justify-center overflow-hidden px-4">
+      <div className="w-full max-w-sm mb-6 text-center">
+        <h2 className="text-lg font-extrabold text-gray-900">{t.tabSwipe}</h2>
+        <p className="text-sm text-gray-500">{t.swipeDesc}</p>
+      </div>
+      
+      <div className="relative w-full h-full flex items-center justify-center">
+        {profilesLoading ? (
+          <div className="animate-pulse w-full max-w-sm aspect-[3/4] bg-gray-200 rounded-3xl" />
+        ) : filteredProfiles.length > 0 ? (
+          filteredProfiles.slice(0, 5).reverse().map((profile) => (
+            <SwipeCard
+              key={profile.id}
+              profile={profile}
+              score={getMatchScore(myProfile, profile).score}
+              onSwipeLeft={() => handleSwipe(profile.id, "left")}
+              onSwipeRight={() => handleSwipe(profile.id, "right")}
+            />
+          ))
+        ) : (
+          <div className="text-center bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+            <p className="text-4xl mb-4">🌏</p>
+            <p className="text-gray-900 font-bold">{t.noMoreSwipe}</p>
+            <p className="text-sm text-gray-500 mt-1">{t.noMoreSwipeDesc}</p>
+            <button onClick={() => setLoadRetryKey(k => k + 1)} className="mt-6 btn-primary px-6 py-2">
+              {t.retry}
             </button>
           </div>
         )}
@@ -757,6 +801,7 @@ export default function HomePage() {
         <div className="flex gap-2 mt-3">
           {[
             { key: "home", label: t.tabHome },
+            { key: "swipe", label: t.tabSwipe },
             { key: "chatlist", label: t.tabChat, badge: totalUnread },
             { key: "favorites", label: t.tabFavorites },
             { key: "profile", label: t.tabProfile },
@@ -778,6 +823,7 @@ export default function HomePage() {
 
       <div className="px-4 py-6 max-w-6xl mx-auto">
         {tab === "home" && renderHomeContent()}
+        {tab === "swipe" && renderSwipeContent()}
         {tab === "favorites" && renderFavoritesContent()}
         {tab === "chatlist" && renderChatListContent()}
         {tab === "profile" && renderProfileContent()}
@@ -787,6 +833,7 @@ export default function HomePage() {
         <nav className="mx-auto flex max-w-6xl items-center justify-around">
           {[
             { key: "home", label: t.tabHome, icon: "🏠" },
+            { key: "swipe", label: t.tabSwipeShort, icon: "🔥" },
             { key: "chatlist", label: t.tabChat, icon: "💬", badge: totalUnread },
             { key: "favorites", label: t.tabFavorites, icon: "⭐" },
             { key: "profile", label: t.tabProfileShort, icon: "👤" },

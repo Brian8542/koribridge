@@ -129,6 +129,7 @@ export default function ProfileSetupPage() {
         bio: form.bio.trim(),
         avatar_url: avatar_url || "",
         interests: form.interests,
+        is_verified: !!user.email_confirmed_at,
       });
 
       if (upsertError) throw upsertError;

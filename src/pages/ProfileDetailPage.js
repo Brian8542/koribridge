@@ -5,11 +5,12 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
-import ConfirmModal from "../components/ConfirmModal";
 import { getLanguageLevel } from "../utils/languageLevel";
 import { getMatchPercentage } from "../utils/matching";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { formatRelativeTime } from "../utils/formatters";
+import ReportModal from "../components/ReportModal";
+import BlockButton from "../components/BlockButton";
 
 const LEVEL_STYLE = {
   고급: "bg-blue-500 text-white",
@@ -27,12 +28,7 @@ export default function ProfileDetailPage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [blockConfirm, setBlockConfirm] = useState(false);
-  const [reportModal, setReportModal] = useState(false);
-  const [reportReason, setReportReason] = useState("");
-  const [reportLoading, setReportLoading] = useState(false);
-  const [reportDone, setReportDone] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -43,44 +39,10 @@ export default function ProfileDetailPage() {
         setProfile(data);
       }
 
-      if (user?.id) {
-        const { data: block } = await supabase
-          .from("blocked_users").select("id")
-          .eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle();
-        setIsBlocked(!!block);
-      }
-
       setLoading(false);
     };
     load();
   }, [id, user, t.profileFetchError]);
-
-  const confirmBlock = async () => {
-    setBlockConfirm(false);
-    if (isBlocked) {
-      const { error: err } = await supabase.from("blocked_users").delete().eq("blocker_id", user.id).eq("blocked_id", id);
-      if (err) { setError(t.unblockFailed); return; }
-      setIsBlocked(false);
-    } else {
-      const { error: err } = await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: id });
-      if (err && err.code !== "23505") { setError(t.blockFailed2); return; }
-      setIsBlocked(true);
-    }
-  };
-
-  const handleReport = async () => {
-    if (!reportReason.trim()) return;
-    setReportLoading(true);
-    const { error: err } = await supabase.from("reports").insert({
-      reporter_id: user.id,
-      reported_id: id,
-      reason: reportReason.trim().slice(0, 1000),
-    });
-    setReportLoading(false);
-    if (err) { setError(t.reportFailed2); return; }
-    setReportDone(true);
-    setReportReason("");
-  };
 
   if (loading) {
     return (
@@ -125,7 +87,7 @@ export default function ProfileDetailPage() {
           {t.backBtn}
         </button>
         <button
-          onClick={() => setReportModal(true)}
+          onClick={() => setIsReportOpen(true)}
           className="absolute top-4 right-4 text-white/60 hover:text-white text-sm transition z-10"
         >
           {t.reportUser}
@@ -151,7 +113,14 @@ export default function ProfileDetailPage() {
             />
           </div>
 
-          <h1 className="text-2xl font-extrabold text-white mt-4">{profile.display_name}</h1>
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <h1 className="text-2xl font-extrabold text-white">{profile.display_name}</h1>
+            {profile.is_verified && (
+              <span className="bg-blue-500 text-white p-1 rounded-full shadow-md" title={t.verifiedUser}>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>
+              </span>
+            )}
+          </div>
           <p className="text-white/70 text-sm mt-0.5">{profile.nationality}</p>
           <p className={`text-sm mt-1 font-semibold ${isOnline ? "text-emerald-300" : "text-white/50"}`}>
             {isOnline ? t.onlineNow : lastActive}
@@ -246,75 +215,21 @@ export default function ProfileDetailPage() {
           {t.startChat}
         </button>
 
-        <button
-          onClick={() => setBlockConfirm(true)}
-          className={`w-full py-3 rounded-2xl text-sm font-semibold transition-all ${
-            isBlocked
-              ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              : "bg-red-50 text-red-600 hover:bg-red-100"
-          }`}
-        >
-          {isBlocked ? t.unblock : t.blockUser}
-        </button>
+        <div className="pt-4 border-t flex flex-col gap-3">
+          <button 
+            onClick={() => setIsReportOpen(true)}
+            className="w-full py-2 text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors"
+          >
+            {t.reportUser}
+          </button>
+          <BlockButton targetId={profile.id} onBlockSuccess={() => navigate("/home")} />
+        </div>
       </div>
 
-      {reportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm">
-            {reportDone ? (
-              <div className="text-center py-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <span className="text-white text-2xl font-bold">✓</span>
-                </div>
-                <p className="font-extrabold text-gray-900 mt-2">{t.reportSuccess}</p>
-                <p className="text-sm text-gray-500 mt-1">{t.reportSuccessDesc}</p>
-                <button
-                  onClick={() => { setReportModal(false); setReportDone(false); }}
-                  className="mt-5 btn-primary w-full py-2.5"
-                >
-                  {t.reportOkBtn}
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-lg font-extrabold text-gray-900 mb-1">{profile.display_name} {t.reportUser}</h3>
-                <p className="text-sm text-gray-500 mb-4">{t.reportModalDesc}</p>
-                <textarea
-                  rows={4}
-                  className="input-field resize-none text-sm w-full"
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  placeholder={t.reportPlaceholder}
-                />
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={() => { setReportModal(false); setReportReason(""); }}
-                    className="flex-1 py-2.5 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition"
-                  >
-                    {t.cancel}
-                  </button>
-                  <button
-                    onClick={handleReport}
-                    disabled={reportLoading || !reportReason.trim()}
-                    className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-red-600 to-rose-500 text-white text-sm font-bold disabled:opacity-50 hover:shadow-md transition-all"
-                  >
-                    {reportLoading ? t.reporting : t.reportBtn}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {blockConfirm && (
-        <ConfirmModal
-          message={isBlocked ? `${profile.display_name}${t.unblockConfirmMsg}` : `${profile.display_name}${t.blockConfirmMsg}`}
-          confirmLabel={isBlocked ? t.unblockConfirmLabel : t.blockConfirmLabel}
-          cancelLabel={t.cancel}
-          danger={!isBlocked}
-          onConfirm={confirmBlock}
-          onCancel={() => setBlockConfirm(false)}
+      {isReportOpen && (
+        <ReportModal
+          targetId={profile.id}
+          onClose={() => setIsReportOpen(false)}
         />
       )}
     </div>

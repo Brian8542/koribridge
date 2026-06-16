@@ -38,6 +38,7 @@ const KO = {
   // home tabs
   homeTitle: 'KoriBridge',
   tabHome: '홈', tabChat: '채팅', tabFavorites: '즐겨찾기',
+  tabSwipe: '둘러보기', tabSwipeShort: '탐색',
   tabProfile: '내 프로필', tabProfileShort: '프로필',
   welcome: '환영합니다,', welcomeUser: '님',
   editProfile: '프로필 수정',
@@ -53,6 +54,9 @@ const KO = {
   loadMore: '더 보기', moreSuffix: '명 더',
   networkError: '데이터를 불러오지 못했습니다',
   networkErrorDesc: '네트워크 연결을 확인해 주세요.',
+  swipeDesc: '오른쪽 스와이프: 좋아요 · 왼쪽 스와이프: 패스',
+  noMoreSwipe: '더 이상 파트너가 없어요',
+  noMoreSwipeDesc: '잠시 후 다시 확인해 주세요',
   // favorites
   favorites: '즐겨찾기', favoritesDesc: '자주 연락하는 파트너를 모아보세요.',
   morePartners: '더 많은 파트너 보기',
@@ -142,6 +146,7 @@ const KO = {
   commonInterestsSuffix: '개의 공통 관심사!',
   startChat: '대화 시작하기',
   unblock: '차단 해제', blockUser: '차단하기', reportUser: '신고',
+  verifiedUser: '이메일 인증 완료',
   reportModalDesc: '신고 사유를 입력해 주세요.',
   reportPlaceholder: '예: 부적절한 언어 사용, 스팸 등',
   reportSuccess: '신고가 접수됐습니다.', reportSuccessDesc: '검토 후 조치하겠습니다.',
@@ -280,6 +285,7 @@ const EN = {
   // home tabs
   homeTitle: 'KoriBridge',
   tabHome: 'Home', tabChat: 'Chat', tabFavorites: 'Favorites',
+  tabSwipe: 'Discover', tabSwipeShort: 'Discover',
   tabProfile: 'My Profile', tabProfileShort: 'Profile',
   welcome: 'Welcome,', welcomeUser: '',
   editProfile: 'Edit Profile',
@@ -295,6 +301,9 @@ const EN = {
   loadMore: 'Show More', moreSuffix: ' more',
   networkError: 'Could not load data',
   networkErrorDesc: 'Please check your network connection.',
+  swipeDesc: 'Swipe right to like · Swipe left to pass',
+  noMoreSwipe: 'No more partners',
+  noMoreSwipeDesc: 'Check back soon',
   // favorites
   favorites: 'Favorites', favoritesDesc: 'Keep frequently contacted partners here.',
   morePartners: 'See more partners',
@@ -384,6 +393,7 @@ const EN = {
   commonInterestsSuffix: ' common interest(s)!',
   startChat: 'Start Conversation',
   unblock: 'Unblock', blockUser: 'Block', reportUser: 'Report',
+  verifiedUser: 'Verified User',
   reportModalDesc: 'Please enter the reason for your report.',
   reportPlaceholder: 'e.g. Inappropriate language, spam, etc.',
   reportSuccess: 'Report submitted.', reportSuccessDesc: 'We will review and take action.',

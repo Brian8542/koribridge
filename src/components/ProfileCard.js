@@ -55,7 +55,15 @@ function ProfileCard({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-1">
-              <div className="min-w-0">
+              <div className="min-w-0 flex items-center gap-1.5">
+                <p className="text-base font-extrabold text-gray-900 truncate">{profile.display_name}</p>
+                {profile.is_verified && (
+                  <svg className="w-4 h-4 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z" />
+                  </svg>
+                )}
+              </div>
+              <div className="min-w-0 hidden"> {/* Backup for formatting */}
                 <p className="text-base font-extrabold text-gray-900 truncate">{profile.display_name}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{profile.nationality}</p>
               </div>
