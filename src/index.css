@@ -7,6 +7,11 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
@@ -17,7 +22,7 @@
   }
 
   body {
-    font-family: "Noto Sans KR", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans KR", "Segoe UI", sans-serif;
     background-color: #09090b; /* zinc-950 */
     color: #fafafa;
     -webkit-font-smoothing: antialiased;
