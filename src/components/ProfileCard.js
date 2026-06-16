@@ -63,11 +63,7 @@ function ProfileCard({
                   </svg>
                 )}
               </div>
-              <div className="min-w-0 hidden"> {/* Backup for formatting */}
-                <p className="text-base font-extrabold text-gray-900 truncate">{profile.display_name}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{profile.nationality}</p>
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
+<div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => onToggleFavorite?.(profile)}

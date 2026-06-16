@@ -8,7 +8,7 @@ import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
 import LanguageSelector from "../components/LanguageSelector";
-import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
+import { isRealAvatar, getAvatarGradient, AVATAR_GRADIENTS } from "../utils/avatarUtils";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import SwipeCard from "../components/SwipeCard";
 import ProfileCard from "../components/ProfileCard";
@@ -17,6 +17,7 @@ import ProfileFilters from "../components/ProfileFilters";
 import ConversationItem from "../components/ConversationItem";
 import StatsBanner from "../components/StatsBanner";
 import ConfirmModal from "../components/ConfirmModal";
+import EmptyState from "../components/EmptyState";
 import { getMatchScore } from "../utils/matching";
 import { pageView } from "../utils/analytics";
 
@@ -32,6 +33,34 @@ const NATIONALITIES = [
 
 const INTERESTS = ["K-pop", "한국 음식", "여행", "드라마", "언어 교환", "게임", "영화", "스포츠"];
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const NAV_ICONS = {
+  home: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
+    </svg>
+  ),
+  swipe: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+    </svg>
+  ),
+  chatlist: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+    </svg>
+  ),
+  favorites: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+    </svg>
+  ),
+  profile: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </svg>
+  ),
+};
 
 export default function HomePage() {
   const { user, signOut } = useAuth();
@@ -81,17 +110,13 @@ export default function HomePage() {
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().then((perm) => {
-        notifGranted.current = perm === "granted";
-      });
+      Notification.requestPermission().then((perm) => { notifGranted.current = perm === "granted"; });
     } else if (Notification.permission === "granted") {
       notifGranted.current = true;
     }
   }, []);
 
-  useEffect(() => {
-    pageView("홈");
-  }, []);
+  useEffect(() => { pageView("홈"); }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -159,13 +184,10 @@ export default function HomePage() {
           msgs?.forEach((message) => {
             const partnerId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
             const current = byPartner.get(partnerId) || { partnerId, lastMessage: message, unreadCount: 0 };
-            if (new Date(message.created_at) > new Date(current.lastMessage.created_at)) {
-              current.lastMessage = message;
-            }
+            if (new Date(message.created_at) > new Date(current.lastMessage.created_at)) current.lastMessage = message;
             if (message.receiver_id === user.id && !message.read_at) current.unreadCount += 1;
             byPartner.set(partnerId, current);
           });
-
           const partnerIds = Array.from(byPartner.keys());
           if (partnerIds.length > 0) {
             const { data: partnerProfiles } = await supabase
@@ -174,10 +196,7 @@ export default function HomePage() {
               .in("id", partnerIds);
             const partnerMap = new Map(partnerProfiles?.map((p) => [p.id, p]));
             const sorted = Array.from(byPartner.values())
-              .map((item) => ({
-                ...item,
-                partner: partnerMap.get(item.partnerId) || { id: item.partnerId, display_name: t.unknownUser },
-              }))
+              .map((item) => ({ ...item, partner: partnerMap.get(item.partnerId) || { id: item.partnerId, display_name: t.unknownUser } }))
               .sort((a, b) => new Date(b.lastMessage.created_at) - new Date(a.lastMessage.created_at));
             setConversations(sorted);
           } else {
@@ -197,26 +216,20 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    const channel = supabase
-      .channel("home-messages")
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${user.id}`,
-      }, (payload) => {
-        const msg = payload.new;
-        if (notifGranted.current && document.visibilityState !== "visible") {
-          new Notification(t.newMsgNotif, { body: msg.content, icon: "/favicon.ico" });
-        }
-        setConversations((prev) => {
-          const partnerId = msg.sender_id;
-          const existing = prev.find((c) => c.partnerId === partnerId);
-          if (existing) {
-            return prev.map((c) =>
-              c.partnerId === partnerId ? { ...c, lastMessage: msg, unreadCount: c.unreadCount + 1 } : c
-            );
+    const channel = supabase.channel("home-messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${user.id}` },
+        (payload) => {
+          const msg = payload.new;
+          if (notifGranted.current && document.visibilityState !== "visible") {
+            new Notification(t.newMsgNotif, { body: msg.content, icon: "/favicon.ico" });
           }
-          return prev;
-        });
-      })
+          setConversations((prev) => {
+            const partnerId = msg.sender_id;
+            const existing = prev.find((c) => c.partnerId === partnerId);
+            if (existing) return prev.map((c) => c.partnerId === partnerId ? { ...c, lastMessage: msg, unreadCount: c.unreadCount + 1 } : c);
+            return prev;
+          });
+        })
       .subscribe();
     return () => supabase.removeChannel(channel);
   }, [user?.id, t.newMsgNotif]);
@@ -239,12 +252,8 @@ export default function HomePage() {
       if (levelFilter && p.language_level !== levelFilter) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
-        if (
-          !p.display_name?.toLowerCase().includes(q) &&
-          !p.nationality?.toLowerCase().includes(q) &&
-          !p.native_language?.toLowerCase().includes(q) &&
-          !p.learning_language?.toLowerCase().includes(q)
-        ) return false;
+        if (!p.display_name?.toLowerCase().includes(q) && !p.nationality?.toLowerCase().includes(q) &&
+          !p.native_language?.toLowerCase().includes(q) && !p.learning_language?.toLowerCase().includes(q)) return false;
       }
       return true;
     });
@@ -276,15 +285,17 @@ export default function HomePage() {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      setProfileError(t.errAvatarType);
-      e.target.value = "";
-      return;
-    }
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) { setProfileError(t.errAvatarType); e.target.value = ""; return; }
     if (file.size > 2 * 1024 * 1024) { setProfileError(t.errAvatarSize); return; }
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
     setProfileError("");
+  };
+
+  const handleGradientSelect = (idx) => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setProfileForm((prev) => ({ ...prev, avatar_url: `gradient:${idx}` }));
   };
 
   const uploadAvatar = async () => {
@@ -324,13 +335,10 @@ export default function HomePage() {
         is_public: profileForm.is_public,
       });
       if (error) throw error;
+      showToast(t.profileSaveBtn, "success");
       setTab("home");
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, display_name, nationality, native_language, learning_language, avatar_url, bio, interests")
-        .neq("id", user.id)
-        .order("created_at", { ascending: false });
-      if (data) setProfiles(data);
+      const { data: myUpdated } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      if (myUpdated) setMyProfile(myUpdated);
     } catch {
       setProfileError(t.saveError);
     } finally {
@@ -346,13 +354,15 @@ export default function HomePage() {
       if (error) { showToast(t.favRemoveFailed, "error"); return; }
       setFavoriteIds((prev) => { const next = new Set(prev); next.delete(profile.id); return next; });
       setFavorites((prev) => prev.filter((item) => item.id !== profile.id));
+      showToast(t.favRemoved, "success");
     } else {
       const { error } = await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
       if (error) { showToast(t.favAddFailed, "error"); return; }
       setFavoriteIds((prev) => new Set(prev).add(profile.id));
       setFavorites((prev) => [...prev, profile]);
+      showToast(t.favAdded, "success");
     }
-  }, [user?.id, favoriteIds, showToast, t.favRemoveFailed, t.favAddFailed]);
+  }, [user?.id, favoriteIds, showToast, t.favRemoveFailed, t.favAddFailed, t.favRemoved, t.favAdded]);
 
   const handleReport = useCallback((profileId, displayName) => {
     setReportModal({ profileId, displayName });
@@ -389,12 +399,14 @@ export default function HomePage() {
   };
 
   const handleSwipe = async (targetId, direction) => {
-    if (direction === "right") {
-      const { error } = await supabase.from("likes").insert({ from_id: user.id, to_id: targetId });
-      if (!error) showToast(t.liked, "success");
+    if (direction === "right" && !favoriteIds.has(targetId)) {
+      const { error } = await supabase.from("favorites").insert({ user_id: user.id, partner_id: targetId });
+      if (!error) {
+        setFavoriteIds((prev) => new Set(prev).add(targetId));
+        showToast(t.liked, "success");
+      }
     }
-    // Remove from UI list temporarily
-    setProfiles(prev => prev.filter(p => p.id !== targetId));
+    setProfiles((prev) => prev.filter((p) => p.id !== targetId));
   };
 
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
@@ -402,23 +414,23 @@ export default function HomePage() {
   const renderHomeContent = () => (
     <div className="space-y-8">
       {myProfile && (
-        <div className="card p-5 flex items-center justify-between bg-gradient-to-r from-red-50 to-rose-50 border-red-100/60">
-          <div className="flex items-center gap-4">
+        <div className="card p-4 flex items-center gap-4 bg-gradient-to-r from-red-50 to-rose-50 border-red-100/60">
+          <div className="flex-shrink-0">
             {isRealAvatar(myProfile.avatar_url) ? (
               <img src={myProfile.avatar_url} alt={t.tabProfile} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-red-100" />
             ) : (
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-xl font-bold text-white shadow-sm`}>
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-xl font-bold text-white`}>
                 {myProfile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
-            <div>
-              <p className="font-extrabold text-gray-900">{myProfile.display_name}</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {myProfile.nationality} · {myProfile.native_language} → {myProfile.learning_language}
-              </p>
-            </div>
           </div>
-          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm w-auto">
+          <div className="flex-1 min-w-0">
+            <p className="font-extrabold text-gray-900 truncate">{myProfile.display_name}</p>
+            <p className="text-xs text-gray-500 mt-0.5 truncate">
+              {myProfile.nationality} · {myProfile.native_language} → {myProfile.learning_language}
+            </p>
+          </div>
+          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm w-auto flex-shrink-0">
             {t.editProfile}
           </button>
         </div>
@@ -462,42 +474,36 @@ export default function HomePage() {
       <div>
         <p className="text-base font-extrabold text-gray-900 mb-4">
           {t.allPartners}{" "}
-          <span className="text-rose-500">({filteredProfiles.length}{locale === 'ko' ? t.people : ''})</span>
+          <span className="text-rose-500">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
         </p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
             Array.from({ length: 6 }).map((_, i) => <ProfileSkeleton key={i} />)
           ) : loadError ? (
-            <div className="card text-center py-20 col-span-full">
-              <p className="text-4xl mb-4">📡</p>
-              <p className="text-gray-900 font-semibold">{t.networkError}</p>
-              <p className="text-sm text-gray-500 mt-1">{t.networkErrorDesc}</p>
-              <button onClick={() => setLoadRetryKey((k) => k + 1)} className="mt-5 btn-primary px-6 py-2.5 text-sm">
-                {t.retry}
-              </button>
-            </div>
+            <EmptyState
+              icon="📡"
+              title={t.networkError}
+              desc={t.networkErrorDesc}
+              action={() => setLoadRetryKey((k) => k + 1)}
+              actionLabel={t.retry}
+            />
           ) : filteredProfiles.length === 0 ? (
             nationalityFilter || languageFilter || levelFilter || searchQuery.trim() ? (
-              <div className="card text-center py-20 col-span-full border-dashed border-2">
-                <div className="text-4xl mb-4">🔍</div>
-                <p className="text-gray-700 font-semibold">{t.noFilterPartners}</p>
-                <p className="text-xs text-gray-400 mt-1">{t.noFilterPartnersDesc}</p>
-                <button
-                  onClick={() => { setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter(""); }}
-                  className="mt-6 inline-flex items-center gap-1.5 text-red-600 text-sm font-bold hover:underline"
-                >
-                  {t.resetFilters}
-                </button>
-              </div>
+              <EmptyState
+                icon="🔍"
+                title={t.noFilterPartners}
+                desc={t.noFilterPartnersDesc}
+                action={() => { setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter(""); }}
+                actionLabel={t.resetFilters}
+              />
             ) : (
-              <div className="card text-center py-20 col-span-full">
-                <div className="text-5xl mb-4">🌏</div>
-                <p className="text-gray-900 font-semibold text-lg">{t.noPartners}</p>
-                <p className="text-sm text-gray-500 mt-2 leading-relaxed">{t.noPartnersDesc}</p>
-                <button onClick={() => setTab("profile")} className="mt-5 btn-primary px-6 py-2.5 text-sm">
-                  {t.editProfile}
-                </button>
-              </div>
+              <EmptyState
+                icon="🌏"
+                title={t.noPartners}
+                desc={t.noPartnersDesc}
+                action={() => setTab("profile")}
+                actionLabel={t.editProfile}
+              />
             )
           ) : (
             filteredProfiles.slice(0, visibleCount).map((profile) => (
@@ -515,8 +521,8 @@ export default function HomePage() {
         </div>
         {filteredProfiles.length > visibleCount && (
           <div className="text-center mt-6">
-            <button onClick={() => setVisibleCount(c => c + 12)} className="btn-secondary px-8 py-3 text-sm w-auto">
-              {t.loadMore} ({filteredProfiles.length - visibleCount}{locale === 'ko' ? t.moreSuffix : t.moreSuffix})
+            <button onClick={() => setVisibleCount((c) => c + 12)} className="btn-secondary px-8 py-3 text-sm w-auto">
+              {t.loadMore} ({filteredProfiles.length - visibleCount}{t.moreSuffix})
             </button>
           </div>
         )}
@@ -525,13 +531,12 @@ export default function HomePage() {
   );
 
   const renderSwipeContent = () => (
-    <div className="relative h-[70vh] flex flex-col items-center justify-center overflow-hidden px-4">
+    <div className="flex flex-col items-center min-h-[65vh]">
       <div className="w-full max-w-sm mb-6 text-center">
-        <h2 className="text-lg font-extrabold text-gray-900">{t.tabSwipe}</h2>
-        <p className="text-sm text-gray-500">{t.swipeDesc}</p>
+        <h2 className="text-xl font-extrabold text-gray-900">{t.tabSwipe}</h2>
+        <p className="text-sm text-gray-400 mt-1">{t.swipeDesc}</p>
       </div>
-      
-      <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative w-full flex-1 flex items-center justify-center">
         {profilesLoading ? (
           <div className="animate-pulse w-full max-w-sm aspect-[3/4] bg-gray-200 rounded-3xl" />
         ) : filteredProfiles.length > 0 ? (
@@ -545,39 +550,43 @@ export default function HomePage() {
             />
           ))
         ) : (
-          <div className="text-center bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-4xl mb-4">🌏</p>
-            <p className="text-gray-900 font-bold">{t.noMoreSwipe}</p>
-            <p className="text-sm text-gray-500 mt-1">{t.noMoreSwipeDesc}</p>
-            <button onClick={() => setLoadRetryKey(k => k + 1)} className="mt-6 btn-primary px-6 py-2">
-              {t.retry}
-            </button>
-          </div>
+          <EmptyState
+            icon="🌏"
+            title={t.noMoreSwipe}
+            desc={t.noMoreSwipeDesc}
+            action={() => setLoadRetryKey((k) => k + 1)}
+            actionLabel={t.retry}
+          />
         )}
       </div>
     </div>
   );
 
   const renderFavoritesContent = () => (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">{t.favorites}</h2>
-          <p className="text-sm text-gray-500">{t.favoritesDesc}</p>
+          <h2 className="text-lg font-extrabold text-gray-900">{t.favorites}</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{t.favoritesDesc}</p>
         </div>
         {favorites.length > 0 && (
-          <button type="button" onClick={() => setTab("home")} className="text-sm text-red-600 hover:text-red-700">
+          <button type="button" onClick={() => setTab("home")} className="text-sm text-red-600 font-semibold hover:text-red-700 transition-colors">
             {t.morePartners}
           </button>
         )}
       </div>
       {favoritesLoading ? (
-        Array.from({ length: 4 }).map((_, idx) => <div key={idx} className="card animate-pulse h-44" />)
-      ) : favorites.length === 0 ? (
-        <div className="card text-center py-16">
-          <p className="text-gray-500">{t.noFavorites}</p>
-          <button onClick={() => setTab("home")} className="mt-4 btn-primary px-6 py-2.5 text-sm">{t.findPartnerBtn}</button>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 4 }).map((_, i) => <ProfileSkeleton key={i} />)}
         </div>
+      ) : favorites.length === 0 ? (
+        <EmptyState
+          icon="⭐"
+          title={t.noFavorites}
+          desc={t.favoritesDesc}
+          action={() => setTab("home")}
+          actionLabel={t.findPartnerBtn}
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {favorites.map((profile) => (
@@ -597,33 +606,36 @@ export default function HomePage() {
   );
 
   const renderChatListContent = () => (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      <div>
+        <h2 className="text-lg font-extrabold text-gray-900">{t.tabChat}</h2>
+      </div>
       {convoLoading ? (
         Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="card p-5 animate-pulse flex items-center gap-4">
-            <div className="w-14 h-14 bg-gray-200 rounded-full" />
+          <div key={i} className="card p-4 animate-pulse flex items-center gap-4 min-h-[80px]">
+            <div className="w-14 h-14 bg-gray-200 rounded-2xl flex-shrink-0" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-1/4" />
-              <div className="h-3 bg-gray-100 rounded w-3/4" />
+              <div className="h-4 bg-gray-200 rounded-lg w-1/3" />
+              <div className="h-3 bg-gray-100 rounded-lg w-2/3" />
             </div>
           </div>
         ))
       ) : loadError ? (
-        <div className="card text-center py-16">
-          <p className="text-3xl mb-3">📡</p>
-          <p className="text-gray-900 font-semibold">{t.chatNetworkError}</p>
-          <p className="text-sm text-gray-500 mt-1">{t.networkErrorDesc}</p>
-          <button onClick={() => setLoadRetryKey((k) => k + 1)} className="mt-5 btn-primary px-6 py-2.5 text-sm">
-            {t.retry}
-          </button>
-        </div>
+        <EmptyState
+          icon="📡"
+          title={t.chatNetworkError}
+          desc={t.networkErrorDesc}
+          action={() => setLoadRetryKey((k) => k + 1)}
+          actionLabel={t.retry}
+        />
       ) : conversations.length === 0 ? (
-        <div className="card text-center py-16 px-6">
-          <div className="text-5xl mb-4">💬</div>
-          <p className="text-gray-900 font-semibold text-lg">{t.noChatTitle}</p>
-          <p className="text-sm text-gray-500 mt-2 leading-relaxed">{t.noChatDesc}</p>
-          <button onClick={() => setTab("home")} className="mt-5 btn-primary px-6 py-2.5 text-sm">{t.browsePartners}</button>
-        </div>
+        <EmptyState
+          icon="💬"
+          title={t.noChatTitle}
+          desc={t.noChatDesc}
+          action={() => setTab("home")}
+          actionLabel={t.browsePartners}
+        />
       ) : (
         conversations.map((conv) => (
           <ConversationItem
@@ -638,88 +650,131 @@ export default function HomePage() {
   );
 
   const renderProfileContent = () => (
-    <div className="card p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900">{t.profileEdit}</h2>
-        <button type="button" onClick={() => setTab("home")} className="text-sm text-gray-500 hover:text-gray-700">{t.backHome}</button>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-extrabold text-gray-900">{t.profileEdit}</h2>
+        <button type="button" onClick={() => setTab("home")} className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" transform="scale(-1,1) translate(-24,0)" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          {t.backHome}
+        </button>
       </div>
+
       <form onSubmit={saveProfile} className="space-y-5">
-        <div className="flex flex-col items-center gap-3">
+        <div className="card flex flex-col items-center gap-4 py-8">
           <div className="relative">
             {avatarPreview ? (
-              <img src={avatarPreview} alt={t.tabProfile} className="w-24 h-24 rounded-full object-cover border-2 border-red-100" />
+              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-100 shadow-lg" />
             ) : isRealAvatar(profileForm.avatar_url) ? (
-              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-24 h-24 rounded-full object-cover border-2 border-red-100" />
+              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-100 shadow-lg" />
             ) : (
-              <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${getAvatarGradient(profileForm.avatar_url, profileForm.display_name)} flex items-center justify-center text-4xl font-bold text-white border-2 border-red-100`}>
+              <div className={`w-28 h-28 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profileForm.avatar_url, user?.id)} flex items-center justify-center text-5xl font-black text-white shadow-lg`}>
                 {profileForm.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
-            <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center cursor-pointer shadow">
-              <span className="text-white text-lg leading-none">+</span>
+            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center cursor-pointer shadow-lg border-2 border-white">
+              <span className="text-white text-xl leading-none font-bold select-none">+</span>
               <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
             </label>
           </div>
           <p className="text-xs text-gray-400">{t.avatarLimit}</p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">{t.nickname}</label>
-            <input type="text" className="input-field" value={profileForm.display_name} maxLength={50}
-              onChange={(e) => handleProfileChange("display_name", e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">{t.nationality}</label>
-            <select className="input-field" value={profileForm.nationality} onChange={(e) => handleProfileChange("nationality", e.target.value)}>
-              <option value="">{t.select}</option>
-              {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">{t.nativeLanguage}</label>
-            <select className="input-field" value={profileForm.native_language} onChange={(e) => handleProfileChange("native_language", e.target.value)}>
-              <option value="">{t.select}</option>
-              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">{t.learningLanguage}</label>
-            <select className="input-field" value={profileForm.learning_language} onChange={(e) => handleProfileChange("learning_language", e.target.value)}>
-              <option value="">{t.select}</option>
-              {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
+          <div className="flex flex-wrap gap-2 justify-center" style={{ maxWidth: 288 }}>
+            {AVATAR_GRADIENTS.map((gradient, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleGradientSelect(idx)}
+                className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
+                  profileForm.avatar_url === `gradient:${idx}` && !avatarPreview
+                    ? "ring-2 ring-offset-2 ring-red-500 scale-110 shadow-md"
+                    : "opacity-70 hover:opacity-100 hover:scale-110"
+                }`}
+              />
+            ))}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">{t.languageLevel}</label>
-          <select className="input-field" value={profileForm.language_level} onChange={(e) => handleProfileChange("language_level", e.target.value)}>
-            {["초급", "중급", "고급"].map((level) => <option key={level} value={level}>{levelLabel(level)}</option>)}
-          </select>
+        <div className="card space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nickname}</label>
+              <input type="text" className="input-field" value={profileForm.display_name} maxLength={50}
+                onChange={(e) => handleProfileChange("display_name", e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nationality}</label>
+              <select className="input-field" value={profileForm.nationality} onChange={(e) => handleProfileChange("nationality", e.target.value)}>
+                <option value="">{t.select}</option>
+                {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nativeLanguage}</label>
+              <select className="input-field" value={profileForm.native_language} onChange={(e) => handleProfileChange("native_language", e.target.value)}>
+                <option value="">{t.select}</option>
+                {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.learningLanguage}</label>
+              <select className="input-field" value={profileForm.learning_language} onChange={(e) => handleProfileChange("learning_language", e.target.value)}>
+                <option value="">{t.select}</option>
+                {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.languageLevel}</label>
+            <div className="flex gap-2">
+              {["초급", "중급", "고급"].map((level) => (
+                <button type="button" key={level} onClick={() => handleProfileChange("language_level", level)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 ${
+                    profileForm.language_level === level
+                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}>
+                  {levelLabel(level)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-1">
+            <div>
+              <p className="text-sm font-bold text-gray-700">{t.isPublic}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{t.noPartnersDesc}</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={profileForm.is_public}
+              onClick={() => handleProfileChange("is_public", !profileForm.is_public)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                profileForm.is_public ? "bg-red-600" : "bg-gray-200"
+              }`}
+            >
+              <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                profileForm.is_public ? "translate-x-5" : "translate-x-0"
+              }`} />
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <label htmlFor="is_public_toggle" className="block text-sm font-semibold text-gray-700">{t.isPublic}</label>
-          <input
-            type="checkbox"
-            id="is_public_toggle"
-            checked={profileForm.is_public}
-            onChange={(e) => handleProfileChange("is_public", e.target.checked)}
-            className="toggle toggle-primary"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">{t.interests}</label>
+        <div className="card">
+          <label className="block text-sm font-bold text-gray-700 mb-3">{t.interests}</label>
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((interest) => (
               <button type="button" key={interest} onClick={() => toggleInterest(interest)}
-                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                  profileForm.interests.includes(interest) ? "bg-red-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
+                  profileForm.interests.includes(interest)
+                    ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}>
                 {interest}
               </button>
@@ -727,9 +782,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-semibold text-gray-700">{t.bio}</label>
+        <div className="card">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-sm font-bold text-gray-700">{t.bio}</label>
             <span className={`text-xs ${profileForm.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
               {profileForm.bio.length}/500
             </span>
@@ -739,10 +794,12 @@ export default function HomePage() {
         </div>
 
         {profileError && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{profileError}</div>
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+            {profileError}
+          </div>
         )}
 
-        <button type="submit" disabled={profileLoading || avatarUploading} className="btn-primary w-full py-3">
+        <button type="submit" disabled={profileLoading || avatarUploading} className="btn-primary py-3.5 text-base">
           {avatarUploading ? t.avatarUploading : profileLoading ? t.saving : t.profileSaveBtn}
         </button>
       </form>
@@ -754,74 +811,66 @@ export default function HomePage() {
       </div>
 
       <div className="pt-2 text-center">
-        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-gray-300 hover:text-red-400 underline">
+        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-gray-300 hover:text-red-400 underline transition-colors">
           {t.deleteAccountBtn}
         </button>
       </div>
     </div>
   );
 
+  const NAV_TABS = [
+    { key: "home", label: t.tabHome },
+    { key: "swipe", label: t.tabSwipeShort },
+    { key: "chatlist", label: t.tabChat, badge: totalUnread },
+    { key: "favorites", label: t.tabFavorites },
+    { key: "profile", label: t.tabProfileShort },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      <Helmet><title>KoriBridge - {t.tabHome}</title></Helmet>
+      <Helmet><title>KoriBridge - {t.homeTitle}</title></Helmet>
 
-      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-5 py-4 sticky top-0 z-40 shadow-lg">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-5 pt-4 pb-3 sticky top-0 z-40 shadow-lg">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-red-100/80 font-medium">
-              {t.welcome} {user.email?.split("@")[0] || t.welcomeUser}{locale === 'ko' ? '님' : ''}
+            <p className="text-[11px] text-red-100/80 font-medium leading-none mb-0.5">
+              {t.welcome} {user.email?.split("@")[0] || ""}{locale === "ko" ? "님" : ""}
             </p>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">{t.homeTitle}</h1>
+            <h1 className="text-xl font-extrabold text-white tracking-tight">{t.homeTitle}</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <LanguageSelector dark />
-            <button type="button" onClick={toggleDarkMode} className="text-sm text-white/70 hover:text-white transition">
+            <button type="button" onClick={toggleDarkMode}
+              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center text-base transition-colors">
               {darkMode ? "🌙" : "☀️"}
             </button>
-            <button type="button" onClick={signOut} className="text-sm text-white/70 hover:text-white transition font-medium">{t.logout}</button>
+            <button type="button" onClick={signOut}
+              className="h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-xs text-white font-bold transition-colors">
+              {t.logout}
+            </button>
           </div>
         </div>
-        <div className="relative">
-          <input
-            type="text"
-            className="w-full pl-4 pr-10 h-11 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder:text-white/60 text-sm font-medium focus:outline-none focus:bg-white/30 focus:ring-2 focus:ring-white/30 transition-all"
-            placeholder={t.searchPlaceholder}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/30 text-white text-xs flex items-center justify-center hover:bg-white/40 transition-colors"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-        <div className="flex gap-2 mt-3">
-          {[
-            { key: "home", label: t.tabHome },
-            { key: "swipe", label: t.tabSwipe },
-            { key: "chatlist", label: t.tabChat, badge: totalUnread },
-            { key: "favorites", label: t.tabFavorites },
-            { key: "profile", label: t.tabProfile },
-          ].map((item) => (
-            <button key={item.key} type="button" onClick={() => setTab(item.key)}
-              className={`relative rounded-xl px-4 py-2 text-sm font-bold transition-all duration-150 ${
-                tab === item.key ? "bg-white text-red-600 shadow-md" : "bg-white/20 text-white hover:bg-white/30"
-              }`}>
-              {item.label}
-              {item.badge > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white border-2 border-red-500 text-[9px] text-red-600 flex items-center justify-center font-bold">
-                  {item.badge > 9 ? "9+" : item.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+
+        {tab === "home" && (
+          <div className="mt-3 relative">
+            <input
+              type="text"
+              className="w-full pl-4 pr-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/55 text-sm focus:outline-none focus:bg-white/30 focus:ring-2 focus:ring-white/30 transition-all"
+              placeholder={t.searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white/30 text-white text-xs flex items-center justify-center hover:bg-white/40 transition-colors">
+                ✕
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="px-4 py-6 max-w-6xl mx-auto">
+      <div className="px-4 py-5 max-w-6xl mx-auto">
         {tab === "home" && renderHomeContent()}
         {tab === "swipe" && renderSwipeContent()}
         {tab === "favorites" && renderFavoritesContent()}
@@ -829,67 +878,58 @@ export default function HomePage() {
         {tab === "profile" && renderProfileContent()}
       </div>
 
-      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 border-t border-gray-100 bg-white/95 backdrop-blur-sm px-4 py-2 shadow-[0_-4px_24px_rgba(15,23,42,0.10)]">
-        <nav className="mx-auto flex max-w-6xl items-center justify-around">
-          {[
-            { key: "home", label: t.tabHome, icon: "🏠" },
-            { key: "swipe", label: t.tabSwipeShort, icon: "🔥" },
-            { key: "chatlist", label: t.tabChat, icon: "💬", badge: totalUnread },
-            { key: "favorites", label: t.tabFavorites, icon: "⭐" },
-            { key: "profile", label: t.tabProfileShort, icon: "👤" },
-          ].map((item) => (
-            <button key={item.key} type="button" onClick={() => setTab(item.key)}
-              className={`relative flex flex-col items-center gap-0.5 px-5 py-2 rounded-2xl text-xs font-semibold transition-all duration-150 ${
-                tab === item.key ? "text-red-600" : "text-gray-400 hover:text-gray-600"
-              }`}>
-              <span className={`text-xl transition-transform duration-150 ${tab === item.key ? "scale-110" : ""}`}>{item.icon}</span>
-              <span>{item.label}</span>
-              {item.badge > 0 && (
-                <span className="absolute top-0.5 right-2.5 w-4 h-4 rounded-full bg-red-600 text-[9px] text-white flex items-center justify-center font-bold">
-                  {item.badge > 9 ? "9+" : item.badge}
+      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 border-t border-gray-100 bg-white/97 backdrop-blur-sm shadow-[0_-4px_24px_rgba(15,23,42,0.08)]">
+        <nav className="mx-auto flex max-w-6xl items-center justify-around px-2">
+          {NAV_TABS.map((item) => {
+            const active = tab === item.key;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setTab(item.key)}
+                className="relative flex flex-col items-center gap-0.5 min-w-[56px] py-2.5 px-3 rounded-2xl transition-all duration-150"
+              >
+                <span className={`transition-colors duration-150 ${active ? "text-red-600" : "text-gray-400"}`}>
+                  {NAV_ICONS[item.key]}
                 </span>
-              )}
-            </button>
-          ))}
+                <span className={`text-[10px] font-semibold transition-colors duration-150 leading-none ${active ? "text-red-600" : "text-gray-400"}`}>
+                  {item.label}
+                </span>
+                {active && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-red-500" />}
+                {item.badge > 0 && (
+                  <span className="absolute top-1.5 right-2 w-4 h-4 rounded-full bg-red-600 text-[9px] text-white flex items-center justify-center font-bold">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
       {reportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-4 sm:pb-0">
           <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">{reportModal.displayName}</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-0.5">{reportModal.displayName}</h3>
             <p className="text-sm text-gray-500 mb-4">{t.reportOrBlock}</p>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">{t.reportReason}</label>
-                <textarea
-                  rows={3}
-                  className="input-field resize-none text-sm"
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  placeholder={t.reportReasonPlaceholder}
-                />
+                <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.reportReason}</label>
+                <textarea rows={3} className="input-field resize-none text-sm"
+                  value={reportReason} onChange={(e) => setReportReason(e.target.value)}
+                  placeholder={t.reportReasonPlaceholder} />
               </div>
-              <button
-                type="button"
-                onClick={submitReport}
-                disabled={reportLoading || !reportReason.trim()}
-                className="w-full rounded-2xl bg-yellow-500 text-white py-2.5 text-sm font-semibold hover:bg-yellow-600 disabled:opacity-50"
-              >
+              <button type="button" onClick={submitReport} disabled={reportLoading || !reportReason.trim()}
+                className="w-full rounded-2xl bg-amber-500 text-white py-3 text-sm font-bold hover:bg-amber-600 disabled:opacity-50 transition-colors">
                 {reportLoading ? t.reporting : t.reportBtn}
               </button>
-              <button
-                type="button"
+              <button type="button"
                 onClick={() => setBlockConfirm({ targetId: reportModal.profileId, displayName: reportModal.displayName })}
-                className="w-full rounded-2xl bg-red-600 text-white py-2.5 text-sm font-semibold hover:bg-red-700"
-              >
+                className="w-full rounded-2xl bg-red-600 text-white py-3 text-sm font-bold hover:bg-red-700 transition-colors">
                 {t.blockBtn}
               </button>
-              <button
-                type="button"
-                onClick={() => { setReportModal(null); setReportReason(""); }}
-                className="w-full rounded-2xl bg-gray-100 text-gray-700 py-2.5 text-sm font-semibold hover:bg-gray-200"
-              >
+              <button type="button" onClick={() => { setReportModal(null); setReportReason(""); }}
+                className="w-full rounded-2xl bg-gray-100 text-gray-700 py-3 text-sm font-semibold hover:bg-gray-200 transition-colors">
                 {t.cancel}
               </button>
             </div>
@@ -899,7 +939,7 @@ export default function HomePage() {
 
       {blockConfirm && (
         <ConfirmModal
-          message={`${blockConfirm.displayName}${locale === 'ko' ? ' ' : ''}${t.blockConfirmMsg}`}
+          message={`${blockConfirm.displayName}${locale === "ko" ? " " : ""}${t.blockConfirmMsg}`}
           confirmLabel={t.blockBtn}
           cancelLabel={t.cancel}
           danger
