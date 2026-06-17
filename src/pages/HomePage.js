@@ -22,6 +22,7 @@ import { getMatchScore } from "../utils/matching";
 import { pageView } from "../utils/analytics";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 import { sendPushNotification } from "../utils/pushNotifications";
+import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -93,6 +94,7 @@ export default function HomePage() {
   const [profileForm, setProfileForm] = useState({
     display_name: "", nationality: "", native_language: "",
     learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [], is_public: true,
+    conversation_goal: "culture_exchange", communication_style: "text_first", opening_question: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -139,6 +141,9 @@ export default function HomePage() {
             avatar_url: me.avatar_url || "",
             interests: me.interests || [],
             is_public: me.is_public ?? true,
+            conversation_goal: me.conversation_goal || "culture_exchange",
+            communication_style: me.communication_style || "text_first",
+            opening_question: me.opening_question || "",
           });
         }
 
@@ -152,7 +157,7 @@ export default function HomePage() {
         if (fIds.size > 0) {
           const { data: favoriteProfiles } = await supabase
             .from("profiles")
-            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
+            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question")
             .in("id", Array.from(fIds));
           setFavorites(favoriteProfiles || []);
         } else {
@@ -169,7 +174,7 @@ export default function HomePage() {
 
         const { data: allProfiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
+          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question")
           .eq("is_public", true)
           .neq("id", user.id)
           .order("created_at", { ascending: false });
@@ -195,7 +200,7 @@ export default function HomePage() {
           if (partnerIds.length > 0) {
             const { data: partnerProfiles } = await supabase
               .from("profiles")
-              .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests")
+              .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question")
               .in("id", partnerIds);
             const partnerMap = new Map(partnerProfiles?.map((p) => [p.id, p]));
             const sorted = Array.from(byPartner.values())
@@ -322,6 +327,7 @@ export default function HomePage() {
     if (!profileForm.native_language) return setProfileError(t.errNativeLang);
     if (!profileForm.learning_language) return setProfileError(t.errLearningLang);
     if (profileForm.bio.length > 500) return setProfileError(t.errBioLen);
+    if (profileForm.opening_question.length > 140) return setProfileError("첫 질문은 140자 이하로 입력해 주세요.");
     setProfileLoading(true);
     try {
       const avatar_url = await uploadAvatar();
@@ -336,6 +342,9 @@ export default function HomePage() {
         avatar_url: avatar_url || profileForm.avatar_url || "",
         interests: profileForm.interests,
         is_public: profileForm.is_public,
+        conversation_goal: profileForm.conversation_goal,
+        communication_style: profileForm.communication_style,
+        opening_question: profileForm.opening_question.trim(),
       });
       if (error) throw error;
       showToast(t.profileSaveBtn, "success");
@@ -782,6 +791,65 @@ export default function HomePage() {
                 profileForm.is_public ? "translate-x-5" : "translate-x-0"
               }`} />
             </button>
+          </div>
+        </div>
+
+        <div className="card space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">대화 목적</label>
+            <div className="grid grid-cols-2 gap-2">
+              {CONVERSATION_GOALS.map((goal) => (
+                <button
+                  type="button"
+                  key={goal.value}
+                  onClick={() => handleProfileChange("conversation_goal", goal.value)}
+                  className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+                    profileForm.conversation_goal === goal.value
+                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {goal.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">선호 대화 방식</label>
+            <div className="grid grid-cols-2 gap-2">
+              {COMMUNICATION_STYLES.map((style) => (
+                <button
+                  type="button"
+                  key={style.value}
+                  onClick={() => handleProfileChange("communication_style", style.value)}
+                  className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+                    profileForm.communication_style === style.value
+                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {style.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-bold text-gray-700">첫 대화 질문</label>
+              <span className={`text-xs ${profileForm.opening_question.length > 120 ? "text-red-500" : "text-gray-400"}`}>
+                {profileForm.opening_question.length}/140
+              </span>
+            </div>
+            <input
+              type="text"
+              className="input-field"
+              value={profileForm.opening_question}
+              maxLength={140}
+              onChange={(e) => handleProfileChange("opening_question", e.target.value)}
+              placeholder="예: 한국에서 꼭 가보고 싶은 곳은 어디예요?"
+            />
           </div>
         </div>
 

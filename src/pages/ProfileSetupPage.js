@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../hooks/useLocale";
 import { AVATAR_GRADIENTS, getAvatarGradient } from "../utils/avatarUtils";
+import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -34,6 +35,9 @@ export default function ProfileSetupPage() {
     bio: "",
     avatar_url: "",
     interests: [],
+    conversation_goal: "culture_exchange",
+    communication_style: "text_first",
+    opening_question: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -111,6 +115,7 @@ export default function ProfileSetupPage() {
     if (!form.learning_language) return setError(t.errLearningLang);
     if (!form.language_level) return setError(t.errLangLevel);
     if (form.bio.length > 500) return setError(t.errBioLen);
+    if (form.opening_question.length > 140) return setError("첫 질문은 140자 이하로 입력해 주세요.");
 
     setLoading(true);
     try {
@@ -129,6 +134,9 @@ export default function ProfileSetupPage() {
         bio: form.bio.trim(),
         avatar_url: avatar_url || "",
         interests: form.interests,
+        conversation_goal: form.conversation_goal,
+        communication_style: form.communication_style,
+        opening_question: form.opening_question.trim(),
         is_verified: !!user.email_confirmed_at,
       });
 
@@ -254,6 +262,65 @@ export default function ProfileSetupPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          <div className="card space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">대화 목적</label>
+              <div className="grid grid-cols-2 gap-2">
+                {CONVERSATION_GOALS.map((goal) => (
+                  <button
+                    type="button"
+                    key={goal.value}
+                    onClick={() => handleChange("conversation_goal", goal.value)}
+                    className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+                      form.conversation_goal === goal.value
+                        ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {goal.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">선호 대화 방식</label>
+              <div className="grid grid-cols-2 gap-2">
+                {COMMUNICATION_STYLES.map((style) => (
+                  <button
+                    type="button"
+                    key={style.value}
+                    onClick={() => handleChange("communication_style", style.value)}
+                    className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+                      form.communication_style === style.value
+                        ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {style.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-bold text-gray-700">첫 대화 질문</label>
+                <span className={`text-xs ${form.opening_question.length > 120 ? "text-red-500" : "text-gray-400"}`}>
+                  {form.opening_question.length}/140
+                </span>
+              </div>
+              <input
+                type="text"
+                className="input-field"
+                value={form.opening_question}
+                maxLength={140}
+                onChange={(e) => handleChange("opening_question", e.target.value)}
+                placeholder="예: 가장 좋아하는 한국 음식은 뭐예요?"
+              />
             </div>
           </div>
 

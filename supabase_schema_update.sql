@@ -158,6 +158,15 @@ ALTER TABLE public.profiles
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS last_seen_at timestamptz DEFAULT NULL;
 
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS conversation_goal text DEFAULT 'culture_exchange';
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS communication_style text DEFAULT 'text_first';
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS opening_question text DEFAULT '';
+
 -- image_url 컬럼 추가 (chat messages)
 ALTER TABLE public.messages
   ADD COLUMN IF NOT EXISTS image_url text DEFAULT NULL;
@@ -233,6 +242,34 @@ BEGIN
     ALTER TABLE public.profiles
       ADD CONSTRAINT profiles_bio_length
       CHECK (char_length(coalesce(bio, '')) <= 500) NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'profiles_opening_question_length'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_opening_question_length
+      CHECK (char_length(coalesce(opening_question, '')) <= 140) NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'profiles_conversation_goal_allowed'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_conversation_goal_allowed
+      CHECK (
+        conversation_goal IN ('serious_learning', 'casual_chat', 'culture_exchange', 'travel_friend')
+      ) NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'profiles_communication_style_allowed'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_communication_style_allowed
+      CHECK (
+        communication_style IN ('text_first', 'voice_friendly', 'correction_focused', 'slow_and_kind')
+      ) NOT VALID;
   END IF;
 
   IF to_regclass('public.reports') IS NOT NULL

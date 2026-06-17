@@ -1,10 +1,12 @@
 import React from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import { CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 
 export default function SwipeCard({ profile, score, onSwipeLeft, onSwipeRight }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
+  const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
 
   const handleDragEnd = (e, info) => {
     if (info.offset.x > 120) onSwipeRight();
@@ -48,7 +50,18 @@ export default function SwipeCard({ profile, score, onSwipeLeft, onSwipeRight })
             <span className="bg-red-50 text-red-600 text-xs font-bold px-2.5 py-1 rounded-lg">
               {profile.learning_language}
             </span>
+            {goalLabel && (
+              <span className="bg-rose-50 text-rose-600 text-xs font-bold px-2.5 py-1 rounded-lg">
+                {goalLabel}
+              </span>
+            )}
           </div>
+          {profile.opening_question && (
+            <div className="rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Opening Question</p>
+              <p className="text-sm text-gray-700 font-semibold line-clamp-2">{profile.opening_question}</p>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

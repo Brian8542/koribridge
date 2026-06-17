@@ -12,6 +12,9 @@ create table public.profiles (
   interests text[] default '{}',
   bio text default '',
   avatar_url text default '',
+  conversation_goal text default 'culture_exchange',
+  communication_style text default 'text_first',
+  opening_question text default '',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

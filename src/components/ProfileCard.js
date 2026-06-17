@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getMatchScore } from "../utils/matching";
 import { useLocale } from "../hooks/useLocale";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
+import { COMMUNICATION_STYLES, CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 
 const LEVEL_STYLE = {
   고급: "bg-blue-100 text-blue-700",
@@ -23,6 +24,8 @@ function ProfileCard({
   const { t, levelLabel } = useLocale();
   const level = profile.language_level || "초급";
   const match = getMatchScore(myProfile, profile);
+  const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
+  const styleLabel = getProfileOptionLabel(COMMUNICATION_STYLES, profile.communication_style);
   const commonInterests = (myProfile?.interests || []).filter((i) =>
     (profile.interests || []).includes(i)
   );
@@ -113,6 +116,28 @@ function ProfileCard({
 
         {profile.bio && (
           <p className="mt-3 text-xs text-gray-500 line-clamp-2 leading-relaxed">{profile.bio}</p>
+        )}
+
+        {(goalLabel || styleLabel) && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {goalLabel && (
+              <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-bold">
+                {goalLabel}
+              </span>
+            )}
+            {styleLabel && (
+              <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold">
+                {styleLabel}
+              </span>
+            )}
+          </div>
+        )}
+
+        {profile.opening_question && (
+          <div className="mt-3 rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Opening Question</p>
+            <p className="text-xs text-gray-700 font-semibold mt-0.5 line-clamp-2">{profile.opening_question}</p>
+          </div>
         )}
 
         {commonInterests.length > 0 && (

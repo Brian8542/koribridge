@@ -27,7 +27,22 @@ export function getMatchScore(me, other) {
     reasons.push(`공통 관심사: ${commonInterests[0]}`);
   }
 
-  // 3. 활동 시간대 (최근 24시간 이내 접속 시 가점)
+  // 3. 대화 목적과 방식이 맞으면 첫 대화 전환율이 높아짐
+  if (me.conversation_goal && me.conversation_goal === other.conversation_goal) {
+    score += 10;
+    reasons.push("대화 목적이 잘 맞아요");
+  }
+
+  if (me.communication_style && me.communication_style === other.communication_style) {
+    score += 8;
+    reasons.push("선호하는 대화 방식이 비슷해요");
+  }
+
+  if (other.opening_question) {
+    score += 4;
+  }
+
+  // 4. 활동 시간대 (최근 24시간 이내 접속 시 가점)
   if (other.last_seen_at) {
     const lastSeen = new Date(other.last_seen_at);
     const isRecent = (new Date() - lastSeen) < 24 * 60 * 60 * 1000;

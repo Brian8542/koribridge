@@ -8,6 +8,7 @@ import { useLocale } from "../hooks/useLocale";
 import { getLanguageLevel } from "../utils/languageLevel";
 import { getMatchPercentage } from "../utils/matching";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
+import { COMMUNICATION_STYLES, CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 import { formatRelativeTime } from "../utils/formatters";
 import ReportModal from "../components/ReportModal";
 import BlockButton from "../components/BlockButton";
@@ -71,6 +72,8 @@ export default function ProfileDetailPage() {
   const matchPercentage = getMatchPercentage(myProfile, profile);
   const lastActive = formatRelativeTime(profile.updated_at || profile.created_at);
   const commonInterests = (myProfile?.interests || []).filter((i) => (profile.interests || []).includes(i));
+  const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
+  const styleLabel = getProfileOptionLabel(COMMUNICATION_STYLES, profile.communication_style);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
@@ -168,6 +171,31 @@ export default function ProfileDetailPage() {
             </div>
           )}
         </div>
+
+        {(goalLabel || styleLabel || profile.opening_question) && (
+          <div className="card p-5 space-y-3">
+            {(goalLabel || styleLabel) && (
+              <div className="flex flex-wrap gap-2">
+                {goalLabel && (
+                  <span className="text-xs bg-rose-50 text-rose-600 px-3 py-1.5 rounded-xl font-bold">
+                    {goalLabel}
+                  </span>
+                )}
+                {styleLabel && (
+                  <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-xl font-bold">
+                    {styleLabel}
+                  </span>
+                )}
+              </div>
+            )}
+            {profile.opening_question && (
+              <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4">
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Opening Question</p>
+                <p className="text-sm text-gray-800 font-semibold mt-1">{profile.opening_question}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {profile.interests?.length > 0 && (
           <div className="card p-5">
