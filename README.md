@@ -61,6 +61,8 @@ cp .env.example .env
 |---|---|
 | `REACT_APP_SUPABASE_URL` | Supabase Dashboard → Settings → API → Project URL |
 | `REACT_APP_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API → `anon` public key |
+| `VITE_SUPABASE_URL` | Optional Vite-style alias for `REACT_APP_SUPABASE_URL` |
+| `VITE_SUPABASE_ANON_KEY` | Optional Vite-style alias for `REACT_APP_SUPABASE_ANON_KEY` |
 
 Supabase Edge Functions also use server-side secrets:
 
@@ -105,7 +107,7 @@ npm start
 
 ```bash
 npm run build
-# Output is in /build — deploy the contents of this folder
+# Output is in /dist — deploy the contents of this folder
 ```
 
 ---
@@ -134,7 +136,7 @@ Enable **Realtime** on the `messages` table for live chat and online-presence fe
 
 - All image uploads are restricted to `image/jpeg`, `image/png`, and `image/webp` (validated client-side by MIME type).
 - Input length limits are enforced on all text fields (`display_name` ≤ 50, `bio` ≤ 500, messages ≤ 1000 characters).
-- Environment secrets are never bundled — only `REACT_APP_*` prefixed variables are embedded in the build, and both are Supabase *public* keys.
+- Environment secrets are never bundled — only `REACT_APP_*`/`VITE_*` prefixed variables are embedded in the build, and these Supabase values are *public* keys.
 - HTTP security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`) are set via `vercel.json`.
 
 ---

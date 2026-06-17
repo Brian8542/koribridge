@@ -226,6 +226,8 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 |---|---|
 | `REACT_APP_SUPABASE_URL` | Supabase project URL |
 | `REACT_APP_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `VITE_SUPABASE_URL` | Optional Vite-style alias for Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Optional Vite-style alias for Supabase anon/public key |
 
 Copy `.env.example` → `.env` and fill in values from the Supabase dashboard (Settings → API).
 
@@ -235,16 +237,16 @@ Copy `.env.example` → `.env` and fill in values from the Supabase dashboard (S
 
 ```bash
 npm start        # Start dev server on http://localhost:3000
-npm run build    # Production build → /build
+npm run build    # Production build → /dist
 npm test         # Run test suite
 ```
 
-Always run `npm run build` and confirm `Compiled successfully` (zero warnings) before committing.
+Always run `npm test` and `npm run build` before committing. Vite chunk-size warnings are acceptable when the build exits successfully.
 
 ---
 
 ## 로그인 관련 절대 규칙
 
 - `signInWithOAuth` 호출 시 반드시 `redirectTo: window.location.origin + "/home"` 를 포함할 것 — 누락 시 Google OAuth 완료 후 SplashScreen(`/`)으로 복귀해 로그인 화면으로 튕기는 버그 재발.
-- `src/context/AuthContext.js` 와 `src/App.js` 는 절대 수정 금지.
+- `src/context/AuthContext.jsx` 와 `src/App.jsx` 는 절대 수정 금지.
 - `profile === null && !loading` 조건 절대 변경 금지 — 이 조건이 프로필 미완성 유저를 `/setup` 으로 보내는 유일한 게이트임.
