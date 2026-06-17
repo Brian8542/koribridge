@@ -16,6 +16,17 @@ import { sendPushNotification } from "../utils/pushNotifications";
 const MSG_SELECT =
   "id, sender_id, receiver_id, content, image_url, voice_url, message_type, created_at, read_at, edited_at";
 
+function getConversationStarters(partner) {
+  const nativeLanguage = partner?.native_language || "모국어";
+  const learningLanguage = partner?.learning_language || "한국어";
+  return [
+    `${nativeLanguage}로 자연스럽게 인사하는 표현을 알려줄 수 있어요?`,
+    `${learningLanguage}를 공부하면서 가장 어려웠던 부분이 뭐예요?`,
+    "요즘 자주 쓰는 일상 표현 하나만 추천해 줄래요?",
+    "서로 틀린 문장을 편하게 고쳐주는 방식으로 대화해볼까요?",
+  ];
+}
+
 function sortMsgs(msgs) {
   return [...msgs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
@@ -189,7 +200,7 @@ export default function ChatPage() {
       setChatLoading(true);
       try {
         const pr = await supabase.from("profiles")
-          .select("id, display_name, nationality, native_language, learning_language, avatar_url")
+          .select("id, display_name, nationality, native_language, learning_language, avatar_url, conversation_goal, communication_style, opening_question")
           .eq("id", partnerId).maybeSingle();
         const mr = await supabase.from("messages")
           .select(MSG_SELECT)
@@ -533,6 +544,11 @@ export default function ChatPage() {
   );
 
   const isPartnerOnline = onlineIds.has(partner?.id);
+  const conversationStarters = getConversationStarters(partner);
+  const applyStarter = (text) => {
+    setNewMessage(text);
+    textareaRef.current?.focus();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -573,7 +589,36 @@ export default function ChatPage() {
           </div>
         )}
         {messages.length === 0 ? (
-          <div className="text-center text-gray-400 py-20 text-sm">{t.firstMessage}</div>
+          <div className="py-12">
+            <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+              <p className="text-center text-sm font-bold text-gray-900">{t.firstMessage}</p>
+              <p className="mt-1 text-center text-xs text-gray-400">부담 없이 아래 질문으로 대화를 시작해 보세요.</p>
+
+              {partner.opening_question && (
+                <button
+                  type="button"
+                  onClick={() => applyStarter(partner.opening_question)}
+                  className="mt-5 w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-left transition hover:border-red-200 hover:bg-red-100"
+                >
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-red-500">Opening Question</span>
+                  <span className="mt-1 block text-sm font-bold text-gray-900">{partner.opening_question}</span>
+                </button>
+              )}
+
+              <div className="mt-4 flex flex-col gap-2">
+                {conversationStarters.map((starter) => (
+                  <button
+                    key={starter}
+                    type="button"
+                    onClick={() => applyStarter(starter)}
+                    className="rounded-2xl bg-gray-50 px-4 py-2.5 text-left text-xs font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    {starter}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         ) : messages.map((msg, idx) => {
           const isMine = msg.sender_id === user.id;
           const isVoice = msg.message_type === "voice";
