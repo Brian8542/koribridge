@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../hooks/useLocale";
 import { AVATAR_GRADIENTS, getAvatarGradient } from "../utils/avatarUtils";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
+import { getProfileCompletion } from "../utils/profileCompletion";
+import ProfileCompletionCard from "../components/ProfileCompletionCard";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -45,6 +47,10 @@ export default function ProfileSetupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
+  const profileCompletion = useMemo(() => getProfileCompletion({
+    ...form,
+    avatar_url: avatarPreview ? "preview" : form.avatar_url,
+  }), [form, avatarPreview]);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -167,6 +173,7 @@ export default function ProfileSetupPage() {
 
       <div className="px-4 py-6 max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-5">
+          <ProfileCompletionCard completion={profileCompletion} />
 
           <div className="card flex flex-col items-center gap-4 py-8">
             <div className="relative">

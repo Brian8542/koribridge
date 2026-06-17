@@ -23,6 +23,8 @@ import { pageView } from "../utils/analytics";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 import { sendPushNotification } from "../utils/pushNotifications";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
+import { getProfileCompletion } from "../utils/profileCompletion";
+import ProfileCompletionCard from "../components/ProfileCompletionCard";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -112,6 +114,10 @@ export default function HomePage() {
   const { permission: pushPermission, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications(user?.id);
   const notifGranted = useRef(false);
   const bottomNavRef = useRef(null);
+  const profileCompletion = useMemo(() => getProfileCompletion({
+    ...profileForm,
+    avatar_url: avatarPreview ? "preview" : profileForm.avatar_url,
+  }), [profileForm, avatarPreview]);
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
@@ -695,6 +701,8 @@ export default function HomePage() {
       </div>
 
       <form onSubmit={saveProfile} className="space-y-5">
+        <ProfileCompletionCard completion={profileCompletion} />
+
         <div className="card flex flex-col items-center gap-4 py-8">
           <div className="relative">
             {avatarPreview ? (
