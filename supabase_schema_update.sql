@@ -27,18 +27,22 @@ ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE IF EXISTS public.messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can update own messages"
+DROP POLICY IF EXISTS "Users can update own messages" ON public.messages;
+CREATE POLICY "Users can update own messages"
   ON public.messages FOR UPDATE
   USING (auth.uid() = sender_id);
 
+DROP POLICY IF EXISTS "Users can view own blocks" ON public.blocked_users;
 CREATE POLICY "Users can view own blocks"
   ON public.blocked_users FOR SELECT
   USING (auth.uid() = blocker_id);
 
+DROP POLICY IF EXISTS "Users can insert own blocks" ON public.blocked_users;
 CREATE POLICY "Users can insert own blocks"
   ON public.blocked_users FOR INSERT
   WITH CHECK (auth.uid() = blocker_id);
 
+DROP POLICY IF EXISTS "Users can delete own blocks" ON public.blocked_users;
 CREATE POLICY "Users can delete own blocks"
   ON public.blocked_users FOR DELETE
   USING (auth.uid() = blocker_id);
@@ -54,15 +58,18 @@ CREATE TABLE IF NOT EXISTS public.favorites (
 
 ALTER TABLE IF EXISTS public.favorites ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Users can insert favorites"
+DROP POLICY IF EXISTS "Users can insert favorites" ON public.favorites;
+CREATE POLICY "Users can insert favorites"
   ON public.favorites FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can select favorites"
+DROP POLICY IF EXISTS "Users can select favorites" ON public.favorites;
+CREATE POLICY "Users can select favorites"
   ON public.favorites FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete favorites"
+DROP POLICY IF EXISTS "Users can delete favorites" ON public.favorites;
+CREATE POLICY "Users can delete favorites"
   ON public.favorites FOR DELETE
   USING (auth.uid() = user_id);
 
@@ -77,6 +84,7 @@ CREATE TABLE IF NOT EXISTS public.reports (
 
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can insert own reports" ON public.reports;
 CREATE POLICY "Users can insert own reports"
   ON public.reports FOR INSERT
   WITH CHECK (auth.uid() = reporter_id);
@@ -88,21 +96,60 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "Anyone can view avatars" ON storage.objects;
 CREATE POLICY "Anyone can view avatars"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'avatars');
 
+DROP POLICY IF EXISTS "Authenticated users can upload avatars" ON storage.objects;
 CREATE POLICY "Authenticated users can upload avatars"
   ON storage.objects FOR INSERT
-  WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+  WITH CHECK (
+    bucket_id = 'avatars'
+    AND auth.role() = 'authenticated'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
 
+DROP POLICY IF EXISTS "Users can update own avatar" ON storage.objects;
 CREATE POLICY "Users can update own avatar"
   ON storage.objects FOR UPDATE
-  USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+  USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1])
+  WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
 
+DROP POLICY IF EXISTS "Users can delete own avatar" ON storage.objects;
 CREATE POLICY "Users can delete own avatar"
   ON storage.objects FOR DELETE
   USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Supabase Storage 버킷 생성 (chat-images)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('chat-images', 'chat-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Anyone can view chat images" ON storage.objects;
+CREATE POLICY "Anyone can view chat images"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'chat-images');
+
+DROP POLICY IF EXISTS "Users can upload own chat images" ON storage.objects;
+CREATE POLICY "Users can upload own chat images"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'chat-images'
+    AND auth.role() = 'authenticated'
+    AND auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+DROP POLICY IF EXISTS "Users can update own chat images" ON storage.objects;
+CREATE POLICY "Users can update own chat images"
+  ON storage.objects FOR UPDATE
+  USING (bucket_id = 'chat-images' AND auth.uid()::text = (storage.foldername(name))[1])
+  WITH CHECK (bucket_id = 'chat-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+DROP POLICY IF EXISTS "Users can delete own chat images" ON storage.objects;
+CREATE POLICY "Users can delete own chat images"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'chat-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 
 -- 5. profiles 테이블에 is_public, last_seen_at 컬럼 추가
 ALTER TABLE public.profiles
@@ -114,3 +161,86 @@ ALTER TABLE public.profiles
 -- image_url 컬럼 추가 (chat messages)
 ALTER TABLE public.messages
   ADD COLUMN IF NOT EXISTS image_url text DEFAULT NULL;
+
+-- Supabase Realtime 활성화 (messages INSERT/UPDATE 수신)
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+-- 메시지 UPDATE 컬럼 제한
+-- 수신자: read_at만 변경 가능
+-- 발신자: content, edited_at만 변경 가능
+CREATE OR REPLACE FUNCTION public.prevent_unsafe_message_update()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  actor uuid := auth.uid();
+BEGIN
+  IF actor IS NULL THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+
+  IF actor = OLD.receiver_id AND actor <> OLD.sender_id THEN
+    IF (to_jsonb(NEW) - 'read_at') <> (to_jsonb(OLD) - 'read_at') THEN
+      RAISE EXCEPTION 'Receivers can only update read_at';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  IF actor = OLD.sender_id THEN
+    IF (to_jsonb(NEW) - ARRAY['content', 'edited_at']) <> (to_jsonb(OLD) - ARRAY['content', 'edited_at']) THEN
+      RAISE EXCEPTION 'Senders can only update content and edited_at';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  RAISE EXCEPTION 'Not allowed to update this message';
+END;
+$$;
+
+DROP TRIGGER IF EXISTS prevent_unsafe_message_update_on_messages ON public.messages;
+CREATE TRIGGER prevent_unsafe_message_update_on_messages
+  BEFORE UPDATE ON public.messages
+  FOR EACH ROW
+  EXECUTE FUNCTION public.prevent_unsafe_message_update();
+
+-- API 직접 호출에도 프론트 입력 제한이 유지되도록 DB CHECK 제약 추가
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'messages_content_length'
+  ) THEN
+    ALTER TABLE public.messages
+      ADD CONSTRAINT messages_content_length
+      CHECK (char_length(content) BETWEEN 1 AND 1000) NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'profiles_display_name_length'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_display_name_length
+      CHECK (char_length(display_name) BETWEEN 1 AND 50) NOT VALID;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'profiles_bio_length'
+  ) THEN
+    ALTER TABLE public.profiles
+      ADD CONSTRAINT profiles_bio_length
+      CHECK (char_length(coalesce(bio, '')) <= 500) NOT VALID;
+  END IF;
+
+  IF to_regclass('public.reports') IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1 FROM pg_constraint WHERE conname = 'reports_reason_length'
+     ) THEN
+    ALTER TABLE public.reports
+      ADD CONSTRAINT reports_reason_length
+      CHECK (char_length(reason) BETWEEN 1 AND 1000) NOT VALID;
+  END IF;
+END $$;

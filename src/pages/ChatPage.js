@@ -154,6 +154,14 @@ export default function ChatPage() {
     setMessages((prev) => prev.some((m) => m.id === msg.id) ? prev : sortMsgs([...prev, msg]));
   }, []);
 
+  const isCurrentChatMessage = useCallback((msg) => {
+    if (!msg || !user?.id || !partnerId) return false;
+    return (
+      (msg.sender_id === user.id && msg.receiver_id === partnerId) ||
+      (msg.sender_id === partnerId && msg.receiver_id === user.id)
+    );
+  }, [user?.id, partnerId]);
+
   const markRead = useCallback(async () => {
     if (!user?.id || !partnerId) return;
     await supabase.from("messages").update({ read_at: new Date().toISOString() })
@@ -207,18 +215,25 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!user?.id || !partnerId) return;
-    const ch = supabase.channel("chat-" + partnerId)
+    const ch = supabase.channel(`chat:${user.id}:${partnerId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: "receiver_id=eq." + user.id },
-        (p) => { addMessage(p.new); markRead(); })
+        (p) => {
+          if (!isCurrentChatMessage(p.new)) return;
+          addMessage(p.new);
+          markRead();
+        })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: "sender_id=eq." + user.id },
-        (p) => setMessages((prev) => prev.map((m) => m.id === p.new.id ? { ...m, ...p.new } : m)))
+        (p) => {
+          if (!isCurrentChatMessage(p.new)) return;
+          setMessages((prev) => prev.map((m) => m.id === p.new.id ? { ...m, ...p.new } : m));
+        })
       .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages" },
         (p) => setMessages((prev) => prev.filter((m) => m.id !== p.old.id)))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "corrections" },
         (p) => setCorrections((prev) => ({ ...prev, [p.new.message_id]: p.new })))
       .subscribe();
     return () => supabase.removeChannel(ch);
-  }, [user?.id, partnerId, addMessage, markRead]);
+  }, [user?.id, partnerId, addMessage, isCurrentChatMessage, markRead]);
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -452,18 +467,21 @@ export default function ChatPage() {
     if (e) e.preventDefault();
     if (!newMessage.trim() || !user?.id || !partnerId || newMessage.length > MAX_MSG_LENGTH) return;
     const msg = newMessage.trim();
-    setNewMessage("");
     setSendLoading(true);
     try {
       const { data, error } = await supabase.from("messages")
         .insert([{ sender_id: user.id, receiver_id: partnerId, content: msg }]).select();
-      if (!error && data?.length > 0) {
+      if (error) throw error;
+      if (data?.length > 0) {
         addMessage(data[0]);
+        setNewMessage("");
         sendPushNotification({
           receiverId: partnerId,
           title: t.pushMsgTitle,
           body: `${partner?.display_name || ""}: ${msg.slice(0, 80)}`,
           url: `/chat/${user.id}`,
+          type: "message",
+          messageId: data[0].id,
         });
       }
     } catch {

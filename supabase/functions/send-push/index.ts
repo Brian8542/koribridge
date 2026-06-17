@@ -13,8 +13,10 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );
 
+const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") ?? "*";
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -24,9 +26,78 @@ serve(async (req) => {
   }
 
   try {
-    const { receiver_id, title, body, url } = await req.json();
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    const sender = authData?.user;
+    if (authError || !sender) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { receiver_id, title, body, url, type, message_id } = await req.json();
     if (!receiver_id) {
       return new Response(JSON.stringify({ error: "receiver_id required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "message") {
+      if (!message_id) {
+        return new Response(JSON.stringify({ error: "message_id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: message } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("id", message_id)
+        .eq("sender_id", sender.id)
+        .eq("receiver_id", receiver_id)
+        .maybeSingle();
+
+      if (!message) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else if (type === "match") {
+      const [{ data: liked }, { data: likedBack }] = await Promise.all([
+        supabase
+          .from("favorites")
+          .select("id")
+          .eq("user_id", sender.id)
+          .eq("partner_id", receiver_id)
+          .maybeSingle(),
+        supabase
+          .from("favorites")
+          .select("id")
+          .eq("user_id", receiver_id)
+          .eq("partner_id", sender.id)
+          .maybeSingle(),
+      ]);
+
+      if (!liked || !likedBack) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      return new Response(JSON.stringify({ error: "Unsupported notification type" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

@@ -420,6 +420,7 @@ export default function HomePage() {
             title: t.pushMatchTitle,
             body: `${senderName}${t.pushMatchBody}`,
             url: `/chat/${user.id}`,
+            type: "match",
           });
         }
       }

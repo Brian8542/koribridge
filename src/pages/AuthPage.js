@@ -6,6 +6,7 @@ import { supabase } from "../lib/supabase";
 import { useToast } from "../components/Toast";
 import { useLocale } from "../hooks/useLocale";
 import { login, signUp as gaSignUp } from "../utils/analytics";
+import { sendWelcomeEmail } from "../utils/welcomeEmail";
 
 const LEFT_FEATURES = [
   { icon: "🎯", titleKey: "f1Title", descKey: "f1Desc" },
@@ -94,12 +95,13 @@ export default function AuthPage() {
       if (password !== confirmPassword) return setError(t.errPasswordMismatch);
       if (password.length < 6) return setError(t.errPasswordShort);
       setLoading(true);
-      const { error: err } = await signUp(email, password);
+      const { data, error: err } = await signUp(email, password);
       setLoading(false);
       if (err) {
         setError(err.message);
       } else {
         gaSignUp("email");
+        sendWelcomeEmail({ userId: data?.user?.id, email, locale });
         setSignupDone(true);
       }
       return;

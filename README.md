@@ -62,6 +62,15 @@ cp .env.example .env
 | `REACT_APP_SUPABASE_URL` | Supabase Dashboard → Settings → API → Project URL |
 | `REACT_APP_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API → `anon` public key |
 
+Supabase Edge Functions also use server-side secrets:
+
+| Secret | Used for |
+|---|---|
+| `RESEND_API_KEY` | Sending welcome emails from `send-welcome-email` |
+| `WELCOME_EMAIL_FROM` | Verified sender address, e.g. `KoriBridge <hello@yourdomain.com>` |
+| `APP_URL` | Public app URL used in email buttons |
+| `ALLOWED_ORIGIN` | Production web origin for Edge Function CORS |
+
 > **Never commit `.env`** — it is already listed in `.gitignore`.
 
 ---
@@ -114,8 +123,8 @@ npm run build
 The app requires the following tables and storage buckets in your Supabase project.  
 Refer to `CLAUDE.md` for the complete column-level schema.
 
-**Tables:** `profiles` · `messages` · `blocked_users` · `favorites` · `reports`  
-**Storage buckets:** `avatars` (2 MB limit) · `chat-images` (5 MB limit)
+**Tables:** `profiles` · `messages` · `blocked_users` · `favorites` · `reports` · `email_deliveries`  
+**Storage buckets:** `avatars` (2 MB limit) · `chat-images` (5 MB limit) · `voice-memos`
 
 Enable **Realtime** on the `messages` table for live chat and online-presence features.
 

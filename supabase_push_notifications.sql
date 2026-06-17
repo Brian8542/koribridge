@@ -9,18 +9,23 @@ CREATE TABLE IF NOT EXISTS public.push_subscriptions (
 
 ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "push_subscriptions_select" ON public.push_subscriptions;
 CREATE POLICY "push_subscriptions_select"
   ON public.push_subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "push_subscriptions_insert" ON public.push_subscriptions;
 CREATE POLICY "push_subscriptions_insert"
   ON public.push_subscriptions FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "push_subscriptions_update" ON public.push_subscriptions;
 CREATE POLICY "push_subscriptions_update"
   ON public.push_subscriptions FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "push_subscriptions_delete" ON public.push_subscriptions;
 CREATE POLICY "push_subscriptions_delete"
   ON public.push_subscriptions FOR DELETE
   USING (auth.uid() = user_id);

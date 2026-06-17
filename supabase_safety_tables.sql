@@ -23,14 +23,17 @@ ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
 
 -- 본인의 차단 목록 및 신고만 조회/생성 가능
+DROP POLICY IF EXISTS "Users can manage own blocks" ON public.blocked_users;
 CREATE POLICY "Users can manage own blocks" ON public.blocked_users
   FOR ALL USING (auth.uid() = blocker_id);
 
+DROP POLICY IF EXISTS "Users can insert own reports" ON public.reports;
 CREATE POLICY "Users can insert own reports" ON public.reports
   FOR INSERT WITH CHECK (auth.uid() = reporter_id);
 
 -- 3. 기존 profiles 조회 정책 수정 (차단 유저 제외)
 DROP POLICY IF EXISTS "Users can view all profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view profiles excluding blocked" ON public.profiles;
 
 CREATE POLICY "Users can view profiles excluding blocked"
   ON public.profiles FOR SELECT
