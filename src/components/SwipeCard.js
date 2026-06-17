@@ -2,7 +2,7 @@ import React from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 
-export default function SwipeCard({ profile, score, onSwipeLeft, onSwipeRight }) {
+export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
@@ -56,6 +56,18 @@ export default function SwipeCard({ profile, score, onSwipeLeft, onSwipeRight })
               </span>
             )}
           </div>
+          {reasons.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {reasons.slice(0, 2).map((reason) => (
+                <span
+                  key={reason}
+                  className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full font-bold"
+                >
+                  {reason}
+                </span>
+              ))}
+            </div>
+          )}
           {profile.opening_question && (
             <div className="rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2">
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Opening Question</p>

@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
 import { getLanguageLevel } from "../utils/languageLevel";
-import { getMatchPercentage } from "../utils/matching";
+import { getMatchScore } from "../utils/matching";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 import { formatRelativeTime } from "../utils/formatters";
@@ -69,7 +69,8 @@ export default function ProfileDetailPage() {
 
   const level = getLanguageLevel(profile);
   const isOnline = onlineIds.has(profile.id);
-  const matchPercentage = getMatchPercentage(myProfile, profile);
+  const match = getMatchScore(myProfile, profile);
+  const matchPercentage = match.percentage;
   const lastActive = formatRelativeTime(profile.updated_at || profile.created_at);
   const commonInterests = (myProfile?.interests || []).filter((i) => (profile.interests || []).includes(i));
   const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
@@ -168,6 +169,18 @@ export default function ProfileDetailPage() {
                   style={{ width: `${matchPercentage}%` }}
                 />
               </div>
+              {match.reasons?.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {match.reasons.slice(0, 3).map((reason) => (
+                    <span
+                      key={reason}
+                      className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl font-bold"
+                    >
+                      {reason}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

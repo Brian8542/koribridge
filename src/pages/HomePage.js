@@ -568,15 +568,19 @@ export default function HomePage() {
         {profilesLoading ? (
           <div className="animate-pulse w-full max-w-sm aspect-[3/4] bg-gray-200 rounded-3xl" />
         ) : filteredProfiles.length > 0 ? (
-          filteredProfiles.slice(0, 5).reverse().map((profile) => (
-            <SwipeCard
-              key={profile.id}
-              profile={profile}
-              score={getMatchScore(myProfile, profile).score}
-              onSwipeLeft={() => handleSwipe(profile.id, "left")}
-              onSwipeRight={() => handleSwipe(profile.id, "right")}
-            />
-          ))
+          filteredProfiles.slice(0, 5).reverse().map((profile) => {
+            const match = getMatchScore(myProfile, profile);
+            return (
+              <SwipeCard
+                key={profile.id}
+                profile={profile}
+                score={match.score}
+                reasons={match.reasons}
+                onSwipeLeft={() => handleSwipe(profile.id, "left")}
+                onSwipeRight={() => handleSwipe(profile.id, "right")}
+              />
+            );
+          })
         ) : (
           <EmptyState
             icon="🌏"

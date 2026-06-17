@@ -1,5 +1,5 @@
 export function getMatchScore(me, other) {
-  if (!me || !other) return { score: 0, percentage: 0, reason: "" };
+  if (!me || !other) return { score: 0, percentage: 0, reason: "", reasons: [] };
   
   // 기본 점수 20점 (Fairness를 위해 모든 사용자 동일 시작)
   let score = 20; 
@@ -40,17 +40,27 @@ export function getMatchScore(me, other) {
 
   if (other.opening_question) {
     score += 4;
+    reasons.push("첫 대화 질문이 준비되어 있어요");
   }
 
   // 4. 활동 시간대 (최근 24시간 이내 접속 시 가점)
   if (other.last_seen_at) {
     const lastSeen = new Date(other.last_seen_at);
     const isRecent = (new Date() - lastSeen) < 24 * 60 * 60 * 1000;
-    if (isRecent) score += 10;
+    if (isRecent) {
+      score += 10;
+      reasons.push("최근에 활동했어요");
+    }
   }
 
   const percentage = Math.min(score, 100);
-  return { score: percentage, percentage, reason: reasons[0] || "관심사가 비슷해요" };
+  const fallbackReason = "관심사가 비슷해요";
+  return {
+    score: percentage,
+    percentage,
+    reason: reasons[0] || fallbackReason,
+    reasons: reasons.length > 0 ? reasons : [fallbackReason],
+  };
 }
 
 export function getMatchPercentage(me, other) {

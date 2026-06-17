@@ -118,6 +118,19 @@ function ProfileCard({
           <p className="mt-3 text-xs text-gray-500 line-clamp-2 leading-relaxed">{profile.bio}</p>
         )}
 
+        {match.reasons?.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {match.reasons.slice(0, 2).map((reason) => (
+              <span
+                key={reason}
+                className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold"
+              >
+                {reason}
+              </span>
+            ))}
+          </div>
+        )}
+
         {(goalLabel || styleLabel) && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {goalLabel && (
