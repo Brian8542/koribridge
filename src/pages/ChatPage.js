@@ -27,6 +27,17 @@ function getConversationStarters(partner) {
   ];
 }
 
+function getLearningPrompts(partner) {
+  const nativeLanguage = partner?.native_language || "모국어";
+  const learningLanguage = partner?.learning_language || "한국어";
+  return [
+    { label: "표현 추천", text: `오늘 ${nativeLanguage}에서 자주 쓰는 자연스러운 표현 하나 알려줄래요?` },
+    { label: "문장 교정", text: `제가 ${learningLanguage}로 짧게 문장을 써볼게요. 자연스럽게 고쳐줄 수 있어요?` },
+    { label: "문화 질문", text: `${nativeLanguage}권 문화에서 처음 만난 사람과 대화할 때 조심하면 좋은 표현이 있나요?` },
+    { label: "발음 연습", text: `${learningLanguage} 발음 연습하기 좋은 짧은 문장 하나 추천해 줄래요?` },
+  ];
+}
+
 function sortMsgs(msgs) {
   return [...msgs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 }
@@ -545,6 +556,7 @@ export default function ChatPage() {
 
   const isPartnerOnline = onlineIds.has(partner?.id);
   const conversationStarters = getConversationStarters(partner);
+  const learningPrompts = getLearningPrompts(partner);
   const applyStarter = (text) => {
     setNewMessage(text);
     textareaRef.current?.focus();
@@ -794,6 +806,25 @@ export default function ChatPage() {
       </div>
 
       <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
+        {messages.length > 0 && (
+          <div className="max-w-3xl mx-auto mb-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <span className="flex-shrink-0 text-[11px] font-extrabold text-gray-400">학습 미션</span>
+              {learningPrompts.map((prompt) => (
+                <button
+                  key={prompt.label}
+                  type="button"
+                  onClick={() => applyStarter(prompt.text)}
+                  disabled={isRecording}
+                  className="flex-shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 transition hover:border-emerald-200 hover:bg-emerald-100 disabled:opacity-40"
+                >
+                  {prompt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
           {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
             <button key={emoji} onClick={() => handleEmojiClick(emoji)} disabled={isRecording}
