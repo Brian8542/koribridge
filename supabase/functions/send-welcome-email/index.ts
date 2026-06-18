@@ -110,6 +110,25 @@ serve(async (req) => {
       });
     }
 
+    // NOTE: this function is called immediately after signUp(), before the
+    // user has confirmed their email — at that point Supabase has not yet
+    // issued a session, so there is no user JWT to require here. When a
+    // bearer token IS present (e.g. OAuth / auto-confirm signups that get a
+    // session right away), we still enforce that it belongs to user_id as
+    // defense-in-depth against spoofed requests.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (token) {
+      const { data: callerData } = await supabase.auth.getUser(token);
+      const caller = callerData?.user;
+      if (caller && caller.id !== user_id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(user_id);
     const user = userData?.user;
     if (userError || !user || user.email?.toLowerCase() !== String(email).toLowerCase()) {

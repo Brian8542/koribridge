@@ -61,7 +61,7 @@ export default function AdminPage() {
     setReportsLoading(true);
     const { data: reportsData } = await supabase
       .from("reports")
-      .select("id, reporter_id, reported_id, reason, created_at, status, resolved_at")
+      .select("id, reporter_id, reported_id, reason, detail, created_at, status, resolved_at")
       .order("created_at", { ascending: false })
       .limit(200);
 
@@ -310,6 +310,11 @@ export default function AdminPage() {
                       <p className="mt-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2 leading-relaxed">
                         {report.reason}
                       </p>
+                      {report.detail && (
+                        <p className="mt-1.5 text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2 leading-relaxed whitespace-pre-wrap">
+                          {report.detail}
+                        </p>
+                      )}
                     </div>
                     {report.status === "pending" && (
                       <div className="flex flex-col gap-2 flex-shrink-0">

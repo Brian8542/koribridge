@@ -66,11 +66,11 @@ function ProfileCard({
                   </svg>
                 )}
               </div>
-<div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => onToggleFavorite?.(profile)}
-                  className={`rounded-full p-1.5 transition-all duration-150 ${
+                  className={`rounded-full w-10 h-10 flex items-center justify-center transition-all duration-150 ${
                     isFavorite
                       ? "text-red-500 bg-red-50"
                       : "text-gray-300 hover:text-red-400 hover:bg-red-50"
@@ -83,7 +83,7 @@ function ProfileCard({
                   <button
                     type="button"
                     onClick={() => onReport?.(profile.id, profile.display_name)}
-                    className="text-gray-300 hover:text-gray-500 text-lg leading-none px-0.5"
+                    className="text-gray-300 hover:text-gray-500 hover:bg-gray-50 text-lg leading-none rounded-full w-10 h-10 flex items-center justify-center"
                     title={t.reportBlockTitle}
                   >
                     ⋯

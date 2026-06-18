@@ -25,6 +25,7 @@ import { sendPushNotification } from "../utils/pushNotifications";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
 import { getProfileCompletion } from "../utils/profileCompletion";
 import ProfileCompletionCard from "../components/ProfileCompletionCard";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -447,6 +448,8 @@ export default function HomePage() {
 
   const renderHomeContent = () => (
     <div className="space-y-8">
+      <AnnouncementBanner />
+
       {myProfile && (
         <div className="card p-4 flex items-center gap-4 bg-gradient-to-r from-red-50 to-rose-50 border-red-100/60">
           <div className="flex-shrink-0">
@@ -989,7 +992,7 @@ export default function HomePage() {
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white/30 text-white text-xs flex items-center justify-center hover:bg-white/40 transition-colors">
+                className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 text-white text-xs flex items-center justify-center hover:bg-white/40 transition-colors">
                 ✕
               </button>
             )}

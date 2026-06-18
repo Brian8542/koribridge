@@ -506,8 +506,8 @@ export default function ChatPage() {
           messageId: data[0].id,
         });
       }
-    } catch {
-      showToast(t.msgSendFailed, "error");
+    } catch (err) {
+      showToast(err?.code === "42501" ? t.msgSendBlocked : t.msgSendFailed, "error");
     } finally {
       setSendLoading(false);
     }

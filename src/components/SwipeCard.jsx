@@ -1,6 +1,7 @@
 import React from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
+import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 
 export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) {
   const x = useMotionValue(0);
@@ -17,10 +18,10 @@ export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, o
     <motion.div style={{ x, rotate, opacity }} drag="x" dragConstraints={{ left: 0, right: 0 }} onDragEnd={handleDragEnd} className="absolute w-full max-w-sm aspect-[3/4] bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing border border-gray-100">
       <div className="relative h-full flex flex-col">
         <div className="flex-1 bg-gray-200 relative overflow-hidden">
-          {profile.avatar_url ? (
+          {isRealAvatar(profile.avatar_url) ? (
             <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-7xl text-gray-400 bg-gray-100">
+            <div className={`w-full h-full flex items-center justify-center text-7xl text-white font-black bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)}`}>
               {profile.display_name?.[0]?.toUpperCase()}
             </div>
           )}

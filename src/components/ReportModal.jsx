@@ -12,7 +12,7 @@ export default function ReportModal({ targetId, onClose, onSuccess }) {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from("reports").insert({
-      reporter_id: user.id, reported_id: targetId, reason, detail
+      reporter_id: user.id, reported_id: targetId, reason, detail: detail.slice(0, 1000)
     });
     setLoading(false);
     if (!error) { onSuccess?.(); onClose(); }
@@ -32,7 +32,7 @@ export default function ReportModal({ targetId, onClose, onSuccess }) {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">상세 내용</label>
-            <textarea value={detail} onChange={(e) => setDetail(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 h-32 resize-none outline-none" placeholder="자세한 상황을 설명해주세요." />
+            <textarea value={detail} onChange={(e) => setDetail(e.target.value)} maxLength={1000} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 h-32 resize-none outline-none" placeholder="자세한 상황을 설명해주세요." />
           </div>
         </div>
         <div className="flex gap-3 mt-6">

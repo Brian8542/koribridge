@@ -31,6 +31,7 @@ export function useOnlineUsers(myUserId) {
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
           await channel.track({ user_id: myUserId, online_at: new Date().toISOString() });
+          supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", myUserId);
         }
       });
 

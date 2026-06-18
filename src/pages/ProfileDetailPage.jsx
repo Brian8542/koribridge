@@ -5,7 +5,6 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
-import { getLanguageLevel } from "../utils/languageLevel";
 import { getMatchScore } from "../utils/matching";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
@@ -67,11 +66,11 @@ export default function ProfileDetailPage() {
     );
   }
 
-  const level = getLanguageLevel(profile);
+  const level = profile.language_level || "초급";
   const isOnline = onlineIds.has(profile.id);
   const match = getMatchScore(myProfile, profile);
   const matchPercentage = match.percentage;
-  const lastActive = formatRelativeTime(profile.updated_at || profile.created_at);
+  const lastActive = formatRelativeTime(profile.last_seen_at || profile.updated_at || profile.created_at);
   const commonInterests = (myProfile?.interests || []).filter((i) => (profile.interests || []).includes(i));
   const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
   const styleLabel = getProfileOptionLabel(COMMUNICATION_STYLES, profile.communication_style);
