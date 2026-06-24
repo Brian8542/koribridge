@@ -447,27 +447,27 @@ export default function HomePage() {
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   const renderHomeContent = () => (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <AnnouncementBanner />
 
       {myProfile && (
-        <div className="card p-4 flex items-center gap-4 bg-gradient-to-r from-red-50 to-rose-50 border-red-100/60">
+        <div className="bg-white rounded-2xl border border-neutral-150 shadow-xs p-4 flex items-center gap-3.5">
           <div className="flex-shrink-0">
             {isRealAvatar(myProfile.avatar_url) ? (
-              <img src={myProfile.avatar_url} alt={t.tabProfile} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-red-100" />
+              <img src={myProfile.avatar_url} alt={t.tabProfile} className="w-11 h-11 rounded-xl object-cover" />
             ) : (
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-xl font-bold text-white`}>
+              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-lg font-bold text-white`}>
                 {myProfile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-extrabold text-gray-900 truncate">{myProfile.display_name}</p>
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="font-bold text-neutral-900 text-sm truncate">{myProfile.display_name}</p>
+            <p className="text-xs text-neutral-400 mt-0.5 truncate">
               {myProfile.nationality} · {myProfile.native_language} → {myProfile.learning_language}
             </p>
           </div>
-          <button onClick={() => setTab("profile")} className="btn-secondary px-4 py-2 text-sm w-auto flex-shrink-0">
+          <button onClick={() => setTab("profile")} className="btn-secondary px-3 py-2 text-xs w-auto flex-shrink-0">
             {t.editProfile}
           </button>
         </div>
@@ -478,8 +478,8 @@ export default function HomePage() {
       {recommendedProfiles.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg font-extrabold text-gray-900">{t.aiRecommended}</span>
-            <span className="text-xs bg-gradient-to-r from-red-600 to-rose-500 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm">{t.recommendedBadge}</span>
+            <span className="text-sm font-bold text-neutral-900">{t.aiRecommended}</span>
+            <span className="badge bg-primary-50 text-primary-600 border border-primary-100 text-[11px]">{t.recommendedBadge}</span>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {recommendedProfiles.map((profile) => (
@@ -509,9 +509,9 @@ export default function HomePage() {
       />
 
       <div>
-        <p className="text-base font-extrabold text-gray-900 mb-4">
+        <p className="text-sm font-bold text-neutral-900 mb-4">
           {t.allPartners}{" "}
-          <span className="text-rose-500">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
+          <span className="text-primary-500 font-semibold">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
         </p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
@@ -558,7 +558,7 @@ export default function HomePage() {
         </div>
         {filteredProfiles.length > visibleCount && (
           <div className="text-center mt-6">
-            <button onClick={() => setVisibleCount((c) => c + 12)} className="btn-secondary px-8 py-3 text-sm w-auto">
+            <button onClick={() => setVisibleCount((c) => c + 12)} className="btn-secondary px-8 py-2.5 text-sm w-auto">
               {t.loadMore} ({filteredProfiles.length - visibleCount}{t.moreSuffix})
             </button>
           </div>
@@ -570,12 +570,12 @@ export default function HomePage() {
   const renderSwipeContent = () => (
     <div className="flex flex-col items-center min-h-[65vh]">
       <div className="w-full max-w-sm mb-6 text-center">
-        <h2 className="text-xl font-extrabold text-gray-900">{t.tabSwipe}</h2>
-        <p className="text-sm text-gray-400 mt-1">{t.swipeDesc}</p>
+        <h2 className="text-lg font-bold text-neutral-900">{t.tabSwipe}</h2>
+        <p className="text-sm text-neutral-400 mt-1">{t.swipeDesc}</p>
       </div>
       <div className="relative w-full flex-1 flex items-center justify-center">
         {profilesLoading ? (
-          <div className="animate-pulse w-full max-w-sm aspect-[3/4] bg-gray-200 rounded-3xl" />
+          <div className="w-full max-w-sm aspect-[3/4] skeleton rounded-3xl" />
         ) : filteredProfiles.length > 0 ? (
           filteredProfiles.slice(0, 5).reverse().map((profile) => {
             const match = getMatchScore(myProfile, profile);
@@ -607,11 +607,11 @@ export default function HomePage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-extrabold text-gray-900">{t.favorites}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{t.favoritesDesc}</p>
+          <h2 className="text-base font-bold text-neutral-900">{t.favorites}</h2>
+          <p className="text-sm text-neutral-400 mt-0.5">{t.favoritesDesc}</p>
         </div>
         {favorites.length > 0 && (
-          <button type="button" onClick={() => setTab("home")} className="text-sm text-red-600 font-semibold hover:text-red-700 transition-colors">
+          <button type="button" onClick={() => setTab("home")} className="text-sm text-primary-500 font-semibold hover:text-primary-600 transition-colors">
             {t.morePartners}
           </button>
         )}
@@ -647,17 +647,17 @@ export default function HomePage() {
   );
 
   const renderChatListContent = () => (
-    <div className="space-y-3">
-      <div>
-        <h2 className="text-lg font-extrabold text-gray-900">{t.tabChat}</h2>
+    <div className="space-y-2.5">
+      <div className="mb-4">
+        <h2 className="text-base font-bold text-neutral-900">{t.tabChat}</h2>
       </div>
       {convoLoading ? (
         Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="card p-4 animate-pulse flex items-center gap-4 min-h-[80px]">
-            <div className="w-14 h-14 bg-gray-200 rounded-2xl flex-shrink-0" />
+          <div key={i} className="bg-white rounded-xl border border-neutral-150 p-4 flex items-center gap-3.5 min-h-[72px]">
+            <div className="w-12 h-12 skeleton rounded-xl flex-shrink-0" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded-lg w-1/3" />
-              <div className="h-3 bg-gray-100 rounded-lg w-2/3" />
+              <div className="h-3.5 skeleton rounded-md w-1/3" />
+              <div className="h-3 skeleton rounded-md w-2/3" />
             </div>
           </div>
         ))
@@ -693,8 +693,8 @@ export default function HomePage() {
   const renderProfileContent = () => (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-gray-900">{t.profileEdit}</h2>
-        <button type="button" onClick={() => setTab("home")} className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+        <h2 className="text-xl font-extrabold text-neutral-900">{t.profileEdit}</h2>
+        <button type="button" onClick={() => setTab("home")} className="text-sm text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" transform="scale(-1,1) translate(-24,0)" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -709,20 +709,20 @@ export default function HomePage() {
         <div className="card flex flex-col items-center gap-4 py-8">
           <div className="relative">
             {avatarPreview ? (
-              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-100 shadow-lg" />
+              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-primary-100 shadow-lg" />
             ) : isRealAvatar(profileForm.avatar_url) ? (
-              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-red-100 shadow-lg" />
+              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-primary-100 shadow-lg" />
             ) : (
               <div className={`w-28 h-28 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profileForm.avatar_url, user?.id)} flex items-center justify-center text-5xl font-black text-white shadow-lg`}>
                 {profileForm.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
-            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center cursor-pointer shadow-lg border-2 border-white">
+            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center cursor-pointer shadow-lg border-2 border-white transition-colors">
               <span className="text-white text-xl leading-none font-bold select-none">+</span>
               <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
             </label>
           </div>
-          <p className="text-xs text-gray-400">{t.avatarLimit}</p>
+          <p className="text-xs text-neutral-400">{t.avatarLimit}</p>
           <div className="flex flex-wrap gap-2 justify-center" style={{ maxWidth: 288 }}>
             {AVATAR_GRADIENTS.map((gradient, idx) => (
               <button
@@ -731,7 +731,7 @@ export default function HomePage() {
                 onClick={() => handleGradientSelect(idx)}
                 className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
                   profileForm.avatar_url === `gradient:${idx}` && !avatarPreview
-                    ? "ring-2 ring-offset-2 ring-red-500 scale-110 shadow-md"
+                    ? "ring-2 ring-offset-2 ring-primary-500 scale-110 shadow-md"
                     : "opacity-70 hover:opacity-100 hover:scale-110"
                 }`}
               />
@@ -742,12 +742,12 @@ export default function HomePage() {
         <div className="card space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nickname}</label>
+              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.nickname}</label>
               <input type="text" className="input-field" value={profileForm.display_name} maxLength={50}
                 onChange={(e) => handleProfileChange("display_name", e.target.value)} />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nationality}</label>
+              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.nationality}</label>
               <select className="input-field" value={profileForm.nationality} onChange={(e) => handleProfileChange("nationality", e.target.value)}>
                 <option value="">{t.select}</option>
                 {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
@@ -757,14 +757,14 @@ export default function HomePage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.nativeLanguage}</label>
+              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.nativeLanguage}</label>
               <select className="input-field" value={profileForm.native_language} onChange={(e) => handleProfileChange("native_language", e.target.value)}>
                 <option value="">{t.select}</option>
                 {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.learningLanguage}</label>
+              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.learningLanguage}</label>
               <select className="input-field" value={profileForm.learning_language} onChange={(e) => handleProfileChange("learning_language", e.target.value)}>
                 <option value="">{t.select}</option>
                 {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -773,14 +773,14 @@ export default function HomePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.languageLevel}</label>
+            <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.languageLevel}</label>
             <div className="flex gap-2">
               {["초급", "중급", "고급"].map((level) => (
                 <button type="button" key={level} onClick={() => handleProfileChange("language_level", level)}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 ${
                     profileForm.language_level === level
-                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-primary-500 text-white shadow-red-sm"
+                      : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}>
                   {levelLabel(level)}
                 </button>
@@ -790,8 +790,8 @@ export default function HomePage() {
 
           <div className="flex items-center justify-between py-1">
             <div>
-              <p className="text-sm font-bold text-gray-700">{t.isPublic}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{t.noPartnersDesc}</p>
+              <p className="text-sm font-bold text-neutral-700">{t.isPublic}</p>
+              <p className="text-xs text-neutral-400 mt-0.5">{t.noPartnersDesc}</p>
             </div>
             <button
               type="button"
@@ -799,7 +799,7 @@ export default function HomePage() {
               aria-checked={profileForm.is_public}
               onClick={() => handleProfileChange("is_public", !profileForm.is_public)}
               className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                profileForm.is_public ? "bg-red-600" : "bg-gray-200"
+                profileForm.is_public ? "bg-primary-500" : "bg-neutral-200"
               }`}
             >
               <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -811,7 +811,7 @@ export default function HomePage() {
 
         <div className="card space-y-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">대화 목적</label>
+            <label className="block text-sm font-bold text-neutral-700 mb-2">대화 목적</label>
             <div className="grid grid-cols-2 gap-2">
               {CONVERSATION_GOALS.map((goal) => (
                 <button
@@ -820,8 +820,8 @@ export default function HomePage() {
                   onClick={() => handleProfileChange("conversation_goal", goal.value)}
                   className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
                     profileForm.conversation_goal === goal.value
-                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-primary-500 text-white"
+                      : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   {goal.label}
@@ -831,7 +831,7 @@ export default function HomePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">선호 대화 방식</label>
+            <label className="block text-sm font-bold text-neutral-700 mb-2">선호 대화 방식</label>
             <div className="grid grid-cols-2 gap-2">
               {COMMUNICATION_STYLES.map((style) => (
                 <button
@@ -840,8 +840,8 @@ export default function HomePage() {
                   onClick={() => handleProfileChange("communication_style", style.value)}
                   className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
                     profileForm.communication_style === style.value
-                      ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-primary-500 text-white"
+                      : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
                   {style.label}
@@ -852,8 +852,8 @@ export default function HomePage() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-bold text-gray-700">첫 대화 질문</label>
-              <span className={`text-xs ${profileForm.opening_question.length > 120 ? "text-red-500" : "text-gray-400"}`}>
+              <label className="block text-sm font-bold text-neutral-700">첫 대화 질문</label>
+              <span className={`text-xs ${profileForm.opening_question.length > 120 ? "text-primary-500" : "text-neutral-400"}`}>
                 {profileForm.opening_question.length}/140
               </span>
             </div>
@@ -869,11 +869,11 @@ export default function HomePage() {
         </div>
 
         <div className="card">
-          <p className="text-sm font-bold text-gray-700 mb-3">{t.pushNotifications}</p>
+          <p className="text-sm font-bold text-neutral-700 mb-3">{t.pushNotifications}</p>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-700">{t.pushMessages}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{
+              <p className="text-sm font-semibold text-neutral-700">{t.pushMessages}</p>
+              <p className="text-xs text-neutral-400 mt-0.5">{
                 pushPermission === "denied" ? t.pushDenied : t.pushMessagesDesc
               }</p>
             </div>
@@ -885,7 +885,7 @@ export default function HomePage() {
                 disabled={pushLoading}
                 onClick={pushSubscribed ? unsubscribePush : subscribePush}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
-                  pushSubscribed ? "bg-red-600" : "bg-gray-200"
+                  pushSubscribed ? "bg-primary-500" : "bg-neutral-200"
                 }`}
               >
                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -897,14 +897,14 @@ export default function HomePage() {
         </div>
 
         <div className="card">
-          <label className="block text-sm font-bold text-gray-700 mb-3">{t.interests}</label>
+          <label className="block text-sm font-bold text-neutral-700 mb-3">{t.interests}</label>
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((interest) => (
               <button type="button" key={interest} onClick={() => toggleInterest(interest)}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
                   profileForm.interests.includes(interest)
-                    ? "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-sm"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-primary-500 text-white"
+                    : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                 }`}>
                 {interest}
               </button>
@@ -914,8 +914,8 @@ export default function HomePage() {
 
         <div className="card">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-sm font-bold text-gray-700">{t.bio}</label>
-            <span className={`text-xs ${profileForm.bio.length > 450 ? "text-red-500" : "text-gray-400"}`}>
+            <label className="block text-sm font-bold text-neutral-700">{t.bio}</label>
+            <span className={`text-xs ${profileForm.bio.length > 450 ? "text-primary-500" : "text-neutral-400"}`}>
               {profileForm.bio.length}/500
             </span>
           </div>
@@ -934,14 +934,14 @@ export default function HomePage() {
         </button>
       </form>
 
-      <div className="flex items-center justify-center gap-4 pt-2 text-xs text-gray-400">
-        <button onClick={() => navigate("/terms")} className="hover:text-gray-600 underline">{t.termsLink}</button>
+      <div className="flex items-center justify-center gap-4 pt-2 text-xs text-neutral-400">
+        <button onClick={() => navigate("/terms")} className="hover:text-neutral-600 underline">{t.termsLink}</button>
         <span>·</span>
-        <button onClick={() => navigate("/privacy")} className="hover:text-gray-600 underline">{t.privacyLink}</button>
+        <button onClick={() => navigate("/privacy")} className="hover:text-neutral-600 underline">{t.privacyLink}</button>
       </div>
 
       <div className="pt-2 text-center">
-        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-gray-300 hover:text-red-400 underline transition-colors">
+        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-neutral-300 hover:text-primary-500 underline transition-colors">
           {t.deleteAccountBtn}
         </button>
       </div>
@@ -957,43 +957,53 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-surface-bg pb-24">
       <Helmet><title>KoriBridge - {t.homeTitle}</title></Helmet>
 
-      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-5 pt-4 pb-3 sticky top-0 z-40 shadow-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] text-red-100/80 font-medium leading-none mb-0.5">
-              {t.welcome} {user.email?.split("@")[0] || ""}{locale === "ko" ? "님" : ""}
-            </p>
-            <h1 className="text-xl font-extrabold text-white tracking-tight">{t.homeTitle}</h1>
+      {/* ── 상단 헤더 ── */}
+      <div className="bg-white border-b border-neutral-150 shadow-nav px-5 pt-4 pb-3 sticky top-0 z-40">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-bold">K</span>
+            </div>
+            <h1 className="text-base font-bold text-neutral-900 tracking-tight">{t.homeTitle}</h1>
           </div>
           <div className="flex items-center gap-1.5">
-            <LanguageSelector dark />
+            <LanguageSelector />
             <button type="button" onClick={toggleDarkMode}
-              className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center text-base transition-colors">
-              {darkMode ? "🌙" : "☀️"}
+              className="w-9 h-9 rounded-lg bg-surface-bg hover:bg-surface-muted flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors">
+              {darkMode ? (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+              )}
             </button>
             <button type="button" onClick={signOut}
-              className="h-9 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-xs text-white font-bold transition-colors">
+              className="h-9 px-3 rounded-lg bg-surface-bg hover:bg-surface-muted text-xs text-neutral-500 font-semibold hover:text-neutral-900 transition-colors border border-neutral-200">
               {t.logout}
             </button>
           </div>
         </div>
 
         {tab === "home" && (
-          <div className="mt-3 relative">
+          <div className="mt-3 relative max-w-6xl mx-auto">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z" />
+            </svg>
             <input
               type="text"
-              className="w-full pl-4 pr-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/55 text-sm focus:outline-none focus:bg-white/30 focus:ring-2 focus:ring-white/30 transition-all"
+              className="w-full pl-10 pr-9 h-10 rounded-xl bg-surface-bg border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-500/10 transition-all"
               placeholder={t.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery("")}
-                className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 text-white text-xs flex items-center justify-center hover:bg-white/40 transition-colors">
-                ✕
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-neutral-200 text-neutral-500 text-xs flex items-center justify-center hover:bg-neutral-300 transition-colors">
+                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             )}
           </div>
@@ -1008,8 +1018,9 @@ export default function HomePage() {
         {tab === "profile" && renderProfileContent()}
       </div>
 
-      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 border-t border-gray-100 bg-white/97 backdrop-blur-sm shadow-[0_-4px_24px_rgba(15,23,42,0.08)]">
-        <nav className="mx-auto flex max-w-6xl items-center justify-around px-2">
+      {/* ── 하단 탭바 ── */}
+      <div ref={bottomNavRef} className="fixed inset-x-0 bottom-0 bg-white border-t border-neutral-150 shadow-[0_-2px_16px_rgba(0,0,0,0.06)]">
+        <nav className="mx-auto flex max-w-6xl items-stretch justify-around px-1 h-[60px]">
           {NAV_TABS.map((item) => {
             const active = tab === item.key;
             return (
@@ -1017,17 +1028,19 @@ export default function HomePage() {
                 key={item.key}
                 type="button"
                 onClick={() => setTab(item.key)}
-                className="relative flex flex-col items-center gap-0.5 min-w-[56px] py-2.5 px-3 rounded-2xl transition-all duration-150"
+                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all duration-150 ${active ? "text-primary-500" : "text-neutral-400 hover:text-neutral-600"}`}
               >
-                <span className={`transition-colors duration-150 ${active ? "text-red-600" : "text-gray-400"}`}>
+                {active && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-primary-500 rounded-b-full" />
+                )}
+                <span className="transition-colors duration-150">
                   {NAV_ICONS[item.key]}
                 </span>
-                <span className={`text-[10px] font-semibold transition-colors duration-150 leading-none ${active ? "text-red-600" : "text-gray-400"}`}>
+                <span className={`text-[10px] font-semibold leading-none transition-colors duration-150`}>
                   {item.label}
                 </span>
-                {active && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-red-500" />}
                 {item.badge > 0 && (
-                  <span className="absolute top-1.5 right-2 w-4 h-4 rounded-full bg-red-600 text-[9px] text-white flex items-center justify-center font-bold">
+                  <span className="absolute top-2 right-[calc(50%-16px)] min-w-[16px] h-4 px-1 rounded-full bg-primary-500 text-[9px] text-white flex items-center justify-center font-bold">
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 )}
@@ -1038,28 +1051,28 @@ export default function HomePage() {
       </div>
 
       {reportModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 px-4 pb-4 sm:pb-0">
-          <div className="bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-0.5">{reportModal.displayName}</h3>
-            <p className="text-sm text-gray-500 mb-4">{t.reportOrBlock}</p>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-neutral-900/40 backdrop-blur-sm px-4 pb-4 sm:pb-0">
+          <div className="bg-white rounded-2xl shadow-modal p-6 w-full max-w-sm border border-neutral-100">
+            <h3 className="text-base font-bold text-neutral-900 mb-0.5">{reportModal.displayName}</h3>
+            <p className="text-sm text-neutral-500 mb-4">{t.reportOrBlock}</p>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">{t.reportReason}</label>
+                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.reportReason}</label>
                 <textarea rows={3} className="input-field resize-none text-sm"
                   value={reportReason} onChange={(e) => setReportReason(e.target.value)}
                   placeholder={t.reportReasonPlaceholder} />
               </div>
               <button type="button" onClick={submitReport} disabled={reportLoading || !reportReason.trim()}
-                className="w-full rounded-2xl bg-amber-500 text-white py-3 text-sm font-bold hover:bg-amber-600 disabled:opacity-50 transition-colors">
+                className="w-full rounded-xl bg-amber-500 text-white py-3 text-sm font-semibold hover:bg-amber-600 disabled:opacity-50 transition-colors">
                 {reportLoading ? t.reporting : t.reportBtn}
               </button>
               <button type="button"
                 onClick={() => setBlockConfirm({ targetId: reportModal.profileId, displayName: reportModal.displayName })}
-                className="w-full rounded-2xl bg-red-600 text-white py-3 text-sm font-bold hover:bg-red-700 transition-colors">
+                className="w-full rounded-xl bg-primary-500 text-white py-3 text-sm font-semibold hover:bg-primary-600 transition-colors">
                 {t.blockBtn}
               </button>
               <button type="button" onClick={() => { setReportModal(null); setReportReason(""); }}
-                className="w-full rounded-2xl bg-gray-100 text-gray-700 py-3 text-sm font-semibold hover:bg-gray-200 transition-colors">
+                className="w-full rounded-xl bg-surface-muted border border-neutral-200 text-neutral-600 py-3 text-sm font-semibold hover:bg-neutral-100 transition-colors">
                 {t.cancel}
               </button>
             </div>

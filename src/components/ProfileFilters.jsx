@@ -18,13 +18,13 @@ function ProfileFilters({
   );
 
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-sm border border-gray-100">
-      <p className="text-sm font-semibold text-gray-700 mb-4">{t.filterTitle}</p>
-      <div className="grid gap-4 sm:grid-cols-3">
+    <div className="rounded-2xl bg-white p-5 border border-neutral-150 shadow-xs">
+      <p className="text-sm font-semibold text-neutral-700 mb-4">{t.filterTitle}</p>
+      <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <label className="text-sm text-gray-600">{t.filterNationality}</label>
+          <label className="text-xs font-semibold text-neutral-500 block mb-1.5">{t.filterNationality}</label>
           <select
-            className="input-field mt-1"
+            className="input-field"
             value={nationalityFilter}
             onChange={(e) => onNationality(e.target.value)}
           >
@@ -35,9 +35,9 @@ function ProfileFilters({
           </select>
         </div>
         <div>
-          <label className="text-sm text-gray-600">{t.filterLanguage}</label>
+          <label className="text-xs font-semibold text-neutral-500 block mb-1.5">{t.filterLanguage}</label>
           <select
-            className="input-field mt-1"
+            className="input-field"
             value={languageFilter}
             onChange={(e) => onLanguage(e.target.value)}
           >
@@ -48,9 +48,9 @@ function ProfileFilters({
           </select>
         </div>
         <div>
-          <label className="text-sm text-gray-600">{t.filterLevel}</label>
+          <label className="text-xs font-semibold text-neutral-500 block mb-1.5">{t.filterLevel}</label>
           <select
-            className="input-field mt-1"
+            className="input-field"
             value={levelFilter}
             onChange={(e) => onLevel(e.target.value)}
           >

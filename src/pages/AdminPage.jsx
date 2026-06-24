@@ -129,22 +129,24 @@ export default function AdminPage() {
   };
 
   if (authLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50">
+    <div className="min-h-screen flex items-center justify-center bg-surface-bg">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
-        <p className="text-sm text-gray-400 font-medium">{t.adminCheckingAuth}</p>
+        <div className="w-10 h-10 border-2 border-neutral-200 border-t-primary-500 rounded-full animate-spin" />
+        <p className="text-sm text-neutral-400 font-medium">{t.adminCheckingAuth}</p>
       </div>
     </div>
   );
 
   if (!user || !isAdmin) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50 px-6">
-      <div className="bg-white rounded-3xl p-8 text-center max-w-sm w-full shadow-lg">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-100 to-rose-100 flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">🔒</span>
+    <div className="min-h-screen flex items-center justify-center bg-surface-bg px-6">
+      <div className="bg-white rounded-2xl p-8 text-center max-w-sm w-full shadow-card border border-neutral-150">
+        <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+          </svg>
         </div>
-        <p className="text-red-600 font-extrabold text-lg">{t.adminNoAccess}</p>
-        <p className="text-sm text-gray-500 mt-2">{t.adminNoAccessDesc}</p>
+        <p className="text-primary-500 font-extrabold text-lg">{t.adminNoAccess}</p>
+        <p className="text-sm text-neutral-500 mt-2">{t.adminNoAccessDesc}</p>
         <button onClick={() => nav("/home")} className="mt-6 btn-primary px-6 py-3 text-sm w-full">{t.adminGoHome}</button>
       </div>
     </div>
@@ -163,16 +165,16 @@ export default function AdminPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-bg">
       <Helmet><title>KoriBridge - {t.adminTitle}</title></Helmet>
-      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-6 py-4 flex items-center gap-4 sticky top-0 z-10 shadow-md">
-        <button onClick={() => nav("/home")} className="text-white/80 hover:text-white text-sm font-semibold transition">{t.adminHomeBtn}</button>
-        <h1 className="font-extrabold text-lg text-white flex-1">{t.adminTitle}</h1>
-        <span className="text-xs bg-white/20 text-white border border-white/30 px-2.5 py-1 rounded-full font-bold">ADMIN</span>
+      <div className="bg-white border-b border-neutral-150 shadow-nav px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
+        <button onClick={() => nav("/home")} className="text-neutral-500 hover:text-neutral-900 transition text-sm font-semibold">{t.adminHomeBtn}</button>
+        <h1 className="font-extrabold text-base text-neutral-900 flex-1">{t.adminTitle}</h1>
+        <span className="text-xs bg-primary-50 text-primary-600 border border-primary-100 px-2.5 py-1 rounded-full font-bold">ADMIN</span>
       </div>
 
-      <div className="bg-white border-b border-gray-100 px-4 py-3">
-        <div className="flex gap-1.5 max-w-5xl mx-auto bg-gray-100 rounded-2xl p-1">
+      <div className="bg-white border-b border-neutral-150 px-4 py-3">
+        <div className="flex gap-1.5 max-w-5xl mx-auto bg-surface-muted rounded-xl p-1">
           {[
             { key: "overview", label: t.adminTabOverview },
             { key: "reports", label: `${t.adminTabReports}${stats.pendingReports > 0 ? ` ${stats.pendingReports}` : ""}` },
@@ -181,10 +183,10 @@ export default function AdminPage() {
             <button
               key={tabItem.key}
               onClick={() => setTab(tabItem.key)}
-              className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
                 tab === tabItem.key
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white text-neutral-900 shadow-xs"
+                  : "text-neutral-500 hover:text-neutral-700"
               }`}
             >
               {tabItem.label}
@@ -206,29 +208,26 @@ export default function AdminPage() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: t.adminStatUsers, value: stats.users.toLocaleString(), gradient: "from-blue-500 to-indigo-500", icon: "👥" },
-                  { label: t.adminStatToday, value: `+${stats.todayUsers}`, gradient: "from-red-600 to-rose-500", icon: "✨" },
-                  { label: t.adminStatMessages, value: stats.messages.toLocaleString(), gradient: "from-violet-500 to-purple-500", icon: "💬" },
+                  { label: t.adminStatUsers, value: stats.users.toLocaleString(), color: "text-neutral-900", bg: "bg-white" },
+                  { label: t.adminStatToday, value: `+${stats.todayUsers}`, color: "text-primary-500", bg: "bg-white" },
+                  { label: t.adminStatMessages, value: stats.messages.toLocaleString(), color: "text-neutral-900", bg: "bg-white" },
                   {
                     label: t.adminStatPending,
                     value: stats.pendingReports.toLocaleString(),
-                    gradient: stats.pendingReports > 0 ? "from-orange-500 to-amber-500" : "from-emerald-500 to-teal-500",
-                    icon: stats.pendingReports > 0 ? "⚠️" : "✅",
+                    color: stats.pendingReports > 0 ? "text-amber-600" : "text-emerald-600",
+                    bg: "bg-white",
                   },
                 ].map(card => (
-                  <div key={card.label} className={`bg-gradient-to-br ${card.gradient} rounded-3xl p-5 shadow-md text-white`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs text-white/70 font-bold uppercase tracking-wider">{card.label}</p>
-                      <span className="text-lg">{card.icon}</span>
-                    </div>
-                    <p className="text-3xl font-black">{card.value}</p>
+                  <div key={card.label} className={`${card.bg} rounded-2xl border border-neutral-150 shadow-xs p-5`}>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 mb-1">{card.label}</p>
+                    <p className={`text-3xl font-black ${card.color}`}>{card.value}</p>
                   </div>
                 ))}
               </div>
             )}
 
             <div className="card p-6">
-              <h2 className="text-sm font-bold text-gray-700 mb-3">{t.adminQuickNav}</h2>
+              <h2 className="text-sm font-bold text-neutral-700 mb-3">{t.adminQuickNav}</h2>
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => setTab("reports")} className="btn-secondary px-4 py-2 text-sm w-auto">
                   {t.adminViewReports}
@@ -247,7 +246,7 @@ export default function AdminPage() {
         {tab === "reports" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="text-base font-bold text-gray-900">{t.adminReportsTitle}</h2>
+              <h2 className="text-base font-bold text-neutral-900">{t.adminReportsTitle}</h2>
               <div className="flex gap-2">
                 {[
                   { key: "pending", label: t.adminPending },
@@ -258,13 +257,13 @@ export default function AdminPage() {
                     key={f.key}
                     onClick={() => setReportFilter(f.key)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                      reportFilter === f.key ? "bg-red-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      reportFilter === f.key ? "bg-primary-500 text-white" : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                     }`}
                   >
                     {f.label}
                   </button>
                 ))}
-                <button onClick={loadReports} className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200">
+                <button onClick={loadReports} className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-muted text-neutral-600 hover:bg-neutral-100">
                   {t.refresh}
                 </button>
               </div>
@@ -275,7 +274,7 @@ export default function AdminPage() {
             ) : filteredReports.length === 0 ? (
               <div className="card text-center py-16">
                 <p className="text-2xl mb-3">✅</p>
-                <p className="text-gray-500 font-medium">
+                <p className="text-neutral-500 font-medium">
                   {reportFilter === "pending" ? t.adminNoReports : t.adminNoReportsAlt}
                 </p>
               </div>
@@ -290,28 +289,28 @@ export default function AdminPage() {
                         }`}>
                           {report.status === "pending" ? t.adminPending : t.adminResolved}
                         </span>
-                        <span className="text-xs text-gray-400">{formatRelativeTime(report.created_at)}</span>
+                        <span className="text-xs text-neutral-400">{formatRelativeTime(report.created_at)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm flex-wrap">
                         <button
                           onClick={() => nav(`/profile/${report.reporter_id}`)}
-                          className="font-semibold text-gray-700 hover:text-red-600 hover:underline"
+                          className="font-semibold text-neutral-700 hover:text-primary-500 hover:underline"
                         >
                           {report.reporter?.display_name}
                         </button>
-                        <span className="text-gray-400">{t.adminReportedArrow}</span>
+                        <span className="text-neutral-400">{t.adminReportedArrow}</span>
                         <button
                           onClick={() => nav(`/profile/${report.reported_id}`)}
-                          className="font-semibold text-gray-900 hover:text-red-600 hover:underline"
+                          className="font-semibold text-neutral-900 hover:text-primary-500 hover:underline"
                         >
                           {report.reported?.display_name}
                         </button>
                       </div>
-                      <p className="mt-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2 leading-relaxed">
+                      <p className="mt-2 text-sm text-neutral-600 bg-surface-bg rounded-xl px-3 py-2 leading-relaxed">
                         {report.reason}
                       </p>
                       {report.detail && (
-                        <p className="mt-1.5 text-xs text-gray-500 bg-gray-50 rounded-xl px-3 py-2 leading-relaxed whitespace-pre-wrap">
+                        <p className="mt-1.5 text-xs text-neutral-500 bg-surface-bg rounded-xl px-3 py-2 leading-relaxed whitespace-pre-wrap">
                           {report.detail}
                         </p>
                       )}
@@ -342,8 +341,8 @@ export default function AdminPage() {
         {tab === "users" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <h2 className="text-base font-bold text-gray-900">{t.adminUsersTitle} ({filteredUsers.length})</h2>
-              <button onClick={loadUsers} className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200">
+              <h2 className="text-base font-bold text-neutral-900">{t.adminUsersTitle} ({filteredUsers.length})</h2>
+              <button onClick={loadUsers} className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-muted text-neutral-600 hover:bg-neutral-100">
                 {t.refresh}
               </button>
             </div>
@@ -362,7 +361,7 @@ export default function AdminPage() {
               Array.from({ length: 5 }).map((_, i) => <div key={i} className="card h-16 animate-pulse" />)
             ) : filteredUsers.length === 0 ? (
               <div className="card text-center py-12">
-                <p className="text-gray-500">{t.adminNoUsers}</p>
+                <p className="text-neutral-500">{t.adminNoUsers}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -371,24 +370,24 @@ export default function AdminPage() {
                     {u.avatar_url ? (
                       <img src={u.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-sm font-bold text-red-600 flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-sm font-bold text-neutral-500 flex-shrink-0">
                         {u.display_name?.[0]?.toUpperCase() || "?"}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{u.display_name}</p>
+                        <p className="font-semibold text-neutral-900 text-sm truncate">{u.display_name}</p>
                         {u.is_admin && (
-                          <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                          <span className="text-[10px] bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded font-bold">ADMIN</span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-400">{u.nationality} · {formatRelativeTime(u.created_at)}</p>
+                      <p className="text-xs text-neutral-400">{u.nationality} · {formatRelativeTime(u.created_at)}</p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <button
                         onClick={() => toggleUserPublic(u.id, u.is_public)}
                         className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                          u.is_public ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                          u.is_public ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-surface-muted text-neutral-500 hover:bg-neutral-100"
                         }`}
                       >
                         {u.is_public ? t.adminPublic : t.adminPrivate}
@@ -397,7 +396,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => toggleUserAdmin(u.id, u.is_admin)}
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                            u.is_admin ? "bg-red-100 text-red-600 hover:bg-red-200" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            u.is_admin ? "bg-primary-100 text-primary-600 hover:bg-primary-200" : "bg-surface-muted text-neutral-500 hover:bg-neutral-100"
                           }`}
                         >
                           {u.is_admin ? t.adminAdmin : t.adminNormal}
@@ -405,7 +404,7 @@ export default function AdminPage() {
                       )}
                       <button
                         onClick={() => nav(`/profile/${u.id}`)}
-                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                       >
                         {t.adminViewProfile}
                       </button>

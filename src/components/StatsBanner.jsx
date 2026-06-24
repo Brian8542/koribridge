@@ -3,17 +3,20 @@ import React from "react";
 function StatsBanner({ onlineCount, total, today }) {
   return (
     <div className="grid grid-cols-3 gap-3">
-      <div className="bg-red-600 rounded-3xl p-4 text-white text-center shadow-lg shadow-red-100">
-        <p className="text-[10px] opacity-80 font-bold uppercase tracking-wider mb-1">Online</p>
-        <p className="text-xl font-black">{onlineCount}</p>
+      <div className="bg-white rounded-xl border border-neutral-150 shadow-xs p-4 text-center">
+        <div className="flex items-center justify-center gap-1.5 mb-1">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <p className="text-2xs font-semibold uppercase tracking-widest text-neutral-400">Online</p>
+        </div>
+        <p className="text-xl font-bold text-emerald-600">{onlineCount}</p>
       </div>
-      <div className="bg-white border border-gray-100 rounded-3xl p-4 text-center">
-        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Total</p>
-        <p className="text-xl font-black text-gray-900">{total}</p>
+      <div className="bg-white rounded-xl border border-neutral-150 shadow-xs p-4 text-center">
+        <p className="text-2xs font-semibold uppercase tracking-widest text-neutral-400 mb-1">Total</p>
+        <p className="text-xl font-bold text-neutral-900">{total}</p>
       </div>
-      <div className="bg-white border border-gray-100 rounded-3xl p-4 text-center">
-        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Today</p>
-        <p className="text-xl font-black text-red-600">+{today}</p>
+      <div className="bg-white rounded-xl border border-neutral-150 shadow-xs p-4 text-center">
+        <p className="text-2xs font-semibold uppercase tracking-widest text-neutral-400 mb-1">Today</p>
+        <p className="text-xl font-bold text-primary-500">+{today}</p>
       </div>
     </div>
   );

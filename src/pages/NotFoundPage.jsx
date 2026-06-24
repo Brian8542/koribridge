@@ -8,32 +8,27 @@ export default function NotFoundPage() {
   const { t } = useLocale();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-600 via-rose-500 to-pink-400 px-6 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-bg px-6">
       <Helmet><title>KoriBridge - {t.notFoundTitle}</title></Helmet>
 
-      <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full bg-white/10 translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        <span className="text-[14rem] font-black text-white/10 leading-none">404</span>
-      </div>
-
-      <div className="relative z-10 text-center text-white">
-        <div className="w-16 h-16 rounded-2xl bg-white/20 border-2 border-white/30 flex items-center justify-center mx-auto mb-6 shadow-2xl backdrop-blur-sm">
-          <span className="text-white text-2xl font-black">K</span>
+      <div className="text-center max-w-sm">
+        <div className="w-14 h-14 rounded-2xl bg-primary-500 flex items-center justify-center mx-auto mb-8 shadow-red-md">
+          <span className="text-white text-xl font-black">K</span>
         </div>
-        <h1 className="text-3xl font-black tracking-tight">{t.notFoundTitle}</h1>
-        <p className="mt-3 text-white/70 text-sm leading-relaxed">{t.notFoundDesc}</p>
+        <p className="text-[7rem] font-black text-neutral-100 leading-none select-none">404</p>
+        <h1 className="text-2xl font-extrabold text-neutral-900 mt-2 tracking-tight">{t.notFoundTitle}</h1>
+        <p className="mt-3 text-neutral-500 text-sm leading-relaxed">{t.notFoundDesc}</p>
 
         <div className="mt-10 flex flex-col items-center gap-3">
           <button
             onClick={() => navigate("/home")}
-            className="bg-white text-red-600 font-extrabold px-8 py-3.5 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all active:scale-[0.98] text-sm"
+            className="btn-primary px-8 py-3.5 text-sm font-extrabold w-auto"
           >
             {t.notFoundHome}
           </button>
           <button
             onClick={() => navigate(-1)}
-            className="text-white/60 text-sm hover:text-white underline transition"
+            className="text-neutral-400 text-sm hover:text-neutral-700 underline transition"
           >
             {t.notFoundBack}
           </button>

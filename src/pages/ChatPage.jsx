@@ -90,31 +90,31 @@ const VoicePlayer = React.memo(function VoicePlayer({ url, isMine }) {
         type="button"
         onClick={toggle}
         className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-          isMine ? "bg-white/20 hover:bg-white/30" : "bg-red-50 hover:bg-red-100"
+          isMine ? "bg-white/20 hover:bg-white/30" : "bg-primary-50 hover:bg-primary-100"
         }`}
       >
         {playing ? (
-          <svg className={`w-4 h-4 ${isMine ? "text-white" : "text-red-600"}`} fill="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 ${isMine ? "text-white" : "text-primary-600"}`} fill="currentColor" viewBox="0 0 24 24">
             <rect x="6" y="4" width="4" height="16" rx="1" />
             <rect x="14" y="4" width="4" height="16" rx="1" />
           </svg>
         ) : (
-          <svg className={`w-4 h-4 ml-0.5 ${isMine ? "text-white" : "text-red-600"}`} fill="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 ml-0.5 ${isMine ? "text-white" : "text-primary-600"}`} fill="currentColor" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7L8 5z" />
           </svg>
         )}
       </button>
       <div className="flex-1 flex flex-col gap-1.5">
         <div
-          className={`h-1.5 rounded-full cursor-pointer ${isMine ? "bg-white/30" : "bg-gray-200"}`}
+          className={`h-1.5 rounded-full cursor-pointer ${isMine ? "bg-white/30" : "bg-neutral-200"}`}
           onClick={handleSeek}
         >
           <div
-            className={`h-full rounded-full transition-all duration-100 ${isMine ? "bg-white" : "bg-red-500"}`}
+            className={`h-full rounded-full transition-all duration-100 ${isMine ? "bg-white" : "bg-primary-500"}`}
             style={{ width: `${progress * 100}%` }}
           />
         </div>
-        <div className={`flex justify-between text-[10px] font-mono ${isMine ? "text-red-200" : "text-gray-400"}`}>
+        <div className={`flex justify-between text-[10px] font-mono ${isMine ? "text-white/60" : "text-neutral-400"}`}>
           <span>{fmtSecs(currentTime)}</span>
           <span>{duration ? fmtSecs(duration) : "--:--"}</span>
         </div>
@@ -523,32 +523,36 @@ export default function ChatPage() {
   };
 
   if (loading || chatLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-rose-50">
+    <div className="min-h-screen flex items-center justify-center bg-surface-bg">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin" />
-        <p className="text-sm text-gray-400 font-medium">{t.chatLoading}</p>
+        <div className="w-10 h-10 border-2 border-neutral-200 border-t-primary-500 rounded-full animate-spin" />
+        <p className="text-sm text-neutral-400 font-medium">{t.chatLoading}</p>
       </div>
     </div>
   );
 
   if (loadError) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-md border border-gray-100">
-        <p className="text-4xl mb-4">📡</p>
-        <p className="text-gray-900 font-extrabold text-lg">{t.chatError}</p>
-        <p className="text-sm text-gray-500 mt-2">{t.chatErrorDesc}</p>
+    <div className="min-h-screen flex items-center justify-center bg-surface-bg px-6">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-card border border-neutral-150">
+        <div className="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-7 h-7 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+          </svg>
+        </div>
+        <p className="text-neutral-900 font-extrabold text-lg">{t.chatError}</p>
+        <p className="text-sm text-neutral-500 mt-2">{t.chatErrorDesc}</p>
         <div className="flex gap-3 mt-6">
-          <button onClick={() => navigate(-1)} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition">{t.goBack}</button>
-          <button onClick={() => { setLoadError(false); setChatLoading(true); }} className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-500 text-white text-sm font-bold hover:shadow-md transition-all">{t.retry}</button>
+          <button onClick={() => navigate(-1)} className="flex-1 btn-secondary py-3">{t.goBack}</button>
+          <button onClick={() => { setLoadError(false); setChatLoading(true); }} className="flex-1 btn-primary py-3">{t.retry}</button>
         </div>
       </div>
     </div>
   );
 
   if (!user || !partner) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-md">
-        <p className="text-red-600 font-semibold">{t.chatNotFound}</p>
+    <div className="min-h-screen flex items-center justify-center bg-surface-bg px-6">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-card border border-neutral-150">
+        <p className="text-primary-500 font-semibold">{t.chatNotFound}</p>
         <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">{t.goBack}</button>
       </div>
     </div>
@@ -563,57 +567,63 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-surface-bg flex flex-col">
       <Helmet><title>KoriBridge - {partner.display_name || t.tabChat}</title></Helmet>
 
-      <div className="bg-gradient-to-r from-red-600 to-rose-500 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-lg">
-        <button onClick={() => navigate(-1)} className="text-white/80 hover:text-white text-sm font-semibold flex-shrink-0 transition">{t.backBtn}</button>
+      {/* 채팅 헤더 */}
+      <div className="bg-white border-b border-neutral-150 shadow-nav px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+        <button onClick={() => navigate(-1)} className="text-neutral-500 hover:text-neutral-900 flex-shrink-0 transition p-1 -ml-1">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         <button onClick={() => navigate("/profile/" + partner.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
           {isRealAvatar(partner.avatar_url) ? (
-            <img src={partner.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover border-2 border-white/30 flex-shrink-0" />
+            <img src={partner.avatar_url} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarGradient(partner.avatar_url, partner.id)} flex items-center justify-center text-sm font-bold text-white flex-shrink-0`}>
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getAvatarGradient(partner.avatar_url, partner.id)} flex items-center justify-center text-sm font-bold text-white flex-shrink-0`}>
               {partner.display_name?.[0]?.toUpperCase() || "?"}
             </div>
           )}
           <div className="min-w-0">
-            <p className="font-bold text-white truncate">{partner.display_name}</p>
-            <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isPartnerOnline ? "bg-emerald-300" : "bg-white/40"}`} />
-              <p className="text-[10px] text-white/70 uppercase font-bold tracking-tight">{isPartnerOnline ? "Online" : "Offline"}</p>
+            <p className="font-bold text-neutral-900 truncate text-sm">{partner.display_name}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${isPartnerOnline ? "bg-emerald-500" : "bg-neutral-300"}`} />
+              <p className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wide">{isPartnerOnline ? "Online" : "Offline"}</p>
             </div>
           </div>
         </button>
-        <button onClick={() => setReportOpen(true)} className="text-white/60 hover:text-white flex-shrink-0 p-2 transition" title={t.reportUser}>
+        <button onClick={() => setReportOpen(true)} className="text-neutral-400 hover:text-neutral-700 flex-shrink-0 p-2 transition" title={t.reportUser}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
           </svg>
         </button>
       </div>
 
+      {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 max-w-3xl w-full mx-auto">
         {hasOlderMsgs && (
           <div className="flex justify-center pt-2 pb-1">
             <button onClick={loadOlderMessages} disabled={loadingOlder}
-              className="text-xs text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 px-4 py-2 rounded-full font-semibold transition shadow-sm disabled:opacity-50">
+              className="text-xs text-neutral-500 bg-white border border-neutral-200 hover:bg-surface-bg px-4 py-2 rounded-full font-semibold transition shadow-xs disabled:opacity-50">
               {loadingOlder ? t.loadingOlder : t.loadOlder}
             </button>
           </div>
         )}
         {messages.length === 0 ? (
           <div className="py-12">
-            <div className="mx-auto max-w-md rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
-              <p className="text-center text-sm font-bold text-gray-900">{t.firstMessage}</p>
-              <p className="mt-1 text-center text-xs text-gray-400">부담 없이 아래 질문으로 대화를 시작해 보세요.</p>
+            <div className="mx-auto max-w-md rounded-2xl border border-neutral-150 bg-white p-5 shadow-card">
+              <p className="text-center text-sm font-bold text-neutral-900">{t.firstMessage}</p>
+              <p className="mt-1 text-center text-xs text-neutral-400">부담 없이 아래 질문으로 대화를 시작해 보세요.</p>
 
               {partner.opening_question && (
                 <button
                   type="button"
                   onClick={() => applyStarter(partner.opening_question)}
-                  className="mt-5 w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-left transition hover:border-red-200 hover:bg-red-100"
+                  className="mt-5 w-full rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 text-left transition hover:border-primary-200 hover:bg-primary-100"
                 >
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-red-500">Opening Question</span>
-                  <span className="mt-1 block text-sm font-bold text-gray-900">{partner.opening_question}</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-primary-500">Opening Question</span>
+                  <span className="mt-1 block text-sm font-bold text-neutral-900">{partner.opening_question}</span>
                 </button>
               )}
 
@@ -623,7 +633,7 @@ export default function ChatPage() {
                     key={starter}
                     type="button"
                     onClick={() => applyStarter(starter)}
-                    className="rounded-2xl bg-gray-50 px-4 py-2.5 text-left text-xs font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+                    className="rounded-xl bg-surface-bg px-4 py-2.5 text-left text-xs font-semibold text-neutral-600 transition hover:bg-surface-muted hover:text-neutral-900"
                   >
                     {starter}
                   </button>
@@ -655,7 +665,7 @@ export default function ChatPage() {
             <React.Fragment key={msg.id}>
               {showDateDivider && (
                 <div className="flex justify-center my-6">
-                  <span className="bg-gray-200/70 text-gray-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span>
+                  <span className="bg-neutral-150 text-neutral-500 text-[10px] px-3 py-1 rounded-full font-bold">{currentDate}</span>
                 </div>
               )}
               <div className={"flex " + (isMine ? "justify-end" : "justify-start") + " group"}>
@@ -663,8 +673,8 @@ export default function ChatPage() {
                   <div
                     onDoubleClick={() => isMine && !msg.image_url && !isVoice && startEditMessage(msg)}
                     className={
-                      "rounded-3xl overflow-hidden text-sm cursor-default shadow-sm " +
-                      (isMine ? "bg-gradient-to-br from-red-600 to-rose-500 text-white" : "bg-white border border-gray-100 text-gray-900")
+                      "rounded-2xl overflow-hidden text-sm cursor-default shadow-xs " +
+                      (isMine ? "bg-primary-500 text-white" : "bg-white border border-neutral-150 text-neutral-900")
                     }
                   >
                     {msg.image_url && (
@@ -683,29 +693,41 @@ export default function ChatPage() {
                             onChange={(e) => setEditContent(e.target.value)}
                             onKeyDown={(e) => handleEditKeyDown(e, msg.id)}
                             rows={3}
-                            className="w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-900"
+                            className="w-full rounded-xl border border-neutral-200 bg-white p-3 text-sm text-neutral-900"
                           />
                         ) : (
                           <p className="leading-relaxed">{msg.content}</p>
                         )}
                       </div>
                     )}
-                    <div className={"px-4 pb-3 flex items-center justify-between gap-2 text-xs " + (isMine ? "text-red-200" : "text-gray-400")}>
+                    <div className={"px-4 pb-3 flex items-center justify-between gap-2 text-xs " + (isMine ? "text-white/60" : "text-neutral-400")}>
                       <span>
                         {formatTime(msg.created_at)}
                         {msg.edited_at && <span className="ml-2 text-[10px] opacity-80">{t.edited}</span>}
                       </span>
                       <div className="flex items-center gap-2 flex-wrap justify-end">
-                        {isMine && <span className={msg.read_at ? "text-blue-300" : ""}>{msg.read_at ? "✓✓" : "✓"}</span>}
+                        {isMine && (
+                          <span className={msg.read_at ? (isMine ? "text-white/80" : "text-blue-400") : ""}>
+                            {msg.read_at ? (
+                              <svg className="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l4 4 3-3.5m2.5-3l4 4-7 7" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3 h-3 inline" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                              </svg>
+                            )}
+                          </span>
+                        )}
                         {!msg.image_url && !isVoice && editingMessageId !== msg.id && (
                           <button onClick={() => copyToClipboard(msg.content)}
-                            className={"opacity-0 group-hover:opacity-100 transition-opacity " + (isMine ? "text-red-200 hover:text-white" : "text-gray-400 hover:text-gray-600")}>
+                            className={"opacity-0 group-hover:opacity-100 transition-opacity " + (isMine ? "text-white/60 hover:text-white" : "text-neutral-400 hover:text-neutral-600")}>
                             {t.copy}
                           </button>
                         )}
                         {!msg.image_url && !isVoice && (
                           <button onClick={() => translateMessage(msg)}
-                            className={"text-xs " + (isMine ? "text-red-200 hover:text-white" : "text-blue-500 hover:text-blue-700")}>
+                            className={"text-xs " + (isMine ? "text-white/60 hover:text-white" : "text-primary-500 hover:text-primary-700")}>
                             {tLoad ? t.translating : tTxt ? (tVis ? t.hideTranslation : t.translateBtn) : t.translateBtn}
                           </button>
                         )}
@@ -726,7 +748,7 @@ export default function ChatPage() {
                         )}
                         {isMine && editingMessageId !== msg.id && !isVoice && (
                           <button onClick={() => deleteMessage(msg.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-200 hover:text-white">
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/50 hover:text-white">
                             {t.deleteMsg}
                           </button>
                         )}
@@ -735,7 +757,7 @@ export default function ChatPage() {
                   </div>
 
                   {tTxt && tVis && (
-                    <div className={"mt-1 rounded-2xl bg-white border border-gray-100 shadow-sm px-3 py-2 text-xs text-gray-600 " + (isMine ? "text-right" : "")}>
+                    <div className={"mt-1 rounded-xl bg-white border border-neutral-150 shadow-xs px-3 py-2 text-xs text-neutral-600 " + (isMine ? "text-right" : "")}>
                       {tTxt}
                     </div>
                   )}
@@ -745,21 +767,23 @@ export default function ChatPage() {
                       <div className="max-w-full">
                         <button onClick={() => toggleCorrectionDetail(msg.id)}
                           className="flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
-                          <span className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center text-[9px]">✓</span>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
                           {corrDetailVisible ? t.correctHide : t.correctBadge}
                         </button>
                         {corrDetailVisible && (
-                          <div className="mt-1.5 rounded-2xl border border-emerald-100 bg-emerald-50 p-3 text-xs space-y-2">
+                          <div className="mt-1.5 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs space-y-2">
                             <div>
-                              <span className="font-bold text-gray-400 text-[10px] uppercase tracking-wider">{t.correctOriginal}</span>
-                              <p className="text-gray-500 mt-0.5 line-through">{correction.original_text}</p>
+                              <span className="font-bold text-neutral-400 text-[10px] uppercase tracking-wider">{t.correctOriginal}</span>
+                              <p className="text-neutral-500 mt-0.5 line-through">{correction.original_text}</p>
                             </div>
                             <div>
                               <span className="font-bold text-emerald-700 text-[10px] uppercase tracking-wider">{t.correctSuggested}</span>
-                              <p className="text-gray-900 font-semibold mt-0.5">{correction.corrected_text}</p>
+                              <p className="text-neutral-900 font-semibold mt-0.5">{correction.corrected_text}</p>
                             </div>
                             {correction.note && (
-                              <p className="text-gray-500 italic text-[11px]">{correction.note}</p>
+                              <p className="text-neutral-500 italic text-[11px]">{correction.note}</p>
                             )}
                           </div>
                         )}
@@ -768,7 +792,7 @@ export default function ChatPage() {
                   )}
 
                   {!isMine && corrInputOpen && !isVoice && (
-                    <div className="mt-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 space-y-2">
+                    <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 space-y-2">
                       <textarea
                         value={corrInput.text}
                         onChange={(e) => setCorrectionInputs((prev) => ({ ...prev, [msg.id]: { ...corrInput, text: e.target.value } }))}
@@ -785,7 +809,7 @@ export default function ChatPage() {
                       />
                       <div className="flex gap-2">
                         <button onClick={() => toggleCorrectionInput(msg.id)}
-                          className="flex-1 py-1.5 text-xs text-gray-500 font-medium hover:text-gray-700 transition">
+                          className="flex-1 py-1.5 text-xs text-neutral-500 font-medium hover:text-neutral-700 transition">
                           {t.cancel}
                         </button>
                         <button
@@ -805,11 +829,12 @@ export default function ChatPage() {
         <div ref={messageEndRef} />
       </div>
 
-      <div className="bg-white border-t border-gray-100 px-4 py-3 sticky bottom-0 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
+      {/* 입력 영역 */}
+      <div className="bg-white border-t border-neutral-150 px-4 py-3 sticky bottom-0 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
         {messages.length > 0 && (
           <div className="max-w-3xl mx-auto mb-2">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              <span className="flex-shrink-0 text-[11px] font-extrabold text-gray-400">학습 미션</span>
+              <span className="flex-shrink-0 text-[11px] font-extrabold text-neutral-400">학습 미션</span>
               {learningPrompts.map((prompt) => (
                 <button
                   key={prompt.label}
@@ -828,26 +853,30 @@ export default function ChatPage() {
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
           {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
             <button key={emoji} onClick={() => handleEmojiClick(emoji)} disabled={isRecording}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full hover:bg-red-50 text-sm transition-colors disabled:opacity-40">
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-surface-bg rounded-full hover:bg-primary-50 text-sm transition-colors disabled:opacity-40">
               {emoji}
             </button>
           ))}
         </div>
 
         {isRecording && (
-          <div className="flex items-center gap-3 mb-2 px-4 py-2.5 rounded-2xl bg-red-50 border border-red-100 max-w-3xl mx-auto">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
-            <span className="text-sm font-bold text-red-600">{t.voiceRecording}</span>
-            <span className="text-sm font-mono text-red-500 ml-auto">{fmtSecs(recordingTime)}</span>
+          <div className="flex items-center gap-3 mb-2 px-4 py-2.5 rounded-xl bg-primary-50 border border-primary-100 max-w-3xl mx-auto">
+            <span className="w-2.5 h-2.5 rounded-full bg-primary-500 animate-pulse flex-shrink-0" />
+            <span className="text-sm font-bold text-primary-600">{t.voiceRecording}</span>
+            <span className="text-sm font-mono text-primary-400 ml-auto">{fmtSecs(recordingTime)}</span>
           </div>
         )}
 
         <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading || isRecording}
-            className="flex-shrink-0 w-11 h-11 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 mb-0.5 transition-colors">
+            className="flex-shrink-0 w-11 h-11 rounded-xl bg-surface-bg border border-neutral-200 flex items-center justify-center hover:bg-surface-muted disabled:opacity-50 mb-0.5 transition-colors">
             {imageUploading
-              ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-              : <span>📷</span>}
+              ? <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
+              : (
+                <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+              )}
           </button>
           <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleImageSelect} />
 
@@ -857,15 +886,15 @@ export default function ChatPage() {
             onPointerUp={stopRecording}
             onPointerCancel={stopRecording}
             disabled={voiceUploading || imageUploading}
-            className={`flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center mb-0.5 transition-all select-none touch-none ${
+            className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center mb-0.5 transition-all select-none touch-none border ${
               isRecording
-                ? "bg-red-500 text-white shadow-lg shadow-red-200 scale-110"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                ? "bg-primary-500 text-white border-primary-500 shadow-red-sm scale-110"
+                : "bg-surface-bg border-neutral-200 hover:bg-surface-muted text-neutral-500"
             } disabled:opacity-50`}
             title={t.voiceHint}
           >
             {voiceUploading
-              ? <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+              ? <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
               : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
@@ -883,7 +912,7 @@ export default function ChatPage() {
               disabled={isRecording}
             />
             {newMessage.length > 800 && (
-              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-red-500 font-semibold" : "text-gray-400"}`}>
+              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-primary-500 font-semibold" : "text-neutral-400"}`}>
                 {newMessage.length}/{MAX_MSG_LENGTH}
               </p>
             )}
@@ -891,7 +920,7 @@ export default function ChatPage() {
 
           <button type="submit"
             disabled={sendLoading || !newMessage.trim() || newMessage.length > MAX_MSG_LENGTH || isRecording}
-            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-2xl bg-gradient-to-br from-red-600 to-rose-500 text-white flex items-center justify-center hover:shadow-md active:scale-95 transition-all duration-150 disabled:opacity-50">
+            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-xl bg-primary-500 text-white flex items-center justify-center hover:bg-primary-600 active:scale-95 transition-all duration-150 disabled:opacity-50 shadow-red-sm">
             {sendLoading
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : (

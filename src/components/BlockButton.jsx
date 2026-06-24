@@ -23,7 +23,7 @@ export default function BlockButton({ targetId, onBlockSuccess }) {
     <>
       <button
         onClick={() => setShowConfirm(true)}
-        className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-100 bg-red-50 hover:bg-red-100 rounded-xl"
+        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-neutral-500 border border-neutral-200 bg-surface-bg hover:bg-surface-muted rounded-xl transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636" />

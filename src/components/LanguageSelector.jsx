@@ -35,11 +35,11 @@ function LanguageSelector({ dark = false }) {
 
   const btnCls = dark
     ? "flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition text-white"
-    : "flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-black/10 border border-black/10 hover:bg-black/15 transition text-gray-700";
+    : "flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-neutral-100 border border-neutral-200 hover:bg-neutral-150 transition text-neutral-700";
 
   const dropdownCls = dark
     ? "absolute right-0 top-full mt-1.5 w-40 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl overflow-hidden z-[9999] py-1"
-    : "absolute right-0 top-full mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[9999] py-1";
+    : "absolute right-0 top-full mt-1.5 w-40 bg-white border border-neutral-150 rounded-xl shadow-card overflow-hidden z-[9999] py-1";
 
   return (
     <div ref={ref} className="relative flex-shrink-0">
@@ -64,7 +64,7 @@ function LanguageSelector({ dark = false }) {
                       locale === opt.code ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                     }`
                   : `w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors ${
-                      locale === opt.code ? "bg-red-50 text-red-600" : "text-gray-700 hover:bg-gray-50"
+                      locale === opt.code ? "bg-primary-50 text-primary-600" : "text-neutral-700 hover:bg-surface-bg"
                     }`
               }
             >

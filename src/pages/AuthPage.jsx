@@ -9,14 +9,42 @@ import { login, signUp as gaSignUp } from "../utils/analytics";
 import { sendWelcomeEmail } from "../utils/welcomeEmail";
 
 const LEFT_FEATURES = [
-  { icon: "🎯", titleKey: "f1Title", descKey: "f1Desc" },
-  { icon: "💬", titleKey: "chatBtn", descKey: "f2Desc" },
-  { icon: "🌸", titleKey: "f5Title", descKey: "f5Desc" },
-  { icon: "🏆", titleKey: "f6Title", descKey: "f6Desc" },
+  {
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+      </svg>
+    ),
+    titleKey: "f1Title", descKey: "f1Desc",
+  },
+  {
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+      </svg>
+    ),
+    titleKey: "chatBtn", descKey: "f2Desc",
+  },
+  {
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+      </svg>
+    ),
+    titleKey: "f5Title", descKey: "f5Desc",
+  },
+  {
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      </svg>
+    ),
+    titleKey: "f6Title", descKey: "f6Desc",
+  },
 ];
 
 const GoogleIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 18 18" aria-hidden="true">
+  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="flex-shrink-0">
     <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
     <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
     <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
@@ -25,7 +53,7 @@ const GoogleIcon = () => (
 );
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("login"); // "login" | "signup" | "reset"
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -83,11 +111,8 @@ export default function AuthPage() {
         redirectTo: `${window.location.origin}/auth`,
       });
       setLoading(false);
-      if (err) {
-        setError(t.errResetFail);
-      } else {
-        setMessage(`${email}${t.resetSentMsg}`);
-      }
+      if (err) setError(t.errResetFail);
+      else setMessage(`${email}${t.resetSentMsg}`);
       return;
     }
 
@@ -97,9 +122,8 @@ export default function AuthPage() {
       setLoading(true);
       const { data, error: err } = await signUp(email, password);
       setLoading(false);
-      if (err) {
-        setError(err.message);
-      } else {
+      if (err) setError(err.message);
+      else {
         gaSignUp("email");
         sendWelcomeEmail({ userId: data?.user?.id, email, locale });
         setSignupDone(true);
@@ -111,28 +135,26 @@ export default function AuthPage() {
     setLoading(true);
     const { error: err } = await signIn(email, password);
     setLoading(false);
-    if (err) {
-      setError(t.errLoginFail);
-    } else {
-      login("email");
-      navigate("/home");
-    }
+    if (err) setError(t.errLoginFail);
+    else { login("email"); navigate("/home"); }
   };
 
   if (signupDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 px-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-bg px-6">
         <Helmet><title>KoriBridge - {t.emailVerifyTitle}</title></Helmet>
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/40">
-            <span className="text-white text-2xl font-bold">✓</span>
+        <div className="bg-white border border-neutral-150 rounded-2xl shadow-card-md p-8 max-w-sm w-full text-center">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-5 shadow-card">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
           </div>
-          <h2 className="text-xl font-extrabold text-white">{t.emailVerifyTitle}</h2>
-          <p className="mt-3 text-sm text-zinc-400 leading-relaxed">
-            <span className="font-semibold text-zinc-200">{email}</span>{t.emailVerifySent}<br />
+          <h2 className="text-lg font-bold text-neutral-900">{t.emailVerifyTitle}</h2>
+          <p className="mt-3 text-sm text-neutral-500 leading-relaxed">
+            <span className="font-semibold text-neutral-800">{email}</span>{t.emailVerifySent}<br />
             {t.emailVerifyClick}
           </p>
-          <p className="mt-4 text-xs text-zinc-600">{t.emailVerifySpam}</p>
+          <p className="mt-3 text-xs text-neutral-400">{t.emailVerifySpam}</p>
           <button onClick={() => switchMode("login")} className="mt-6 btn-primary py-3">
             {t.goToLogin}
           </button>
@@ -141,7 +163,7 @@ export default function AuthPage() {
               await supabase.auth.resend({ type: "signup", email });
               showToast(t.resendEmail, "success");
             }}
-            className="mt-3 text-sm text-zinc-600 hover:text-zinc-400 underline transition-colors"
+            className="mt-3 text-sm text-neutral-400 hover:text-neutral-600 underline transition-colors block w-full"
           >
             {t.resendEmail}
           </button>
@@ -151,53 +173,60 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-zinc-950">
+    <div className="min-h-screen flex bg-surface-bg">
       <Helmet>
         <title>KoriBridge - {mode === "login" ? t.signIn : mode === "signup" ? t.signUp : t.resetPassword}</title>
       </Helmet>
 
-      {/* ── 왼쪽 패널 (데스크탑 전용) ── */}
-      <div className="hidden lg:flex flex-col justify-between w-[460px] xl:w-[500px] flex-shrink-0 bg-zinc-900/40 border-r border-zinc-800/60 p-10 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-red-900/20 via-rose-900/10 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-red-900/10 blur-3xl pointer-events-none" />
-        <div
-          className="absolute inset-0 pointer-events-none opacity-30"
-          style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-        />
-
-        <div className="relative z-10">
+      {/* ── 왼쪽 패널 (데스크탑) ── */}
+      <div className="hidden lg:flex flex-col justify-between w-[440px] xl:w-[480px] flex-shrink-0 bg-neutral-900 p-10">
+        <div>
           <div className="flex items-center gap-2.5 mb-14">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center font-black text-base shadow-lg shadow-red-900/50">K</div>
-            <span className="font-extrabold text-lg tracking-tight text-white">KoriBridge</span>
+            <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+                <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 9.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="white" />
+              </svg>
+            </div>
+            <span className="font-bold text-[15px] tracking-tight text-white">KoriBridge</span>
           </div>
 
-          <h2 className="font-black tracking-[-0.025em] leading-tight text-white mb-4" style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)" }}>
-            {locale === "ko" ? <>한국어, 세계와<br /><span className="bg-gradient-to-r from-red-500 via-rose-400 to-pink-400 bg-clip-text text-transparent">연결하다</span></> : <>Korean, Connect<br /><span className="bg-gradient-to-r from-red-500 via-rose-400 to-pink-400 bg-clip-text text-transparent">the World</span></>}
+          <h2 className="font-extrabold tracking-[-0.025em] leading-tight text-white mb-3" style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.1rem)" }}>
+            {locale === "ko" ? (
+              <>한국어, 세계와<br /><span className="text-primary-400">연결하다</span></>
+            ) : (
+              <>Korean, Connect<br /><span className="text-primary-400">the World</span></>
+            )}
           </h2>
-          <p className="text-zinc-500 text-sm leading-relaxed mb-10">
-            {locale === "ko" ? <>전 세계 127개국 48,000명이 선택한<br />한국어 교류 플랫폼</> : <>The Korean exchange platform chosen<br />by 48,000 learners in 127 countries</>}
+          <p className="text-neutral-500 text-sm leading-relaxed mb-10">
+            {locale === "ko"
+              ? "전 세계 127개국 48,000명이 선택한 한국어 교류 플랫폼"
+              : "The Korean exchange platform chosen by 48,000 learners in 127 countries"}
           </p>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {LEFT_FEATURES.map((f) => (
-              <div key={f.titleKey} className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-xl bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center text-lg flex-shrink-0 group-hover:bg-zinc-800 transition-colors duration-200">
+              <div key={f.titleKey} className="flex items-center gap-4">
+                <div className="w-9 h-9 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-neutral-400 flex-shrink-0">
                   {f.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white">{t[f.titleKey]}</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">{t[f.descKey]}</p>
+                  <p className="text-sm font-semibold text-white leading-tight">{t[f.titleKey]}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5 leading-tight">{t[f.descKey]}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="relative z-10 flex items-center gap-3 bg-zinc-800/60 border border-zinc-700/50 rounded-2xl px-4 py-3">
+        <div className="flex items-center gap-3 bg-white/5 border border-white/8 rounded-xl px-4 py-3.5">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
           <div>
-            <p className="text-sm font-bold text-white">{locale === "ko" ? "지금 1,247명 대화 중" : "1,247 people chatting now"}</p>
-            <p className="text-xs text-zinc-500">{locale === "ko" ? "127개국 파트너가 당신을 기다립니다" : "Partners from 127 countries await you"}</p>
+            <p className="text-sm font-semibold text-white leading-tight">
+              {locale === "ko" ? "지금 1,247명 대화 중" : "1,247 people chatting now"}
+            </p>
+            <p className="text-xs text-neutral-500 leading-tight">
+              {locale === "ko" ? "127개국 파트너가 당신을 기다립니다" : "Partners from 127 countries await you"}
+            </p>
           </div>
         </div>
       </div>
@@ -205,42 +234,49 @@ export default function AuthPage() {
       {/* ── 오른쪽 패널 (폼) ── */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 min-h-screen">
         <div className="lg:hidden flex items-center gap-2.5 mb-10">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-rose-500 flex items-center justify-center font-black text-sm shadow-lg shadow-red-900/50">K</div>
-          <span className="font-extrabold text-[15px] tracking-tight text-white">KoriBridge</span>
+          <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-xs font-bold">K</span>
+          </div>
+          <span className="font-bold text-[15px] tracking-tight text-neutral-900">KoriBridge</span>
         </div>
 
         <div className="w-full max-w-sm">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-6">
             <button
               onClick={toggleLocale}
-              className="text-sm font-bold px-3 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition text-zinc-300"
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-surface-muted border border-neutral-200 hover:bg-neutral-100 transition text-neutral-600"
             >
               {locale === "ko" ? "EN" : "한"}
             </button>
           </div>
 
           <div className="mb-7">
-            {mode === "reset" ? (
-              <button onClick={() => switchMode("login")} className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-white transition-colors mb-5">
-                ← {t.resetBack}
+            {mode === "reset" && (
+              <button onClick={() => switchMode("login")} className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-700 transition-colors mb-5">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                {t.resetBack}
               </button>
-            ) : null}
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            )}
+            <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">
               {mode === "login" ? t.authLoginTitle : mode === "signup" ? t.authSignupTitle : t.authResetTitle}
             </h1>
-            <p className="text-sm text-zinc-500 mt-1.5">
+            <p className="text-sm text-neutral-400 mt-1.5">
               {mode === "login" ? t.authLoginDesc : mode === "signup" ? t.authSignupDesc : t.authResetDesc}
             </p>
           </div>
 
           {mode !== "reset" && (
-            <div className="flex bg-zinc-900 border border-zinc-800 rounded-xl p-1 mb-6">
+            <div className="flex bg-surface-muted border border-neutral-200 rounded-xl p-1 mb-6">
               {["login", "signup"].map((m) => (
                 <button
                   key={m}
                   onClick={() => switchMode(m)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-200 ${
-                    mode === m ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-150 ${
+                    mode === m
+                      ? "bg-white text-neutral-900 shadow-xs border border-neutral-150"
+                      : "text-neutral-400 hover:text-neutral-700"
                   }`}
                 >
                   {m === "login" ? t.signIn : t.signUp}
@@ -251,11 +287,11 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "reset" && (
-              <p className="text-sm text-zinc-500">{t.resetDesc}</p>
+              <p className="text-sm text-neutral-500">{t.resetDesc}</p>
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-zinc-300 mb-1.5">{t.email}</label>
+              <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.email}</label>
               <input
                 type="email"
                 className="input-field"
@@ -269,7 +305,7 @@ export default function AuthPage() {
 
             {mode !== "reset" && (
               <div>
-                <label className="block text-sm font-semibold text-zinc-300 mb-1.5">{t.password}</label>
+                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.password}</label>
                 <input
                   type="password"
                   className="input-field"
@@ -284,7 +320,7 @@ export default function AuthPage() {
 
             {mode === "signup" && (
               <div>
-                <label className="block text-sm font-semibold text-zinc-300 mb-1.5">{t.confirmPassword}</label>
+                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.confirmPassword}</label>
                 <input
                   type="password"
                   className="input-field"
@@ -298,13 +334,13 @@ export default function AuthPage() {
             )}
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm px-4 py-3 rounded-xl">
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm px-4 py-3 rounded-xl">
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-xl">
                 {message}
               </div>
             )}
@@ -321,12 +357,12 @@ export default function AuthPage() {
 
             {mode === "login" && (
               <>
-                <label className="flex items-center gap-2 text-sm text-zinc-500 cursor-pointer select-none">
+                <label className="flex items-center gap-2 text-sm text-neutral-500 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-red-600 focus:ring-red-900/40"
+                    className="h-4 w-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500/20"
                   />
                   {t.rememberMe}
                 </label>
@@ -334,7 +370,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => switchMode("reset")}
-                    className="text-sm text-zinc-600 hover:text-red-400 underline transition-colors"
+                    className="text-sm text-neutral-400 hover:text-primary-500 transition-colors"
                   >
                     {t.forgotPassword}
                   </button>
@@ -345,14 +381,14 @@ export default function AuthPage() {
             {mode !== "reset" && (
               <>
                 <div className="relative flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-zinc-800" />
-                  <span className="text-xs text-zinc-600 font-medium">{locale === "ko" ? "또는" : "or"}</span>
-                  <div className="flex-1 h-px bg-zinc-800" />
+                  <div className="flex-1 h-px bg-neutral-150" />
+                  <span className="text-xs text-neutral-400 font-medium">{locale === "ko" ? "또는" : "or"}</span>
+                  <div className="flex-1 h-px bg-neutral-150" />
                 </div>
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="w-full py-3.5 px-4 bg-zinc-900 border border-zinc-700 rounded-xl text-zinc-300 font-bold hover:border-zinc-600 hover:bg-zinc-800 hover:text-white transition-all duration-200 flex items-center justify-center gap-3"
+                  className="w-full py-3.5 px-4 bg-white border border-neutral-200 rounded-xl text-neutral-700 font-semibold text-sm hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-150 flex items-center justify-center gap-3 shadow-xs"
                 >
                   <GoogleIcon />
                   {t.googleSignIn}
@@ -360,10 +396,10 @@ export default function AuthPage() {
               </>
             )}
 
-            <div className="flex items-center justify-center gap-3 pt-1 text-xs text-zinc-600">
-              <a href="/terms" className="hover:text-zinc-400 underline transition-colors">{t.terms}</a>
-              <span>·</span>
-              <a href="/privacy" className="hover:text-zinc-400 underline transition-colors">{t.privacy}</a>
+            <div className="flex items-center justify-center gap-3 pt-1 text-xs text-neutral-400">
+              <a href="/terms" className="hover:text-neutral-600 underline transition-colors">{t.terms}</a>
+              <span className="text-neutral-200">·</span>
+              <a href="/privacy" className="hover:text-neutral-600 underline transition-colors">{t.privacy}</a>
             </div>
           </form>
         </div>
