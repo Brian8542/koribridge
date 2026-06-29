@@ -95,6 +95,34 @@ export default function ProfileDetailPage() {
 
       <div className="px-4 py-6 max-w-lg mx-auto space-y-4">
 
+        {/* 신뢰 배지 행 — 아바타보다 먼저 표시 */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full ${
+            profile.is_verified
+              ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+              : "bg-neutral-100 text-neutral-400 border border-neutral-150"
+          }`}>
+            {profile.is_verified ? (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+              </svg>
+            )}
+            {profile.is_verified ? t.verifiedUser : t.trustBadgeUnverified}
+          </div>
+          <span className={`badge border text-xs ${LEVEL_STYLE[level] || "badge"}`}>
+            {levelLabel(level)}
+          </span>
+          {matchPercentage > 0 && (
+            <span className="badge bg-primary-50 text-primary-600 border border-primary-100 text-xs">
+              {t.matchLabel} {matchPercentage}{t.matchSuffix}
+            </span>
+          )}
+        </div>
+
         {/* 프로필 카드 */}
         <div className="bg-white rounded-2xl border border-neutral-150 shadow-card p-6 text-center">
           <div className="relative inline-block">
@@ -115,7 +143,7 @@ export default function ProfileDetailPage() {
           <div className="flex items-center justify-center gap-2 mt-4">
             <h1 className="text-xl font-extrabold text-neutral-900">{profile.display_name}</h1>
             {profile.is_verified && (
-              <span className="bg-primary-500 text-white p-1 rounded-full" title={t.verifiedUser}>
+              <span className="bg-emerald-500 text-white p-1 rounded-full" title={t.verifiedUser}>
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
               </span>
             )}
@@ -125,13 +153,21 @@ export default function ProfileDetailPage() {
             {isOnline ? t.onlineNow : lastActive}
           </p>
 
-          <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
-            <span className={`badge ${LEVEL_STYLE[level] || "badge"}`}>
-              {levelLabel(level)}
-            </span>
-            {matchPercentage > 0 && (
-              <span className="badge bg-primary-50 text-primary-600 border border-primary-100">
-                {t.matchLabel} {matchPercentage}{t.matchSuffix}
+          {/* Profile completeness chips */}
+          <div className="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
+            {profile.bio && profile.bio.trim().length >= 20 && (
+              <span className="text-[11px] bg-surface-muted text-neutral-500 border border-neutral-100 px-2 py-0.5 rounded-full font-medium">
+                {t.profileCompleteBio}
+              </span>
+            )}
+            {isRealAvatar(profile.avatar_url) && (
+              <span className="text-[11px] bg-surface-muted text-neutral-500 border border-neutral-100 px-2 py-0.5 rounded-full font-medium">
+                {t.profileCompletePhoto}
+              </span>
+            )}
+            {profile.interests?.length > 0 && (
+              <span className="text-[11px] bg-surface-muted text-neutral-500 border border-neutral-100 px-2 py-0.5 rounded-full font-medium">
+                {t.profileCompleteInterests}
               </span>
             )}
           </div>
