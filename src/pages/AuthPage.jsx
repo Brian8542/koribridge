@@ -199,8 +199,8 @@ export default function AuthPage() {
           </h2>
           <p className="text-neutral-500 text-sm leading-relaxed mb-10">
             {locale === "ko"
-              ? "전 세계 127개국 48,000명이 선택한 한국어 교류 플랫폼"
-              : "The Korean exchange platform chosen by 48,000 learners in 127 countries"}
+              ? "이메일 인증 기반의 한국어 교류 플랫폼. 허위 프로필 없이, 신뢰부터 시작합니다."
+              : "A trust-first Korean language exchange platform. Real people, real conversations."}
           </p>
 
           <div className="space-y-4">
@@ -219,13 +219,13 @@ export default function AuthPage() {
         </div>
 
         <div className="flex items-center gap-3 bg-white/5 border border-white/8 rounded-xl px-4 py-3.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+          <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
           <div>
             <p className="text-sm font-semibold text-white leading-tight">
-              {locale === "ko" ? "지금 1,247명 대화 중" : "1,247 people chatting now"}
+              {locale === "ko" ? "이메일 인증으로 신뢰를 보장합니다" : "Trust verified by email"}
             </p>
             <p className="text-xs text-neutral-500 leading-tight">
-              {locale === "ko" ? "127개국 파트너가 당신을 기다립니다" : "Partners from 127 countries await you"}
+              {locale === "ko" ? "인증된 멤버만 파트너 목록에 표시됩니다" : "Only verified members appear in the partner list"}
             </p>
           </div>
         </div>
@@ -347,7 +347,7 @@ export default function AuthPage() {
 
             <button type="submit" className="btn-primary py-3.5" disabled={loading}>
               {loading
-                ? t.deleting
+                ? t.loading
                 : mode === "login"
                 ? t.signIn
                 : mode === "signup"

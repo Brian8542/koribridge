@@ -334,7 +334,7 @@ export default function HomePage() {
     if (!profileForm.native_language) return setProfileError(t.errNativeLang);
     if (!profileForm.learning_language) return setProfileError(t.errLearningLang);
     if (profileForm.bio.length > 500) return setProfileError(t.errBioLen);
-    if (profileForm.opening_question.length > 140) return setProfileError("첫 질문은 140자 이하로 입력해 주세요.");
+    if (profileForm.opening_question.length > 140) return setProfileError(t.errOpeningQuestionLen);
     setProfileLoading(true);
     try {
       const avatar_url = await uploadAvatar();
@@ -811,7 +811,7 @@ export default function HomePage() {
 
         <div className="card space-y-4">
           <div>
-            <label className="block text-sm font-bold text-neutral-700 mb-2">대화 목적</label>
+            <label className="block text-sm font-bold text-neutral-700 mb-2">{t.conversationGoalLabel}</label>
             <div className="grid grid-cols-2 gap-2">
               {CONVERSATION_GOALS.map((goal) => (
                 <button
@@ -831,7 +831,7 @@ export default function HomePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-neutral-700 mb-2">선호 대화 방식</label>
+            <label className="block text-sm font-bold text-neutral-700 mb-2">{t.communicationStyleLabel}</label>
             <div className="grid grid-cols-2 gap-2">
               {COMMUNICATION_STYLES.map((style) => (
                 <button
@@ -852,7 +852,7 @@ export default function HomePage() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-bold text-neutral-700">첫 대화 질문</label>
+              <label className="block text-sm font-bold text-neutral-700">{t.openingQuestionLabel}</label>
               <span className={`text-xs ${profileForm.opening_question.length > 120 ? "text-primary-500" : "text-neutral-400"}`}>
                 {profileForm.opening_question.length}/140
               </span>
@@ -863,7 +863,7 @@ export default function HomePage() {
               value={profileForm.opening_question}
               maxLength={140}
               onChange={(e) => handleProfileChange("opening_question", e.target.value)}
-              placeholder="예: 한국에서 꼭 가보고 싶은 곳은 어디예요?"
+              placeholder={t.openingQuestionPlaceholder}
             />
           </div>
         </div>

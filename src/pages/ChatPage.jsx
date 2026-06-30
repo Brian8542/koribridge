@@ -589,7 +589,7 @@ export default function ChatPage() {
             <p className="font-bold text-neutral-900 truncate text-sm">{partner.display_name}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={`w-1.5 h-1.5 rounded-full ${isPartnerOnline ? "bg-emerald-500" : "bg-neutral-300"}`} />
-              <p className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wide">{isPartnerOnline ? "Online" : "Offline"}</p>
+              <p className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wide">{isPartnerOnline ? t.splashOnline : t.splashOffline}</p>
             </div>
           </div>
         </button>

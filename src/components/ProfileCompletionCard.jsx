@@ -1,15 +1,17 @@
 import React from "react";
+import { useLocale } from "../hooks/useLocale";
 
 export default function ProfileCompletionCard({ completion }) {
+  const { t } = useLocale();
   if (!completion) return null;
 
   return (
     <div className="card p-5 space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-extrabold text-neutral-900">프로필 완성도</p>
+          <p className="text-sm font-extrabold text-neutral-900">{t.profileCompletionTitle}</p>
           <p className="mt-0.5 text-xs text-neutral-400">
-            완성도가 높을수록 추천과 첫 대화가 더 쉬워집니다.
+            {t.profileCompletionDesc}
           </p>
         </div>
         <span className="rounded-full bg-primary-50 border border-primary-100 px-3 py-1 text-sm font-extrabold text-primary-600">
@@ -50,7 +52,7 @@ export default function ProfileCompletionCard({ completion }) {
 
       {completion.nextItem && (
         <p className="text-xs font-semibold text-neutral-500">
-          다음 추천: <span className="text-primary-500">{completion.nextItem.label}</span>
+          {t.profileCompletionNext} <span className="text-primary-500">{completion.nextItem.label}</span>
         </p>
       )}
     </div>

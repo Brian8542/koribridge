@@ -78,6 +78,11 @@ const KO = {
   languageLevel: '언어 수준', isPublic: '프로필 공개',
   interests: '관심사', bio: '자기소개',
   bioPlaceholder: '초급/중급/고급 수준을 포함해 주세요',
+  conversationGoalLabel: '대화 목적',
+  communicationStyleLabel: '선호 대화 방식',
+  openingQuestionLabel: '첫 대화 질문',
+  openingQuestionPlaceholder: '예: 한국에서 꼭 가보고 싶은 곳은 어디예요?',
+  errOpeningQuestionLen: '첫 질문은 140자 이하로 입력해 주세요.',
   profileSaveBtn: '프로필 저장', avatarUploading: '사진 업로드 중...',
   avatarLimit: 'JPG/PNG/WebP, 최대 2MB',
   errName: '이름을 입력해 주세요.', errNameLen: '닉네임은 50자 이하여야 합니다.',
@@ -210,6 +215,10 @@ const KO = {
   notFoundTitle: '페이지 없음',
   notFoundDesc: '요청하신 페이지가 존재하지 않거나 이동됐습니다.',
   notFoundHome: '홈으로 돌아가기', notFoundBack: '이전 페이지로',
+  // profile completion card
+  profileCompletionTitle: '프로필 완성도',
+  profileCompletionDesc: '완성도가 높을수록 추천과 첫 대화가 더 쉬워집니다.',
+  profileCompletionNext: '다음 추천:',
   // profile card
   nativeLangShort: '모국어', learningLangShort: '학습언어',
   viewProfile: '프로필 보기', chatBtn: '채팅하기',
@@ -231,6 +240,7 @@ const KO = {
   beginner: '초급', intermediate: '중급', advanced: '고급',
   // splash
   splashOnline: '온라인', splashOffline: '오프라인',
+  statsBannerOnline: '온라인', statsBannerTotal: '전체 멤버', statsBannerToday: '오늘 가입',
   stat1Label: '활성 학습자', stat2Label: '참여 국가', stat3Label: '평균 평점', stat4Label: '목표 달성률',
   stat2Suffix: '개',
   splashOnlineBadge: '지금', splashOnlineMid: '명이 한국어로 대화 중',
@@ -391,6 +401,11 @@ const EN = {
   languageLevel: 'Language Level', isPublic: 'Public Profile',
   interests: 'Interests', bio: 'About Me',
   bioPlaceholder: 'Include your level: Beginner / Intermediate / Advanced',
+  conversationGoalLabel: 'Conversation Goal',
+  communicationStyleLabel: 'Communication Style',
+  openingQuestionLabel: 'Opening Question',
+  openingQuestionPlaceholder: 'e.g. What place in Korea do you most want to visit?',
+  errOpeningQuestionLen: 'Opening question must be 140 characters or less.',
   profileSaveBtn: 'Save Profile', avatarUploading: 'Uploading photo...',
   avatarLimit: 'JPG/PNG/WebP, max 2MB',
   errName: 'Please enter your name.', errNameLen: 'Nickname must be 50 characters or less.',
@@ -523,6 +538,10 @@ const EN = {
   notFoundTitle: 'Page Not Found',
   notFoundDesc: 'The page you requested doesn\'t exist or has moved.',
   notFoundHome: 'Back to Home', notFoundBack: 'Previous Page',
+  // profile completion card
+  profileCompletionTitle: 'Profile Completeness',
+  profileCompletionDesc: 'A complete profile gets better recommendations and more first conversations.',
+  profileCompletionNext: 'Next suggestion:',
   // profile card
   nativeLangShort: 'Native', learningLangShort: 'Learning',
   viewProfile: 'View Profile', chatBtn: 'Chat',
@@ -544,6 +563,7 @@ const EN = {
   beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced',
   // splash
   splashOnline: 'Online', splashOffline: 'Offline',
+  statsBannerOnline: 'Online', statsBannerTotal: 'Total', statsBannerToday: 'Today',
   stat1Label: 'Active Learners', stat2Label: 'Countries', stat3Label: 'Avg Rating', stat4Label: 'Success Rate',
   stat2Suffix: '',
   splashOnlineBadge: 'Right now', splashOnlineMid: ' people are learning Korean',
