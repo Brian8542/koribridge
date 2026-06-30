@@ -22,10 +22,11 @@ import { getMatchScore } from "../utils/matching";
 import { pageView } from "../utils/analytics";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 import { sendPushNotification } from "../utils/pushNotifications";
-import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
+import { COMMUNICATION_STYLES, CONVERSATION_GOALS, INTERESTS, MAX_INTERESTS } from "../utils/profileOptions";
 import { getProfileCompletion } from "../utils/profileCompletion";
 import ProfileCompletionCard from "../components/ProfileCompletionCard";
 import AnnouncementBanner from "../components/AnnouncementBanner";
+import AdvancedFiltersModal from "../components/AdvancedFiltersModal";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -37,7 +38,6 @@ const NATIONALITIES = [
   "인도네시아", "말레이시아", "카자흐스탄", "우즈베키스탄", "중국", "일본", "기타",
 ];
 
-const INTERESTS = ["K-pop", "한국 음식", "여행", "드라마", "언어 교환", "게임", "영화", "스포츠"];
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const NAV_ICONS = {
@@ -86,6 +86,10 @@ export default function HomePage() {
   const [nationalityFilter, setNationalityFilter] = useState("");
   const [languageFilter, setLanguageFilter] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
+  const [nativeLangFilter, setNativeLangFilter] = useState("");
+  const [interestFilter, setInterestFilter] = useState([]);
+  const [verifiedOnlyFilter, setVerifiedOnlyFilter] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
@@ -181,7 +185,7 @@ export default function HomePage() {
 
         const { data: allProfiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question")
+          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, is_verified, conversation_goal, communication_style, opening_question")
           .eq("is_public", true)
           .neq("id", user.id)
           .order("created_at", { ascending: false });
@@ -278,12 +282,27 @@ export default function HomePage() {
       .slice(0, 3);
   }, [myProfile, profiles, blockedIds]);
 
+  const nationalities = useMemo(
+    () => [...new Set(profiles.map((p) => p.nationality).filter(Boolean))].sort(),
+    [profiles]
+  );
+
+  const filterActiveCount = useMemo(
+    () =>
+      [nationalityFilter, languageFilter, nativeLangFilter, levelFilter, verifiedOnlyFilter]
+        .filter(Boolean).length + (interestFilter.length > 0 ? 1 : 0),
+    [nationalityFilter, languageFilter, nativeLangFilter, levelFilter, verifiedOnlyFilter, interestFilter]
+  );
+
   const filteredProfiles = useMemo(() => {
     return profiles.filter((p) => {
       if (blockedIds.includes(p.id)) return false;
       if (nationalityFilter && p.nationality !== nationalityFilter) return false;
       if (languageFilter && p.learning_language !== languageFilter) return false;
       if (levelFilter && p.language_level !== levelFilter) return false;
+      if (nativeLangFilter && p.native_language !== nativeLangFilter) return false;
+      if (interestFilter.length > 0 && !interestFilter.some((i) => p.interests?.includes(i))) return false;
+      if (verifiedOnlyFilter && !p.is_verified) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         if (!p.display_name?.toLowerCase().includes(q) && !p.nationality?.toLowerCase().includes(q) &&
@@ -291,9 +310,19 @@ export default function HomePage() {
       }
       return true;
     });
-  }, [profiles, nationalityFilter, languageFilter, levelFilter, blockedIds, searchQuery]);
+  }, [profiles, nationalityFilter, languageFilter, levelFilter, nativeLangFilter, interestFilter, verifiedOnlyFilter, blockedIds, searchQuery]);
 
-  useEffect(() => { setVisibleCount(12); }, [nationalityFilter, languageFilter, levelFilter, searchQuery]);
+  const handleResetFilters = useCallback(() => {
+    setNationalityFilter("");
+    setLanguageFilter("");
+    setNativeLangFilter("");
+    setLevelFilter("");
+    setInterestFilter([]);
+    setVerifiedOnlyFilter(false);
+    setSearchQuery("");
+  }, []);
+
+  useEffect(() => { setVisibleCount(12); }, [nationalityFilter, languageFilter, levelFilter, nativeLangFilter, interestFilter, verifiedOnlyFilter, searchQuery]);
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -312,6 +341,7 @@ export default function HomePage() {
   const toggleInterest = (interest) => {
     setProfileForm((prev) => {
       const has = prev.interests.includes(interest);
+      if (!has && prev.interests.length >= MAX_INTERESTS) return prev;
       return { ...prev, interests: has ? prev.interests.filter((i) => i !== interest) : [...prev.interests, interest] };
     });
   };
@@ -518,14 +548,10 @@ export default function HomePage() {
       )}
 
       <ProfileFilters
-        profiles={profiles}
-        languages={LANGUAGES}
-        nationalityFilter={nationalityFilter}
-        languageFilter={languageFilter}
-        levelFilter={levelFilter}
-        onNationality={setNationalityFilter}
-        onLanguage={setLanguageFilter}
-        onLevel={setLevelFilter}
+        activeCount={filterActiveCount}
+        onOpenFilter={() => setIsFilterModalOpen(true)}
+        onReset={handleResetFilters}
+        resultCount={filteredProfiles.length}
       />
 
       <div>
@@ -545,12 +571,12 @@ export default function HomePage() {
               actionLabel={t.retry}
             />
           ) : filteredProfiles.length === 0 ? (
-            nationalityFilter || languageFilter || levelFilter || searchQuery.trim() ? (
+            filterActiveCount > 0 || searchQuery.trim() ? (
               <EmptyState
                 icon="🔍"
                 title={t.noFilterPartners}
                 desc={t.noFilterPartnersDesc}
-                action={() => { setSearchQuery(""); setNationalityFilter(""); setLanguageFilter(""); setLevelFilter(""); }}
+                action={handleResetFilters}
                 actionLabel={t.resetFilters}
               />
             ) : (
@@ -917,14 +943,21 @@ export default function HomePage() {
         </div>
 
         <div className="card">
-          <label className="block text-sm font-bold text-neutral-700 mb-3">{t.interests}</label>
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-bold text-neutral-700">{t.interests}</label>
+            <span className={`text-[12px] font-semibold ${profileForm.interests.length >= MAX_INTERESTS ? "text-[#0071e3]" : "text-neutral-400"}`}>
+              {profileForm.interests.length}/{MAX_INTERESTS}
+            </span>
+          </div>
           <div className="flex flex-wrap gap-2">
             {INTERESTS.map((interest) => (
               <button type="button" key={interest} onClick={() => toggleInterest(interest)}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
                   profileForm.interests.includes(interest)
                     ? "bg-[#0071e3] text-white"
-                    : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
+                    : profileForm.interests.length >= MAX_INTERESTS
+                      ? "bg-surface-muted text-neutral-300 cursor-not-allowed"
+                      : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                 }`}>
                 {interest}
               </button>
@@ -1112,6 +1145,30 @@ export default function HomePage() {
       )}
 
       {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
+
+      {isFilterModalOpen && (
+        <AdvancedFiltersModal
+          languages={LANGUAGES}
+          nationalities={nationalities}
+          filters={{
+            nationalityFilter,
+            languageFilter,
+            nativeLangFilter,
+            levelFilter,
+            interestFilter,
+            verifiedOnly: verifiedOnlyFilter,
+          }}
+          onApply={(f) => {
+            setNationalityFilter(f.nationalityFilter);
+            setLanguageFilter(f.languageFilter);
+            setNativeLangFilter(f.nativeLangFilter);
+            setLevelFilter(f.levelFilter);
+            setInterestFilter(f.interestFilter);
+            setVerifiedOnlyFilter(f.verifiedOnly);
+          }}
+          onClose={() => setIsFilterModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

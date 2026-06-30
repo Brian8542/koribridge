@@ -256,6 +256,19 @@ const KO = {
   filterTitle: '파트너 필터', filterNationality: '국적',
   filterLanguage: '배우고 싶은 언어', filterLevel: '언어 수준',
   filterAll: '전체',
+  // advanced filters
+  filterOpenBtn: '필터',
+  filterApplyBtn: '적용하기',
+  filterResetBtn: '전체 초기화',
+  filterNativeLang: '모국어',
+  filterInterests: '관심사',
+  filterVerifiedOnly: '이메일 인증 회원만',
+  filterIntro: '원하는 파트너의 조건을 설정하세요.',
+  filterActiveLabel: '개 필터 적용 중',
+  filterResultCount: '명',
+  interestsLabel2: '관심사 (최대 10개)',
+  interestsMaxReached: '관심사는 최대 10개까지 선택할 수 있습니다.',
+  interestsCount: '개 선택됨',
   // conversation
   continueChat: '대화 이어가기',
   // announcement
@@ -607,6 +620,19 @@ const EN = {
   filterTitle: 'Filters', filterNationality: 'Nationality',
   filterLanguage: 'Learning Language', filterLevel: 'Language Level',
   filterAll: 'All',
+  // advanced filters
+  filterOpenBtn: 'Filter',
+  filterApplyBtn: 'Apply',
+  filterResetBtn: 'Reset All',
+  filterNativeLang: 'Native Language',
+  filterInterests: 'Interests',
+  filterVerifiedOnly: 'Email-verified only',
+  filterIntro: 'Set your preferred partner criteria.',
+  filterActiveLabel: ' filter(s) active',
+  filterResultCount: '',
+  interestsLabel2: 'Interests (max 10)',
+  interestsMaxReached: 'You can select up to 10 interests.',
+  interestsCount: ' selected',
   // conversation
   continueChat: 'Continue Chat',
   // announcement

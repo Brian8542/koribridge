@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useLocale } from "../hooks/useLocale";
 import { AVATAR_GRADIENTS, getAvatarGradient } from "../utils/avatarUtils";
-import { COMMUNICATION_STYLES, CONVERSATION_GOALS } from "../utils/profileOptions";
+import { COMMUNICATION_STYLES, CONVERSATION_GOALS, INTERESTS, MAX_INTERESTS } from "../utils/profileOptions";
 import { getProfileCompletion } from "../utils/profileCompletion";
 import ProfileCompletionCard from "../components/ProfileCompletionCard";
 
@@ -18,8 +18,6 @@ const NATIONALITIES = [
   "한국", "미국", "영국", "캐나다", "호주", "베트남", "태국", "필리핀",
   "인도네시아", "말레이시아", "카자흐스탄", "우즈베키스탄", "중국", "일본", "기타",
 ];
-
-const INTERESTS = ["K-pop", "한국 음식", "여행", "드라마", "언어 교환", "게임", "영화", "스포츠"];
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -59,6 +57,7 @@ export default function ProfileSetupPage() {
   const toggleInterest = (interest) => {
     setForm((prev) => {
       const has = prev.interests.includes(interest);
+      if (!has && prev.interests.length >= MAX_INTERESTS) return prev;
       return {
         ...prev,
         interests: has ? prev.interests.filter((i) => i !== interest) : [...prev.interests, interest],
@@ -331,7 +330,12 @@ export default function ProfileSetupPage() {
           </div>
 
           <div className="card">
-            <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-3">{t.interests}</label>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-[13px] font-semibold text-[#1d1d1f]">{t.interests}</label>
+              <span className={`text-[12px] font-semibold ${form.interests.length >= MAX_INTERESTS ? "text-[#0071e3]" : "text-[#86868b]"}`}>
+                {form.interests.length}/{MAX_INTERESTS}
+              </span>
+            </div>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
                 <button
@@ -341,7 +345,9 @@ export default function ProfileSetupPage() {
                   className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all duration-150 ${
                     form.interests.includes(interest)
                       ? "bg-[#0071e3] text-white"
-                      : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                      : form.interests.length >= MAX_INTERESTS
+                        ? "bg-[#f5f5f7] text-[#d2d2d7] cursor-not-allowed"
+                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
                   }`}
                 >
                   {interest}
