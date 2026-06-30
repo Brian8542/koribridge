@@ -614,7 +614,7 @@ export default function ChatPage() {
           <div className="py-12">
             <div className="mx-auto max-w-md rounded-2xl border border-neutral-150 bg-white p-5 shadow-card">
               <p className="text-center text-sm font-bold text-neutral-900">{t.firstMessage}</p>
-              <p className="mt-1 text-center text-xs text-neutral-400">부담 없이 아래 질문으로 대화를 시작해 보세요.</p>
+              <p className="mt-1 text-center text-xs text-neutral-400">{t.chatStartHint}</p>
 
               {partner.opening_question && (
                 <button
@@ -622,7 +622,7 @@ export default function ChatPage() {
                   onClick={() => applyStarter(partner.opening_question)}
                   className="mt-5 w-full rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 text-left transition hover:border-primary-200 hover:bg-primary-100"
                 >
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-primary-500">Opening Question</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-primary-500">{t.chatOpeningQuestionLabel}</span>
                   <span className="mt-1 block text-sm font-bold text-neutral-900">{partner.opening_question}</span>
                 </button>
               )}
@@ -834,7 +834,7 @@ export default function ChatPage() {
         {messages.length > 0 && (
           <div className="max-w-3xl mx-auto mb-2">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              <span className="flex-shrink-0 text-[11px] font-extrabold text-neutral-400">학습 미션</span>
+              <span className="flex-shrink-0 text-[11px] font-extrabold text-neutral-400">{t.chatLearningMission}</span>
               {learningPrompts.map((prompt) => (
                 <button
                   key={prompt.label}

@@ -121,7 +121,7 @@ export default function ProfileSetupPage() {
     if (!form.learning_language) return setError(t.errLearningLang);
     if (!form.language_level) return setError(t.errLangLevel);
     if (form.bio.length > 500) return setError(t.errBioLen);
-    if (form.opening_question.length > 140) return setError("첫 질문은 140자 이하로 입력해 주세요.");
+    if (form.opening_question.length > 140) return setError(t.errOpeningQuestionLen);
 
     setLoading(true);
     try {
@@ -325,7 +325,7 @@ export default function ProfileSetupPage() {
                 value={form.opening_question}
                 maxLength={140}
                 onChange={(e) => handleChange("opening_question", e.target.value)}
-                placeholder="예: 가장 좋아하는 한국 음식은 뭐예요?"
+                placeholder={t.openingQuestionPlaceholder}
               />
             </div>
           </div>
