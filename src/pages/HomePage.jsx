@@ -480,7 +480,7 @@ export default function HomePage() {
         <div>
           <div className="flex items-center gap-2 mb-4">
             <span className="text-sm font-bold text-neutral-900">{t.aiRecommended}</span>
-            <span className="badge bg-primary-50 text-primary-600 border border-primary-100 text-[11px]">{t.recommendedBadge}</span>
+            <span className="badge bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 text-[11px]">{t.recommendedBadge}</span>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {recommendedProfiles.map((profile) => (
@@ -512,7 +512,7 @@ export default function HomePage() {
       <div>
         <p className="text-sm font-bold text-neutral-900 mb-4">
           {t.allPartners}{" "}
-          <span className="text-primary-500 font-semibold">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
+          <span className="text-[#0071e3] font-semibold">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
         </p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
@@ -612,7 +612,7 @@ export default function HomePage() {
           <p className="text-sm text-neutral-400 mt-0.5">{t.favoritesDesc}</p>
         </div>
         {favorites.length > 0 && (
-          <button type="button" onClick={() => setTab("home")} className="text-sm text-primary-500 font-semibold hover:text-primary-600 transition-colors">
+          <button type="button" onClick={() => setTab("home")} className="text-[13px] text-[#0071e3] font-semibold hover:text-[#0077ed] transition-colors">
             {t.morePartners}
           </button>
         )}
@@ -710,15 +710,15 @@ export default function HomePage() {
         <div className="card flex flex-col items-center gap-4 py-8">
           <div className="relative">
             {avatarPreview ? (
-              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-primary-100 shadow-lg" />
+              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-[#0071e3]/20 shadow-lg" />
             ) : isRealAvatar(profileForm.avatar_url) ? (
-              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-primary-100 shadow-lg" />
+              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-[#0071e3]/20 shadow-lg" />
             ) : (
               <div className={`w-28 h-28 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profileForm.avatar_url, user?.id)} flex items-center justify-center text-5xl font-black text-white shadow-lg`}>
                 {profileForm.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
-            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center cursor-pointer shadow-lg border-2 border-white transition-colors">
+            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#0071e3] hover:bg-[#0077ed] flex items-center justify-center cursor-pointer shadow-lg border-2 border-white transition-colors">
               <span className="text-white text-xl leading-none font-bold select-none">+</span>
               <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
             </label>
@@ -732,7 +732,7 @@ export default function HomePage() {
                 onClick={() => handleGradientSelect(idx)}
                 className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
                   profileForm.avatar_url === `gradient:${idx}` && !avatarPreview
-                    ? "ring-2 ring-offset-2 ring-primary-500 scale-110 shadow-md"
+                    ? "ring-2 ring-offset-2 ring-[#0071e3] scale-110 shadow-md"
                     : "opacity-70 hover:opacity-100 hover:scale-110"
                 }`}
               />
@@ -780,7 +780,7 @@ export default function HomePage() {
                 <button type="button" key={level} onClick={() => handleProfileChange("language_level", level)}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 ${
                     profileForm.language_level === level
-                      ? "bg-primary-500 text-white shadow-red-sm"
+                      ? "bg-[#0071e3] text-white"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}>
                   {levelLabel(level)}
@@ -800,7 +800,7 @@ export default function HomePage() {
               aria-checked={profileForm.is_public}
               onClick={() => handleProfileChange("is_public", !profileForm.is_public)}
               className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                profileForm.is_public ? "bg-primary-500" : "bg-neutral-200"
+                profileForm.is_public ? "bg-[#0071e3]" : "bg-[#d2d2d7]"
               }`}
             >
               <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -821,7 +821,7 @@ export default function HomePage() {
                   onClick={() => handleProfileChange("conversation_goal", goal.value)}
                   className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
                     profileForm.conversation_goal === goal.value
-                      ? "bg-primary-500 text-white"
+                      ? "bg-[#0071e3] text-white"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
@@ -841,7 +841,7 @@ export default function HomePage() {
                   onClick={() => handleProfileChange("communication_style", style.value)}
                   className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
                     profileForm.communication_style === style.value
-                      ? "bg-primary-500 text-white"
+                      ? "bg-[#0071e3] text-white"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
@@ -854,7 +854,7 @@ export default function HomePage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-bold text-neutral-700">{t.openingQuestionLabel}</label>
-              <span className={`text-xs ${profileForm.opening_question.length > 120 ? "text-primary-500" : "text-neutral-400"}`}>
+              <span className={`text-[12px] ${profileForm.opening_question.length > 120 ? "text-[#0071e3]" : "text-neutral-400"}`}>
                 {profileForm.opening_question.length}/140
               </span>
             </div>
@@ -886,7 +886,7 @@ export default function HomePage() {
                 disabled={pushLoading}
                 onClick={pushSubscribed ? unsubscribePush : subscribePush}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
-                  pushSubscribed ? "bg-primary-500" : "bg-neutral-200"
+                  pushSubscribed ? "bg-[#0071e3]" : "bg-[#d2d2d7]"
                 }`}
               >
                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -904,7 +904,7 @@ export default function HomePage() {
               <button type="button" key={interest} onClick={() => toggleInterest(interest)}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
                   profileForm.interests.includes(interest)
-                    ? "bg-primary-500 text-white"
+                    ? "bg-[#0071e3] text-white"
                     : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                 }`}>
                 {interest}
@@ -916,7 +916,7 @@ export default function HomePage() {
         <div className="card">
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-sm font-bold text-neutral-700">{t.bio}</label>
-            <span className={`text-xs ${profileForm.bio.length > 450 ? "text-primary-500" : "text-neutral-400"}`}>
+            <span className={`text-[12px] ${profileForm.bio.length > 450 ? "text-[#0071e3]" : "text-neutral-400"}`}>
               {profileForm.bio.length}/500
             </span>
           </div>
@@ -942,7 +942,7 @@ export default function HomePage() {
       </div>
 
       <div className="pt-2 text-center">
-        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-neutral-300 hover:text-primary-500 underline transition-colors">
+        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-neutral-300 hover:text-[#0071e3] underline transition-colors">
           {t.deleteAccountBtn}
         </button>
       </div>
@@ -994,7 +994,7 @@ export default function HomePage() {
             </svg>
             <input
               type="text"
-              className="w-full pl-10 pr-9 h-10 rounded-xl bg-surface-bg border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-500/10 transition-all"
+              className="w-full pl-10 pr-9 h-10 rounded-xl bg-surface-bg border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]/10 transition-all"
               placeholder={t.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -1029,10 +1029,10 @@ export default function HomePage() {
                 key={item.key}
                 type="button"
                 onClick={() => setTab(item.key)}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all duration-150 ${active ? "text-primary-500" : "text-neutral-400 hover:text-neutral-600"}`}
+                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all duration-150 ${active ? "text-[#0071e3]" : "text-[#86868b] hover:text-[#1d1d1f]"}`}
               >
                 {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-primary-500 rounded-b-full" />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#0071e3] rounded-b-full" />
                 )}
                 <span className="transition-colors duration-150">
                   {NAV_ICONS[item.key]}
@@ -1041,7 +1041,7 @@ export default function HomePage() {
                   {item.label}
                 </span>
                 {item.badge > 0 && (
-                  <span className="absolute top-2 right-[calc(50%-16px)] min-w-[16px] h-4 px-1 rounded-full bg-primary-500 text-[9px] text-white flex items-center justify-center font-bold">
+                  <span className="absolute top-2 right-[calc(50%-16px)] min-w-[16px] h-4 px-1 rounded-full bg-[#0071e3] text-[9px] text-white flex items-center justify-center font-bold">
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 )}
@@ -1069,7 +1069,7 @@ export default function HomePage() {
               </button>
               <button type="button"
                 onClick={() => setBlockConfirm({ targetId: reportModal.profileId, displayName: reportModal.displayName })}
-                className="w-full rounded-xl bg-primary-500 text-white py-3 text-sm font-semibold hover:bg-primary-600 transition-colors">
+                className="w-full rounded-full bg-[#0071e3] text-white py-3 text-[13px] font-semibold hover:bg-[#0077ed] transition-colors">
                 {t.blockBtn}
               </button>
               <button type="button" onClick={() => { setReportModal(null); setReportReason(""); }}

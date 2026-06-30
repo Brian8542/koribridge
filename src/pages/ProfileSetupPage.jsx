@@ -156,15 +156,15 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-bg">
+    <div className="min-h-screen bg-[#f5f5f7]">
       <Helmet><title>KoriBridge - {t.setupTitle}</title></Helmet>
 
-      <div className="bg-white border-b border-neutral-150 px-6 pt-12 pb-8 text-center">
-        <div className="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center mx-auto mb-4">
-          <span className="text-white text-sm font-extrabold">K</span>
+      <div className="bg-white border-b border-[#d2d2d7]/40 px-6 pt-12 pb-8 text-center">
+        <div className="w-10 h-10 rounded-apple bg-primary-500 flex items-center justify-center mx-auto mb-4">
+          <span className="text-white text-sm font-bold">K</span>
         </div>
-        <h1 className="text-2xl font-extrabold text-neutral-900 tracking-tight">{t.setupTitle}</h1>
-        <p className="text-neutral-500 text-sm mt-1.5">{t.setupDesc}</p>
+        <h1 className="text-[28px] font-bold text-[#1d1d1f] tracking-[-0.025em]">{t.setupTitle}</h1>
+        <p className="text-[#86868b] text-[14px] mt-1.5">{t.setupDesc}</p>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto">
@@ -174,27 +174,27 @@ export default function ProfileSetupPage() {
           <div className="card flex flex-col items-center gap-4 py-8">
             <div className="relative">
               {avatarPreview ? (
-                <img src={avatarPreview} alt="preview" className="w-32 h-32 rounded-2xl object-cover ring-4 ring-primary-100 shadow-card" />
+                <img src={avatarPreview} alt="preview" className="w-32 h-32 rounded-apple object-cover ring-4 ring-[#0071e3]/20 shadow-card" />
               ) : form.avatar_url.startsWith("gradient:") ? (
-                <div className={`w-32 h-32 rounded-2xl bg-gradient-to-br ${getAvatarGradient(form.avatar_url)} flex items-center justify-center text-6xl font-black text-white shadow-card`}>
+                <div className={`w-32 h-32 rounded-apple bg-gradient-to-br ${getAvatarGradient(form.avatar_url)} flex items-center justify-center text-6xl font-black text-white shadow-card`}>
                   {form.display_name?.[0]?.toUpperCase() || "?"}
                 </div>
               ) : (
-                <div className="w-32 h-32 rounded-2xl bg-neutral-100 border-2 border-dashed border-neutral-250 flex items-center justify-center">
-                  <svg className="w-10 h-10 text-neutral-300" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <div className="w-32 h-32 rounded-apple bg-[#f5f5f7] border-2 border-dashed border-[#d2d2d7] flex items-center justify-center">
+                  <svg className="w-10 h-10 text-[#86868b]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                   </svg>
                 </div>
               )}
-              <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center cursor-pointer shadow-card border-2 border-white transition-colors">
+              <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#0071e3] hover:bg-[#0077ed] flex items-center justify-center cursor-pointer shadow-card border-2 border-white transition-colors">
                 <span className="text-white text-lg leading-none font-bold">+</span>
                 <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-neutral-700">{t.avatarLabel}</p>
-              <p className="text-xs text-neutral-400 mt-0.5">{t.avatarLimit}</p>
+              <p className="text-[14px] font-semibold text-[#1d1d1f]">{t.avatarLabel}</p>
+              <p className="text-[12px] text-[#86868b] mt-0.5">{t.avatarLimit}</p>
             </div>
             <div className="flex flex-wrap gap-2 justify-center" style={{ maxWidth: 288 }}>
               {AVATAR_GRADIENTS.map((gradient, idx) => (
@@ -204,7 +204,7 @@ export default function ProfileSetupPage() {
                   onClick={() => handleGradientSelect(idx)}
                   className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
                     form.avatar_url === `gradient:${idx}` && !avatarPreview
-                      ? "ring-2 ring-offset-2 ring-primary-500 scale-110 shadow-md"
+                      ? "ring-2 ring-offset-2 ring-[#0071e3] scale-110 shadow-md"
                       : "opacity-70 hover:opacity-100 hover:scale-110"
                   }`}
                 />
@@ -214,7 +214,7 @@ export default function ProfileSetupPage() {
 
           <div className="card space-y-4">
             <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.nickname}</label>
+              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.nickname}</label>
               <input
                 type="text"
                 className="input-field"
@@ -227,14 +227,14 @@ export default function ProfileSetupPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.nationality}</label>
+                <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.nationality}</label>
                 <select className="input-field" value={form.nationality} onChange={(e) => handleChange("nationality", e.target.value)}>
                   <option value="">{t.select}</option>
                   {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.nativeLanguage}</label>
+                <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.nativeLanguage}</label>
                 <select className="input-field" value={form.native_language} onChange={(e) => handleChange("native_language", e.target.value)}>
                   <option value="">{t.select}</option>
                   {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -243,7 +243,7 @@ export default function ProfileSetupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.learningLanguage}</label>
+              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.learningLanguage}</label>
               <select className="input-field" value={form.learning_language} onChange={(e) => handleChange("learning_language", e.target.value)}>
                 <option value="">{t.select}</option>
                 {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -251,17 +251,17 @@ export default function ProfileSetupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-1.5">{t.languageLevel}</label>
+              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.languageLevel}</label>
               <div className="flex gap-2">
                 {["초급", "중급", "고급"].map((level) => (
                   <button
                     type="button"
                     key={level}
                     onClick={() => handleChange("language_level", level)}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 ${
+                    className={`flex-1 py-2.5 rounded-full text-[13px] font-semibold transition-all duration-150 ${
                       form.language_level === level
-                        ? "bg-primary-500 text-white shadow-red-sm"
-                        : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
+                        ? "bg-[#0071e3] text-white"
+                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
                     }`}
                   >
                     {levelLabel(level)}
@@ -273,17 +273,17 @@ export default function ProfileSetupPage() {
 
           <div className="card space-y-4">
             <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-2">대화 목적</label>
+              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-2">대화 목적</label>
               <div className="grid grid-cols-2 gap-2">
                 {CONVERSATION_GOALS.map((goal) => (
                   <button
                     type="button"
                     key={goal.value}
                     onClick={() => handleChange("conversation_goal", goal.value)}
-                    className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+                    className={`rounded-full px-3 py-2.5 text-[13px] font-semibold transition-all ${
                       form.conversation_goal === goal.value
-                        ? "bg-primary-500 text-white"
-                        : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
+                        ? "bg-[#0071e3] text-white"
+                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
                     }`}
                   >
                     {goal.label}
@@ -293,17 +293,17 @@ export default function ProfileSetupPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-2">선호 대화 방식</label>
+              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-2">선호 대화 방식</label>
               <div className="grid grid-cols-2 gap-2">
                 {COMMUNICATION_STYLES.map((style) => (
                   <button
                     type="button"
                     key={style.value}
                     onClick={() => handleChange("communication_style", style.value)}
-                    className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
+                    className={`rounded-full px-3 py-2.5 text-[13px] font-semibold transition-all ${
                       form.communication_style === style.value
-                        ? "bg-primary-500 text-white"
-                        : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
+                        ? "bg-[#0071e3] text-white"
+                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
                     }`}
                   >
                     {style.label}
@@ -314,8 +314,8 @@ export default function ProfileSetupPage() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-bold text-neutral-700">첫 대화 질문</label>
-                <span className={`text-xs ${form.opening_question.length > 120 ? "text-primary-500" : "text-neutral-400"}`}>
+                <label className="block text-[13px] font-semibold text-[#1d1d1f]">첫 대화 질문</label>
+                <span className={`text-[12px] ${form.opening_question.length > 120 ? "text-[#0071e3]" : "text-[#86868b]"}`}>
                   {form.opening_question.length}/140
                 </span>
               </div>
@@ -331,17 +331,17 @@ export default function ProfileSetupPage() {
           </div>
 
           <div className="card">
-            <label className="block text-sm font-bold text-neutral-700 mb-3">{t.interests}</label>
+            <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-3">{t.interests}</label>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((interest) => (
                 <button
                   type="button"
                   key={interest}
                   onClick={() => toggleInterest(interest)}
-                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
+                  className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all duration-150 ${
                     form.interests.includes(interest)
-                      ? "bg-primary-500 text-white"
-                      : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
+                      ? "bg-[#0071e3] text-white"
+                      : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
                   }`}
                 >
                   {interest}
@@ -352,8 +352,8 @@ export default function ProfileSetupPage() {
 
           <div className="card">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-bold text-neutral-700">{t.bio}</label>
-              <span className={`text-xs ${form.bio.length > 450 ? "text-primary-500" : "text-neutral-400"}`}>
+              <label className="block text-[13px] font-semibold text-[#1d1d1f]">{t.bio}</label>
+              <span className={`text-[12px] ${form.bio.length > 450 ? "text-[#0071e3]" : "text-[#86868b]"}`}>
                 {form.bio.length}/500
               </span>
             </div>
@@ -368,7 +368,7 @@ export default function ProfileSetupPage() {
           </div>
 
           {error && (
-            <div className="rounded-xl border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-700">
+            <div className="rounded-apple border border-[#ff3b30]/20 bg-[#fff2f2] px-4 py-3 text-[13px] text-[#ff3b30]">
               {error}
             </div>
           )}
@@ -376,7 +376,7 @@ export default function ProfileSetupPage() {
           <button
             type="submit"
             disabled={loading || uploading}
-            className="btn-primary w-full py-3.5 text-base"
+            className="btn-primary w-full py-3.5 text-[15px]"
           >
             {uploading ? t.avatarUploading : loading ? t.saving : t.saveProfileBtn}
           </button>

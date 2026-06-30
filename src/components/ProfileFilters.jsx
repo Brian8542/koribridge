@@ -18,11 +18,11 @@ function ProfileFilters({
   );
 
   return (
-    <div className="rounded-2xl bg-white p-5 border border-neutral-150 shadow-xs">
-      <p className="text-sm font-semibold text-neutral-700 mb-4">{t.filterTitle}</p>
+    <div className="rounded-apple-lg bg-white p-5 border border-[#d2d2d7]/40">
+      <p className="text-[13px] font-semibold text-[#1d1d1f] mb-4">{t.filterTitle}</p>
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <label className="text-xs font-semibold text-neutral-500 block mb-1.5">{t.filterNationality}</label>
+          <label className="text-[11px] font-semibold text-[#86868b] block mb-1.5">{t.filterNationality}</label>
           <select
             className="input-field"
             value={nationalityFilter}
@@ -35,7 +35,7 @@ function ProfileFilters({
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold text-neutral-500 block mb-1.5">{t.filterLanguage}</label>
+          <label className="text-[11px] font-semibold text-[#86868b] block mb-1.5">{t.filterLanguage}</label>
           <select
             className="input-field"
             value={languageFilter}
@@ -48,7 +48,7 @@ function ProfileFilters({
           </select>
         </div>
         <div>
-          <label className="text-xs font-semibold text-neutral-500 block mb-1.5">{t.filterLevel}</label>
+          <label className="text-[11px] font-semibold text-[#86868b] block mb-1.5">{t.filterLevel}</label>
           <select
             className="input-field"
             value={levelFilter}

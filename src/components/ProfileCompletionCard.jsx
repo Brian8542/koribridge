@@ -14,14 +14,14 @@ export default function ProfileCompletionCard({ completion }) {
             {t.profileCompletionDesc}
           </p>
         </div>
-        <span className="rounded-full bg-primary-50 border border-primary-100 px-3 py-1 text-sm font-extrabold text-primary-600">
+        <span className="rounded-full bg-[#e8f4ff] px-3 py-1 text-[13px] font-bold text-[#0071e3]">
           {completion.percentage}%
         </span>
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-neutral-100">
+      <div className="h-1.5 overflow-hidden rounded-full bg-[#f5f5f7]">
         <div
-          className="h-full rounded-full bg-primary-500 transition-all duration-500"
+          className="h-full rounded-full bg-[#0071e3] transition-all duration-500"
           style={{ width: `${completion.percentage}%` }}
         />
       </div>
@@ -30,8 +30,8 @@ export default function ProfileCompletionCard({ completion }) {
         {completion.items.map((item) => (
           <div
             key={item.key}
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold ${
-              item.done ? "bg-emerald-50 text-emerald-700" : "bg-surface-bg text-neutral-400"
+            className={`flex items-center gap-2 rounded-apple px-3 py-2 text-[12px] font-semibold ${
+              item.done ? "bg-emerald-50 text-emerald-700" : "bg-[#f5f5f7] text-[#86868b]"
             }`}
           >
             <span
@@ -52,7 +52,7 @@ export default function ProfileCompletionCard({ completion }) {
 
       {completion.nextItem && (
         <p className="text-xs font-semibold text-neutral-500">
-          {t.profileCompletionNext} <span className="text-primary-500">{completion.nextItem.label}</span>
+          {t.profileCompletionNext} <span className="text-[#0071e3]">{completion.nextItem.label}</span>
         </p>
       )}
     </div>

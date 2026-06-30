@@ -90,16 +90,16 @@ const VoicePlayer = React.memo(function VoicePlayer({ url, isMine }) {
         type="button"
         onClick={toggle}
         className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-          isMine ? "bg-white/20 hover:bg-white/30" : "bg-primary-50 hover:bg-primary-100"
+          isMine ? "bg-white/20 hover:bg-white/30" : "bg-[#e8f4ff] hover:bg-[#d6ecff]"
         }`}
       >
         {playing ? (
-          <svg className={`w-4 h-4 ${isMine ? "text-white" : "text-primary-600"}`} fill="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 ${isMine ? "text-white" : "text-[#0071e3]"}`} fill="currentColor" viewBox="0 0 24 24">
             <rect x="6" y="4" width="4" height="16" rx="1" />
             <rect x="14" y="4" width="4" height="16" rx="1" />
           </svg>
         ) : (
-          <svg className={`w-4 h-4 ml-0.5 ${isMine ? "text-white" : "text-primary-600"}`} fill="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 ml-0.5 ${isMine ? "text-white" : "text-[#0071e3]"}`} fill="currentColor" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7L8 5z" />
           </svg>
         )}
@@ -110,7 +110,7 @@ const VoicePlayer = React.memo(function VoicePlayer({ url, isMine }) {
           onClick={handleSeek}
         >
           <div
-            className={`h-full rounded-full transition-all duration-100 ${isMine ? "bg-white" : "bg-primary-500"}`}
+            className={`h-full rounded-full transition-all duration-100 ${isMine ? "bg-white" : "bg-[#0071e3]"}`}
             style={{ width: `${progress * 100}%` }}
           />
         </div>
@@ -525,7 +525,7 @@ export default function ChatPage() {
   if (loading || chatLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-surface-bg">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-2 border-neutral-200 border-t-primary-500 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
         <p className="text-sm text-neutral-400 font-medium">{t.chatLoading}</p>
       </div>
     </div>
@@ -552,7 +552,7 @@ export default function ChatPage() {
   if (!user || !partner) return (
     <div className="min-h-screen flex items-center justify-center bg-surface-bg px-6">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-card border border-neutral-150">
-        <p className="text-primary-500 font-semibold">{t.chatNotFound}</p>
+        <p className="text-[#ff3b30] font-semibold">{t.chatNotFound}</p>
         <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">{t.goBack}</button>
       </div>
     </div>
@@ -620,9 +620,9 @@ export default function ChatPage() {
                 <button
                   type="button"
                   onClick={() => applyStarter(partner.opening_question)}
-                  className="mt-5 w-full rounded-xl border border-primary-100 bg-primary-50 px-4 py-3 text-left transition hover:border-primary-200 hover:bg-primary-100"
+                  className="mt-5 w-full rounded-xl border border-[#0071e3]/20 bg-[#e8f4ff] px-4 py-3 text-left transition hover:border-[#0071e3]/40 hover:bg-[#d6ecff]"
                 >
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-primary-500">{t.chatOpeningQuestionLabel}</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-[#0071e3]">{t.chatOpeningQuestionLabel}</span>
                   <span className="mt-1 block text-sm font-bold text-neutral-900">{partner.opening_question}</span>
                 </button>
               )}
@@ -674,7 +674,7 @@ export default function ChatPage() {
                     onDoubleClick={() => isMine && !msg.image_url && !isVoice && startEditMessage(msg)}
                     className={
                       "rounded-2xl overflow-hidden text-sm cursor-default shadow-xs " +
-                      (isMine ? "bg-primary-500 text-white" : "bg-white border border-neutral-150 text-neutral-900")
+                      (isMine ? "bg-[#0071e3] text-white" : "bg-white border border-[#e8e8ed] text-[#1d1d1f]")
                     }
                   >
                     {msg.image_url && (
@@ -727,7 +727,7 @@ export default function ChatPage() {
                         )}
                         {!msg.image_url && !isVoice && (
                           <button onClick={() => translateMessage(msg)}
-                            className={"text-xs " + (isMine ? "text-white/60 hover:text-white" : "text-primary-500 hover:text-primary-700")}>
+                            className={"text-xs " + (isMine ? "text-white/60 hover:text-white" : "text-[#0071e3] hover:text-[#0077ed]")}>
                             {tLoad ? t.translating : tTxt ? (tVis ? t.hideTranslation : t.translateBtn) : t.translateBtn}
                           </button>
                         )}
@@ -853,16 +853,16 @@ export default function ChatPage() {
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
           {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
             <button key={emoji} onClick={() => handleEmojiClick(emoji)} disabled={isRecording}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-surface-bg rounded-full hover:bg-primary-50 text-sm transition-colors disabled:opacity-40">
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#f5f5f7] rounded-full hover:bg-[#e8f4ff] text-sm transition-colors disabled:opacity-40">
               {emoji}
             </button>
           ))}
         </div>
 
         {isRecording && (
-          <div className="flex items-center gap-3 mb-2 px-4 py-2.5 rounded-xl bg-primary-50 border border-primary-100 max-w-3xl mx-auto">
-            <span className="w-2.5 h-2.5 rounded-full bg-primary-500 animate-pulse flex-shrink-0" />
-            <span className="text-sm font-bold text-primary-600">{t.voiceRecording}</span>
+          <div className="flex items-center gap-3 mb-2 px-4 py-2.5 rounded-apple bg-[#e8f4ff] border border-[#0071e3]/20 max-w-3xl mx-auto">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#0071e3] animate-pulse flex-shrink-0" />
+            <span className="text-[13px] font-bold text-[#0071e3]">{t.voiceRecording}</span>
             <span className="text-sm font-mono text-primary-400 ml-auto">{fmtSecs(recordingTime)}</span>
           </div>
         )}
@@ -888,7 +888,7 @@ export default function ChatPage() {
             disabled={voiceUploading || imageUploading}
             className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center mb-0.5 transition-all select-none touch-none border ${
               isRecording
-                ? "bg-primary-500 text-white border-primary-500 shadow-red-sm scale-110"
+                ? "bg-[#0071e3] text-white border-[#0071e3] scale-110"
                 : "bg-surface-bg border-neutral-200 hover:bg-surface-muted text-neutral-500"
             } disabled:opacity-50`}
             title={t.voiceHint}
@@ -912,7 +912,7 @@ export default function ChatPage() {
               disabled={isRecording}
             />
             {newMessage.length > 800 && (
-              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-primary-500 font-semibold" : "text-neutral-400"}`}>
+              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-[#0071e3] font-semibold" : "text-neutral-400"}`}>
                 {newMessage.length}/{MAX_MSG_LENGTH}
               </p>
             )}
@@ -920,7 +920,7 @@ export default function ChatPage() {
 
           <button type="submit"
             disabled={sendLoading || !newMessage.trim() || newMessage.length > MAX_MSG_LENGTH || isRecording}
-            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-xl bg-primary-500 text-white flex items-center justify-center hover:bg-primary-600 active:scale-95 transition-all duration-150 disabled:opacity-50 shadow-red-sm">
+            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-xl bg-[#0071e3] text-white flex items-center justify-center hover:bg-[#0077ed] active:scale-95 transition-all duration-150 disabled:opacity-50">
             {sendLoading
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : (

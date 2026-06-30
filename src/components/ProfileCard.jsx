@@ -59,16 +59,16 @@ function ProfileCard({
   const trustScore = getTrustScore(profile);
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-150 shadow-card overflow-hidden transition-all duration-200 hover:shadow-card-md hover:-translate-y-0.5 group flex flex-col">
+    <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card overflow-hidden transition-all duration-200 hover:shadow-card-md hover:-translate-y-0.5 group flex flex-col">
       {/* Top accent */}
-      <div className="h-0.5 bg-primary-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div className="h-0.5 bg-[#0071e3] opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
       {/* Trust header row */}
       <div className="flex items-center justify-between px-4 pt-3 pb-0">
         <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
           profile.is_verified
             ? "bg-emerald-50 text-emerald-700"
-            : "bg-neutral-100 text-neutral-400"
+            : "bg-[#f5f5f7] text-[#86868b]"
         }`}>
           {profile.is_verified ? (
             <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -87,8 +87,8 @@ function ProfileCard({
             onClick={() => onToggleFavorite?.(profile)}
             className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 ${
               isFavorite
-                ? "text-primary-500 bg-primary-50"
-                : "text-neutral-300 hover:text-primary-400 hover:bg-primary-50"
+                ? "text-[#0071e3] bg-[#e8f4ff]"
+                : "text-[#d2d2d7] hover:text-[#0071e3] hover:bg-[#e8f4ff]"
             }`}
             title={isFavorite ? t.favRemove : t.favAdd}
           >
@@ -126,28 +126,28 @@ function ProfileCard({
                 src={profile.avatar_url}
                 alt={profile.display_name}
                 loading="lazy"
-                className="w-12 h-12 rounded-xl object-cover"
+                className="w-12 h-12 rounded-apple object-cover"
               />
             ) : (
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-lg text-white font-bold`}>
+              <div className={`w-12 h-12 rounded-apple bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-lg text-white font-bold`}>
                 {profile.display_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
             <span
               className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
-                isOnline ? "bg-emerald-500" : "bg-neutral-300"
+                isOnline ? "bg-emerald-500" : "bg-[#d2d2d7]"
               }`}
             />
           </div>
 
           {/* Name + level */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-neutral-900 truncate">{profile.display_name}</p>
+            <p className="text-[14px] font-bold text-[#1d1d1f] truncate">{profile.display_name}</p>
             <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
               <span className={`badge border text-[10px] ${LEVEL_STYLE[level] || LEVEL_STYLE["초급"]}`}>
                 {levelLabel(level)}
               </span>
-              <span className="badge bg-primary-50 text-primary-600 border border-primary-100 text-[10px]">
+              <span className="badge bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 text-[10px]">
                 {t.matchingLabel} {match.percentage}%
               </span>
             </div>
@@ -156,13 +156,13 @@ function ProfileCard({
 
         {/* Language info */}
         <div className="mt-3 grid grid-cols-2 gap-1.5">
-          <div className="bg-surface-bg rounded-lg px-2.5 py-2">
-            <p className="text-[10px] text-neutral-400 leading-none mb-0.5">{t.nativeLangShort}</p>
-            <p className="text-xs font-semibold text-neutral-700 truncate">{profile.native_language}</p>
+          <div className="bg-[#f5f5f7] rounded-apple px-2.5 py-2">
+            <p className="text-[10px] text-[#86868b] leading-none mb-0.5">{t.nativeLangShort}</p>
+            <p className="text-[11px] font-semibold text-[#1d1d1f] truncate">{profile.native_language}</p>
           </div>
-          <div className="bg-surface-bg rounded-lg px-2.5 py-2">
-            <p className="text-[10px] text-neutral-400 leading-none mb-0.5">{t.learningLangShort}</p>
-            <p className="text-xs font-semibold text-primary-600 truncate">{profile.learning_language}</p>
+          <div className="bg-[#f5f5f7] rounded-apple px-2.5 py-2">
+            <p className="text-[10px] text-[#86868b] leading-none mb-0.5">{t.learningLangShort}</p>
+            <p className="text-[11px] font-semibold text-[#0071e3] truncate">{profile.learning_language}</p>
           </div>
         </div>
 
@@ -230,7 +230,7 @@ function ProfileCard({
             {commonInterests.slice(0, 3).map((interest) => (
               <span
                 key={interest}
-                className="text-[10px] bg-primary-50 text-primary-600 border border-primary-100 px-1.5 py-0.5 rounded-md font-medium"
+                className="text-[10px] bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 px-1.5 py-0.5 rounded-md font-medium"
               >
                 {interest}
               </span>

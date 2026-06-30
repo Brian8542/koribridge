@@ -21,9 +21,10 @@
   }
 
   body {
-    font-family: "Pretendard", "Inter", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-    background-color: #FFFFFF;
-    color: #18181B;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+      "Apple SD Gothic Neo", Pretendard, "Helvetica Neue", Arial, sans-serif;
+    background-color: #ffffff;
+    color: #1d1d1f;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
@@ -37,162 +38,166 @@
   @media (pointer: fine) {
     ::-webkit-scrollbar       { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 99px; }
-    ::-webkit-scrollbar-thumb:hover { background: #A1A1AA; }
+    ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #aeaeb2; }
   }
 }
 
 @layer components {
 
-  /* ── Buttons ────────────────────────────────── */
+  /* ── Buttons ──────────────────────────────────────── */
 
   .btn-primary {
     @apply inline-flex items-center justify-center w-full
-           px-5 py-3 rounded-xl
-           bg-primary-500 text-white text-sm font-semibold tracking-tight
-           hover:bg-primary-600
+           px-5 py-3 rounded-full
+           bg-[#0071e3] text-white text-sm font-medium tracking-[-0.01em]
+           hover:bg-[#0077ed]
            active:scale-[0.97]
-           transition-all duration-150
+           transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40 focus-visible:ring-offset-2;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center w-full
-           px-5 py-3 rounded-xl
-           bg-white border border-neutral-200 text-neutral-700 text-sm font-semibold
-           hover:bg-neutral-50 hover:border-neutral-300 hover:text-neutral-900
+           px-5 py-3 rounded-full
+           bg-white border border-[#d2d2d7] text-[#1d1d1f] text-sm font-medium
+           hover:bg-[#f5f5f7]
            active:scale-[0.97]
-           transition-all duration-150
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 focus-visible:ring-offset-2;
+           transition-all duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/30 focus-visible:ring-offset-2;
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center
-           px-3 py-2 rounded-lg
-           text-neutral-500 text-sm font-medium
-           hover:text-neutral-900 hover:bg-neutral-100
-           transition-all duration-150;
+           px-3 py-2 rounded-full
+           text-[#86868b] text-sm font-medium
+           hover:text-[#1d1d1f] hover:bg-[#f5f5f7]
+           transition-all duration-200;
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center w-full
-           px-5 py-3 rounded-xl
-           bg-primary-500 text-white text-sm font-semibold
-           hover:bg-primary-600
+           px-5 py-3 rounded-full
+           bg-[#ff3b30] text-white text-sm font-medium
+           hover:bg-[#e0352b]
            active:scale-[0.97]
-           transition-all duration-150;
+           transition-all duration-200;
   }
 
-  /* ── Inputs ─────────────────────────────────── */
+  /* ── Inputs ───────────────────────────────────────── */
 
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl text-sm
-           bg-white border border-neutral-200
-           text-neutral-900 placeholder:text-neutral-400
-           focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10
-           transition-all duration-150;
+    @apply w-full px-4 py-3 rounded-apple text-sm
+           bg-[#f5f5f7] border-0
+           text-[#1d1d1f] placeholder:text-[#86868b]
+           focus:ring-2 focus:ring-[#0071e3]/25
+           transition-all duration-200;
   }
 
-  /* ── Cards ──────────────────────────────────── */
+  /* ── Cards ────────────────────────────────────────── */
 
   .card {
-    @apply bg-white rounded-2xl border border-neutral-150 shadow-card p-5;
+    @apply bg-[#f5f5f7] rounded-apple-lg p-6;
   }
 
   .card-sm {
-    @apply bg-white rounded-xl border border-neutral-150 shadow-xs p-4;
+    @apply bg-[#f5f5f7] rounded-apple p-4;
   }
 
-  /* ── Badges ─────────────────────────────────── */
+  .card-white {
+    @apply bg-white rounded-apple-lg border border-[#d2d2d7]/50 shadow-card p-6;
+  }
+
+  /* ── Badges ───────────────────────────────────────── */
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
   .badge-level-고급 {
-    @apply bg-blue-50 text-blue-700 border border-blue-100;
-  }
-  .badge-level-중급 {
-    @apply bg-amber-50 text-amber-700 border border-amber-100;
-  }
-  .badge-level-초급 {
-    @apply bg-emerald-50 text-emerald-700 border border-emerald-100;
+    @apply bg-blue-50 text-blue-700;
   }
 
-  /* ── Tag (interest / label) ──────────────────── */
+  .badge-level-중급 {
+    @apply bg-amber-50 text-amber-700;
+  }
+
+  .badge-level-초급 {
+    @apply bg-emerald-50 text-emerald-700;
+  }
+
+  /* ── Tag ──────────────────────────────────────────── */
 
   .tag {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-           bg-neutral-100 text-neutral-600;
-  }
-  .tag-active {
-    @apply bg-primary-500 text-white;
+           bg-[#e8e8ed] text-[#6e6e73];
   }
 
-  /* ── Section label ───────────────────────────── */
+  .tag-active {
+    @apply bg-[#0071e3] text-white;
+  }
+
+  /* ── Section label ────────────────────────────────── */
 
   .section-label {
-    @apply text-xs font-bold uppercase tracking-widest text-primary-500;
+    @apply text-xs font-semibold uppercase tracking-widest text-[#86868b];
   }
 
-  /* ── Online indicator ────────────────────────── */
+  /* ── Online indicator ─────────────────────────────── */
 
   .online-dot {
     @apply absolute w-3 h-3 rounded-full border-2 border-white;
   }
 
-  /* ── Skeleton ────────────────────────────────── */
+  /* ── Skeleton ─────────────────────────────────────── */
 
   .skeleton {
     background: linear-gradient(
       90deg,
-      #F1F3F5 25%,
-      #F8F9FA 50%,
-      #F1F3F5 75%
+      #f5f5f7 25%,
+      #fafafa 50%,
+      #f5f5f7 75%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.6s linear infinite;
+    animation: shimmer 1.8s linear infinite;
     border-radius: 6px;
   }
 
-  /* ── Light-mode base ────────────────────────── */
+  /* ── Apple section helpers ────────────────────────── */
 
-  html:not(.dark) body {
-    background-color: #FFFFFF;
-    color: #18181B;
+  .section-apple {
+    @apply py-24 md:py-32 px-5;
   }
 
-  html:not(.dark) .card {
-    @apply bg-white border-neutral-150;
+  .container-apple {
+    @apply max-w-[980px] mx-auto;
   }
 
-  html:not(.dark) .input-field {
-    @apply bg-white border-neutral-200 text-neutral-900;
-  }
-
-  html:not(.dark) .btn-secondary {
-    @apply bg-white border-neutral-200 text-neutral-700;
-  }
-
-  /* ── Dark overrides (AuthPage uses these) ── */
+  /* ── Dark-mode overrides ──────────────────────────── */
 
   html.dark body {
-    background-color: #111110;
-    color: #F8F9FA;
+    background-color: #000000;
+    color: #f5f5f7;
   }
 
   html.dark .card {
-    @apply bg-neutral-800 border-neutral-700 text-neutral-100;
+    background-color: #1c1c1e;
+    color: #f5f5f7;
   }
 
   html.dark .input-field {
-    @apply bg-neutral-900 border-neutral-700 text-neutral-100 placeholder:text-neutral-500
-           focus:border-primary-500;
+    background-color: #2c2c2e;
+    color: #f5f5f7;
+  }
+
+  html.dark .input-field::placeholder {
+    color: #6e6e73;
   }
 
   html.dark .btn-secondary {
-    @apply bg-neutral-800 border-neutral-700 text-neutral-300
-           hover:bg-neutral-700 hover:border-neutral-600 hover:text-white;
+    background-color: #1c1c1e;
+    border-color: #3a3a3c;
+    color: #f5f5f7;
   }
 }

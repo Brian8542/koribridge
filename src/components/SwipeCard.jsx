@@ -40,7 +40,7 @@ export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, o
               <span className="text-xs font-bold text-neutral-800">{score}% Match</span>
             </div>
             {profile.is_verified && (
-              <div className="bg-primary-500 text-white p-1.5 rounded-full shadow-xs">
+              <div className="bg-[#0071e3] text-white p-1.5 rounded-full shadow-xs">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                 </svg>
@@ -55,7 +55,7 @@ export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, o
             <span className="text-sm text-neutral-400">{profile.nationality}</span>
           </div>
           <div className="flex flex-wrap gap-2 mb-3">
-            <span className="badge bg-primary-50 text-primary-700 border border-primary-100">
+            <span className="badge bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20">
               {profile.learning_language}
             </span>
             {goalLabel && (

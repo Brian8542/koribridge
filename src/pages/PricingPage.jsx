@@ -2,223 +2,259 @@ import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
-const FEMALE_FEATURES = [
-  "무제한 파트너 매칭",
-  "무제한 채팅",
-  "AI 매칭",
-  "번역 무제한",
+const Check = () => (
+  <svg className="w-4 h-4 text-[#0071e3] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+  </svg>
+);
+
+const Dash = () => (
+  <svg className="w-4 h-4 text-[#d2d2d7] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+  </svg>
+);
+
+const PLANS = [
+  {
+    id: "free",
+    name: "기본",
+    price: "₩0",
+    period: "/월",
+    badge: null,
+    desc: "가볍게 시작해보세요",
+    cta: "무료로 시작",
+    ctaClass: "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed]",
+    features: {
+      "파트너 매칭": "3명",
+      "채팅": "하루 20회",
+      "번역": "5회/일",
+      "AI 매칭": false,
+      "음성 메모": false,
+      "우선 매칭": false,
+    },
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "₩4,900",
+    period: "/월",
+    badge: "인기",
+    desc: "가장 인기 있는 플랜",
+    cta: "Pro 시작하기",
+    ctaClass: "bg-[#0071e3] text-white hover:bg-[#0077ed]",
+    features: {
+      "파트너 매칭": "무제한",
+      "채팅": "무제한",
+      "번역": "무제한",
+      "AI 매칭": true,
+      "음성 메모": true,
+      "우선 매칭": false,
+    },
+    originalPrice: "₩9,900",
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    price: "₩9,900",
+    period: "/월",
+    badge: null,
+    desc: "최고의 학습 경험",
+    cta: "Premium 시작",
+    ctaClass: "bg-[#1d1d1f] text-white hover:bg-[#3a3a3c]",
+    features: {
+      "파트너 매칭": "무제한",
+      "채팅": "무제한",
+      "번역": "무제한",
+      "AI 매칭": true,
+      "음성 메모": true,
+      "우선 매칭": true,
+    },
+  },
 ];
 
-const FREE_FEATURES = [
-  "파트너 3명",
-  "채팅 하루 20회",
-  "번역 5회/일",
-];
-
-const PRO_FEATURES = [
-  "무제한 파트너",
-  "무제한 채팅",
-  "AI 매칭",
-  "번역 무제한",
-];
-
-const PREMIUM_FEATURES = [
-  "Pro 전체 포함",
-  "AI 발음 코치",
-  "우선 매칭",
-  "프로필 상단 노출",
-];
-
-const CheckIcon = React.memo(function CheckIcon({ className }) {
-  return (
-    <svg className={`w-4 h-4 flex-shrink-0 ${className}`} viewBox="0 0 16 16" fill="none">
-      <path d="M3 8l3 3 7-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-});
+const FEATURE_KEYS = ["파트너 매칭", "채팅", "번역", "AI 매칭", "음성 메모", "우선 매칭"];
 
 export default function PricingPage() {
   const navigate = useNavigate();
   const goToAuth = useCallback(() => navigate("/auth"), [navigate]);
 
   return (
-    <div className="bg-surface-bg text-neutral-900 min-h-screen">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f]">
       <Helmet>
         <title>KoriBridge - 요금제 | 여성 완전 무료</title>
-        <meta name="description" content="KoriBridge 요금제 안내. 여성 회원은 모든 기능을 영구 무료로 이용하세요. Pro 플랜 월 4,900원 (론칭 특가)." />
-        <meta property="og:title" content="KoriBridge - 요금제 | 여성 완전 무료" />
-        <meta property="og:description" content="여성 회원은 모든 기능을 영구 무료. Pro 플랜 월 4,900원 론칭 특가." />
-        <meta property="og:url" content="https://koribridge.vercel.app/pricing" />
+        <meta name="description" content="KoriBridge 요금제 안내. 여성 회원은 모든 기능을 영구 무료로 이용하세요." />
       </Helmet>
 
-      {/* 론칭 배너 */}
-      <div className="bg-primary-500 text-center py-2.5 px-5 text-sm font-semibold text-white">
-        지금 가입하면 론칭 특가 · Pro 월 <strong>4,900원</strong> (정가 ₩9,900)
+      {/* Launch banner */}
+      <div className="bg-[#1d1d1f] text-center py-2.5 px-5 text-[13px] font-medium text-white">
+        지금 가입하면 론칭 특가 · Pro 월{" "}
+        <strong className="text-[#0071e3]">₩4,900</strong>{" "}
+        <span className="text-[#6e6e73] line-through">₩9,900</span>
       </div>
 
-      {/* 네비게이션 */}
-      <nav className="sticky top-0 z-40 border-b border-neutral-150 bg-white/95 backdrop-blur-xl shadow-nav">
-        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center font-black text-sm text-white">K</div>
-            <span className="font-extrabold text-[15px] tracking-tight text-neutral-900 group-hover:text-neutral-600 transition-colors">KoriBridge</span>
+      {/* Nav */}
+      <nav className="bg-white/90 backdrop-blur-xl border-b border-[#d2d2d7]/40 px-5 h-14 flex items-center sticky top-0 z-40">
+        <div className="max-w-[980px] mx-auto w-full flex items-center justify-between">
+          <button onClick={() => navigate("/")} className="flex items-center gap-2 group">
+            <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center">
+              <span className="text-white text-[11px] font-black">K</span>
+            </div>
+            <span className="font-semibold text-[14px] text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">KoriBridge</span>
           </button>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/")}
-              className="hidden sm:block px-3 py-2 text-sm font-medium text-neutral-400 hover:text-neutral-900 transition-colors"
-            >
+            <button onClick={() => navigate("/")} className="hidden sm:block text-[13px] text-[#86868b] hover:text-[#1d1d1f] transition-colors">
               ← 홈으로
             </button>
-            <button onClick={goToAuth} className="btn-primary px-4 py-2.5 text-sm font-bold w-auto">
+            <button onClick={goToAuth} className="px-4 py-1.5 bg-[#0071e3] text-white text-[13px] font-medium rounded-full hover:bg-[#0077ed] transition-all duration-200">
               무료로 시작하기
             </button>
           </div>
         </div>
       </nav>
 
-      {/* 히어로 */}
-      <section className="text-center pt-20 pb-14 px-5">
+      {/* Hero */}
+      <section className="py-20 px-5 text-center">
         <p className="section-label mb-5">Pricing</p>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-5 text-neutral-900">
-          투명한 요금제,<br />
-          <span className="text-primary-500">여성은 완전 무료</span>
+        <h1 className="font-bold tracking-[-0.04em] leading-[1.07] text-[#1d1d1f]"
+          style={{ fontSize: "clamp(2.4rem, 5vw, 3.6rem)" }}>
+          투명한 요금제.<br />
+          <span className="text-[#0071e3]">여성은 완전 무료.</span>
         </h1>
-        <p className="text-neutral-500 text-base max-w-sm mx-auto leading-relaxed">
+        <p className="mt-5 text-[17px] text-[#86868b] max-w-sm mx-auto leading-relaxed">
           숨겨진 비용 없이 투명하게.<br />여성 회원은 모든 기능을 영구 무료로 이용하세요.
         </p>
       </section>
 
-      {/* 요금제 */}
-      <section className="px-5 pb-28 max-w-6xl mx-auto">
-
-        {/* 여성 무료 — featured */}
-        <div className="relative mb-6 rounded-2xl border-2 border-primary-200 bg-white p-8 md:p-10 shadow-card-md hover:border-primary-300 transition-colors duration-300">
-          <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16">
+      {/* Female free highlight */}
+      <section className="px-5 pb-8 max-w-[980px] mx-auto">
+        <div className="bg-white rounded-apple-lg p-8 md:p-10 border border-[#d2d2d7]/30 shadow-card-md">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2.5 mb-5">
-                <span className="badge bg-primary-500 text-white border-primary-500">여성 회원 혜택</span>
-                <span className="badge bg-primary-50 text-primary-600 border border-primary-100">영구 무료</span>
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-[12px] font-semibold px-3 py-1 rounded-full bg-[#0071e3] text-white">여성 회원 혜택</span>
+                <span className="text-[12px] font-semibold px-3 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f]">영구 무료</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black text-neutral-900 mb-2">여성 무료</h2>
-              <p className="text-neutral-500 text-sm mb-6">여성 회원이라면 모든 프리미엄 기능을 영구 무료로</p>
-              <div className="flex items-end gap-2 mb-8">
-                <span className="text-6xl font-black text-primary-500">₩0</span>
-                <span className="text-neutral-400 text-sm mb-2">/영구 무료</span>
-              </div>
-              <button onClick={goToAuth} className="btn-primary px-8 py-3.5 text-sm font-bold inline-flex items-center gap-2 w-auto">
-                지금 가입하기
-                <span>→</span>
+              <h2 className="text-[32px] font-bold text-[#1d1d1f] tracking-[-0.03em] mb-2">여성 회원 · 모든 기능 무료</h2>
+              <p className="text-[15px] text-[#86868b] mb-6">여성 회원이라면 Pro 기능을 포함한 모든 프리미엄 기능을 영구 무료로</p>
+              <button onClick={goToAuth} className="inline-flex items-center gap-2 px-7 py-3 bg-[#0071e3] text-white text-[15px] font-medium rounded-full hover:bg-[#0077ed] transition-all duration-200">
+                지금 가입하기 ›
               </button>
-              <p className="mt-4 text-xs text-neutral-400">신용카드 불필요 · 가입 즉시 이용 가능</p>
+              <p className="mt-3 text-[13px] text-[#86868b]">신용카드 불필요 · 가입 즉시 이용 가능</p>
             </div>
-            <div className="lg:w-72 flex-shrink-0">
-              <p className="section-label mb-4">포함 기능</p>
-              <ul className="space-y-2.5">
-                {FEMALE_FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-3 bg-primary-50 border border-primary-100 rounded-xl px-4 py-3">
-                    <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 8" fill="none">
-                        <path d="M1 4l2.5 2.5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <span className="text-sm text-neutral-800 font-medium">{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* 3-tier grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-
-          {/* 기본 무료 */}
-          <div className="rounded-2xl border border-neutral-150 bg-white p-6 hover:border-neutral-300 hover:-translate-y-1 shadow-card transition-all duration-300">
-            <h3 className="text-lg font-black text-neutral-900 mb-1">기본 무료</h3>
-            <p className="text-xs text-neutral-400 mb-5">가볍게 시작해보세요</p>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-4xl font-black text-neutral-900">₩0</span>
-              <span className="text-neutral-400 text-sm mb-1">/월</span>
-            </div>
-            <button onClick={goToAuth} className="btn-secondary w-full py-3 mb-6">
-              무료로 시작
-            </button>
-            <ul className="space-y-2.5">
-              {FREE_FEATURES.map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-sm text-neutral-500">
-                  <CheckIcon className="text-neutral-300" />
-                  {f}
-                </li>
+            <div className="grid grid-cols-2 gap-2 lg:w-72 flex-shrink-0">
+              {["무제한 파트너 매칭", "무제한 채팅", "AI 매칭", "번역 무제한", "음성 메모", "우선 매칭"].map(f => (
+                <div key={f} className="flex items-center gap-2 bg-[#f5f5f7] rounded-apple px-3 py-2.5">
+                  <Check />
+                  <span className="text-[13px] text-[#1d1d1f] font-medium">{f}</span>
+                </div>
               ))}
-            </ul>
-          </div>
-
-          {/* Pro */}
-          <div className="relative rounded-2xl border-2 border-primary-400 bg-white p-6 shadow-card-md hover:border-primary-500 hover:-translate-y-1 transition-all duration-300">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className="badge bg-primary-500 text-white border-primary-500 px-3.5 py-1 whitespace-nowrap">인기</span>
             </div>
-            <h3 className="text-lg font-black text-neutral-900 mb-1 mt-2">Pro</h3>
-            <p className="text-xs text-neutral-400 mb-5">가장 인기 있는 플랜</p>
-            <div className="flex items-end gap-1 mb-1">
-              <span className="text-4xl font-black text-neutral-900">₩4,900</span>
-              <span className="text-neutral-400 text-sm mb-1">/월</span>
-            </div>
-            <p className="text-xs text-neutral-300 line-through mb-5">정가 ₩9,900</p>
-            <button onClick={goToAuth} className="btn-primary w-full py-3 mb-6">
-              Pro 시작하기
-            </button>
-            <ul className="space-y-2.5">
-              {PRO_FEATURES.map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-sm text-neutral-700">
-                  <CheckIcon className="text-primary-500" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Premium */}
-          <div className="rounded-2xl border border-neutral-150 bg-white p-6 hover:border-amber-200 hover:-translate-y-1 shadow-card transition-all duration-300">
-            <h3 className="text-lg font-black text-neutral-900 mb-1">Premium</h3>
-            <p className="text-xs text-neutral-400 mb-5">최고의 학습 경험</p>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-4xl font-black text-neutral-900">₩9,900</span>
-              <span className="text-neutral-400 text-sm mb-1">/월</span>
-            </div>
-            <button
-              onClick={goToAuth}
-              className="w-full py-3 rounded-xl border border-amber-200 text-amber-700 font-bold text-sm hover:border-amber-300 hover:bg-amber-50 transition-all duration-200 mb-6"
-            >
-              Premium 시작
-            </button>
-            <ul className="space-y-2.5">
-              {PREMIUM_FEATURES.map((f) => (
-                <li key={f} className="flex items-center gap-2.5 text-sm text-neutral-500">
-                  <CheckIcon className="text-amber-500" />
-                  {f}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>
 
-      {/* CTA 섹션 */}
-      <section className="px-5 py-20 border-t border-neutral-150 bg-neutral-900 text-center">
-        <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4 text-white">
-          지금 바로 시작하세요
+      {/* Plan comparison */}
+      <section className="px-5 pb-24 max-w-[980px] mx-auto">
+        {/* Mobile: card stack */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:hidden">
+          {PLANS.map(plan => (
+            <div key={plan.id} className={`bg-white rounded-apple-lg p-6 relative ${plan.id === "pro" ? "ring-2 ring-[#0071e3]" : "border border-[#d2d2d7]/40"} shadow-card`}>
+              {plan.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="text-[11px] font-semibold px-3 py-1 bg-[#0071e3] text-white rounded-full">{plan.badge}</span>
+                </div>
+              )}
+              <h3 className="text-[19px] font-bold text-[#1d1d1f] mt-2">{plan.name}</h3>
+              <p className="text-[13px] text-[#86868b] mt-1 mb-4">{plan.desc}</p>
+              <div className="flex items-baseline gap-1 mb-4">
+                <span className="text-[32px] font-bold text-[#1d1d1f] tracking-tight">{plan.price}</span>
+                <span className="text-[14px] text-[#86868b]">{plan.period}</span>
+              </div>
+              {plan.originalPrice && (
+                <p className="text-[12px] text-[#aeaeb2] line-through -mt-3 mb-4">정가 {plan.originalPrice}</p>
+              )}
+              <button onClick={goToAuth} className={`w-full py-2.5 rounded-full text-[14px] font-medium transition-all duration-200 mb-5 ${plan.ctaClass}`}>
+                {plan.cta}
+              </button>
+              <ul className="space-y-2.5">
+                {FEATURE_KEYS.map(key => {
+                  const val = plan.features[key];
+                  return (
+                    <li key={key} className="flex items-center gap-2 text-[13px]">
+                      {val === false ? <Dash /> : <Check />}
+                      <span className={val === false ? "text-[#aeaeb2]" : "text-[#1d1d1f]"}>
+                        {typeof val === "string" ? val : key}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Apple-style comparison table */}
+        <div className="hidden md:block bg-white rounded-apple-lg shadow-card overflow-hidden border border-[#d2d2d7]/30">
+          {/* Header row */}
+          <div className="grid grid-cols-4 border-b border-[#f5f5f7]">
+            <div className="p-6" />
+            {PLANS.map(plan => (
+              <div key={plan.id} className={`p-6 text-center relative ${plan.id === "pro" ? "bg-[#f5f5f7]" : ""}`}>
+                {plan.badge && (
+                  <span className="absolute top-4 left-1/2 -translate-x-1/2 text-[11px] font-semibold px-3 py-1 bg-[#0071e3] text-white rounded-full">{plan.badge}</span>
+                )}
+                <h3 className="text-[18px] font-bold text-[#1d1d1f] mt-5">{plan.name}</h3>
+                <div className="mt-2 flex items-baseline justify-center gap-1">
+                  <span className="text-[28px] font-bold text-[#1d1d1f] tracking-tight">{plan.price}</span>
+                  <span className="text-[13px] text-[#86868b]">{plan.period}</span>
+                </div>
+                {plan.originalPrice && (
+                  <p className="text-[12px] text-[#aeaeb2] line-through">정가 {plan.originalPrice}</p>
+                )}
+                <button onClick={goToAuth} className={`mt-4 w-full py-2 rounded-full text-[13px] font-medium transition-all duration-200 ${plan.ctaClass}`}>
+                  {plan.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Feature rows */}
+          {FEATURE_KEYS.map((key, i) => (
+            <div key={key} className={`grid grid-cols-4 border-b border-[#f5f5f7] last:border-0 ${i % 2 === 0 ? "" : "bg-[#fafafa]"}`}>
+              <div className="px-6 py-4 text-[14px] text-[#1d1d1f] font-medium flex items-center">{key}</div>
+              {PLANS.map(plan => {
+                const val = plan.features[key];
+                return (
+                  <div key={plan.id} className={`px-6 py-4 text-center flex items-center justify-center ${plan.id === "pro" ? "bg-[#f5f5f7]" : ""}`}>
+                    {val === false ? (
+                      <Dash />
+                    ) : typeof val === "string" ? (
+                      <span className="text-[13px] font-semibold text-[#1d1d1f]">{val}</span>
+                    ) : (
+                      <Check />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 px-5 bg-[#1d1d1f] text-center">
+        <h2 className="font-bold tracking-[-0.04em] leading-[1.07] text-white"
+          style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
+          지금 바로 시작하세요.
         </h2>
-        <p className="text-neutral-400 text-sm mb-8 max-w-xs mx-auto leading-relaxed">
+        <p className="mt-4 text-[15px] text-[#86868b] max-w-xs mx-auto">
           신용카드 불필요 · 언제든 플랜 변경 가능
         </p>
         <button
           onClick={goToAuth}
-          className="inline-flex items-center gap-2 px-10 py-4 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-2xl transition-all duration-200 active:scale-[0.98]"
+          className="mt-8 px-8 py-3.5 bg-[#0071e3] text-white text-[17px] font-medium rounded-full hover:bg-[#0077ed] transition-all duration-200 active:scale-[0.97]"
         >
           무료로 시작하기
-          <span>→</span>
         </button>
       </section>
     </div>

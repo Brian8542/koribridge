@@ -8,41 +8,6 @@ import { useLocale } from "../hooks/useLocale";
 import { login, signUp as gaSignUp } from "../utils/analytics";
 import { sendWelcomeEmail } from "../utils/welcomeEmail";
 
-const LEFT_FEATURES = [
-  {
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-      </svg>
-    ),
-    titleKey: "f1Title", descKey: "f1Desc",
-  },
-  {
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-      </svg>
-    ),
-    titleKey: "chatBtn", descKey: "f2Desc",
-  },
-  {
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-      </svg>
-    ),
-    titleKey: "f5Title", descKey: "f5Desc",
-  },
-  {
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-      </svg>
-    ),
-    titleKey: "f6Title", descKey: "f6Desc",
-  },
-];
-
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="flex-shrink-0">
     <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -53,15 +18,15 @@ const GoogleIcon = () => (
 );
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [mode, setMode]                     = useState("login");
+  const [email, setEmail]                   = useState("");
+  const [password, setPassword]             = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [signupDone, setSignupDone] = useState(false);
+  const [rememberMe, setRememberMe]         = useState(true);
+  const [error, setError]                   = useState("");
+  const [message, setMessage]               = useState("");
+  const [loading, setLoading]               = useState(false);
+  const [signupDone, setSignupDone]         = useState(false);
 
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -76,10 +41,7 @@ export default function AuthPage() {
   }, []);
 
   const switchMode = (newMode) => {
-    setMode(newMode);
-    setError("");
-    setMessage("");
-    setSignupDone(false);
+    setMode(newMode); setError(""); setMessage(""); setSignupDone(false);
   };
 
   const handleGoogleSignIn = async () => {
@@ -91,21 +53,17 @@ export default function AuthPage() {
         redirectTo: `${window.location.origin}/home`,
       },
     });
-    if (err) {
-      setError(t.errEmailAuth);
-    } else {
-      login("google");
-    }
+    if (err) setError(t.errEmailAuth);
+    else login("google");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
+    setError(""); setMessage("");
     window.localStorage.setItem("rememberMe", rememberMe ? "true" : "false");
 
     if (mode === "reset") {
-      if (!email) return setError(t.email + " " + t.errName.replace("이름을", "주소를"));
+      if (!email) return setError(t.email + " " + t.errName?.replace("이름을", "주소를"));
       setLoading(true);
       const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth`,
@@ -123,11 +81,7 @@ export default function AuthPage() {
       const { data, error: err } = await signUp(email, password);
       setLoading(false);
       if (err) setError(err.message);
-      else {
-        gaSignUp("email");
-        sendWelcomeEmail({ userId: data?.user?.id, email, locale });
-        setSignupDone(true);
-      }
+      else { gaSignUp("email"); sendWelcomeEmail({ userId: data?.user?.id, email, locale }); setSignupDone(true); }
       return;
     }
 
@@ -139,23 +93,24 @@ export default function AuthPage() {
     else { login("email"); navigate("/home"); }
   };
 
+  /* ── Sign-up done screen ── */
   if (signupDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f7] px-5">
         <Helmet><title>KoriBridge - {t.emailVerifyTitle}</title></Helmet>
-        <div className="bg-white border border-neutral-150 rounded-2xl shadow-card-md p-8 max-w-sm w-full text-center">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-5 shadow-card">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <div className="bg-white rounded-apple-lg shadow-card-md p-8 max-w-sm w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-[#34c759] flex items-center justify-center mx-auto mb-5">
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-neutral-900">{t.emailVerifyTitle}</h2>
-          <p className="mt-3 text-sm text-neutral-500 leading-relaxed">
-            <span className="font-semibold text-neutral-800">{email}</span>{t.emailVerifySent}<br />
+          <h2 className="text-[22px] font-bold text-[#1d1d1f] tracking-tight">{t.emailVerifyTitle}</h2>
+          <p className="mt-3 text-[15px] text-[#86868b] leading-relaxed">
+            <span className="font-semibold text-[#1d1d1f]">{email}</span>{t.emailVerifySent}<br />
             {t.emailVerifyClick}
           </p>
-          <p className="mt-3 text-xs text-neutral-400">{t.emailVerifySpam}</p>
-          <button onClick={() => switchMode("login")} className="mt-6 btn-primary py-3">
+          <p className="mt-2 text-[13px] text-[#aeaeb2]">{t.emailVerifySpam}</p>
+          <button onClick={() => switchMode("login")} className="mt-7 btn-primary py-3">
             {t.goToLogin}
           </button>
           <button
@@ -163,7 +118,7 @@ export default function AuthPage() {
               await supabase.auth.resend({ type: "signup", email });
               showToast(t.resendEmail, "success");
             }}
-            className="mt-3 text-sm text-neutral-400 hover:text-neutral-600 underline transition-colors block w-full"
+            className="mt-3 text-[13px] text-[#86868b] hover:text-[#0071e3] transition-colors block w-full"
           >
             {t.resendEmail}
           </button>
@@ -178,73 +133,86 @@ export default function AuthPage() {
         <title>KoriBridge - {mode === "login" ? t.signIn : mode === "signup" ? t.signUp : t.resetPassword}</title>
       </Helmet>
 
-      {/* ── 왼쪽 패널 (데스크탑) ── */}
-      <div className="hidden lg:flex flex-col justify-between w-[440px] xl:w-[480px] flex-shrink-0 bg-surface-bg border-r border-neutral-150 p-10">
+      {/* ── Left panel (desktop) ── */}
+      <div className="hidden lg:flex flex-col justify-between w-[420px] xl:w-[460px] flex-shrink-0 bg-[#f5f5f7] p-10 border-r border-[#d2d2d7]/50">
         <div>
           <div className="flex items-center gap-2.5 mb-14">
             <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
-              <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-                <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 9.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="white" />
-              </svg>
+              <span className="text-white text-[11px] font-black">K</span>
             </div>
-            <span className="font-bold text-[15px] tracking-tight text-neutral-900">KoriBridge</span>
+            <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1d1d1f]">KoriBridge</span>
           </div>
 
-          <h2 className="font-extrabold tracking-[-0.025em] leading-tight text-neutral-900 mb-3" style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.1rem)" }}>
+          <h2 className="font-bold tracking-[-0.04em] leading-[1.08] text-[#1d1d1f] mb-4"
+            style={{ fontSize: "clamp(1.6rem, 2.6vw, 2.2rem)" }}>
             {locale === "ko" ? (
-              <>한국과 세계를<br /><span className="text-primary-500">진심으로 잇다</span></>
+              <>한국과 세계를<br />진심으로 잇다.</>
             ) : (
-              <>Connect Korea<br /><span className="text-primary-500">to the World</span></>
+              <>Connect Korea<br />to the World.</>
             )}
           </h2>
-          <p className="text-neutral-500 text-sm leading-relaxed mb-10">
+
+          <p className="text-[15px] text-[#86868b] leading-relaxed mb-10">
             {locale === "ko"
               ? "이메일 인증 기반의 한국어 교류 플랫폼. 허위 프로필 없이, 신뢰부터 시작합니다."
               : "A trust-first Korean language exchange platform. Real people, real conversations."}
           </p>
 
-          <div className="space-y-4">
-            {LEFT_FEATURES.map((f) => (
-              <div key={f.titleKey} className="flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center text-neutral-500 flex-shrink-0">
+          <div className="space-y-5">
+            {[
+              {
+                icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>,
+                titleKey: "f1Title", descKey: "f1Desc",
+              },
+              {
+                icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>,
+                titleKey: "chatBtn", descKey: "f2Desc",
+              },
+              {
+                icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>,
+                titleKey: "f6Title", descKey: "f6Desc",
+              },
+            ].map((f) => (
+              <div key={f.titleKey} className="flex items-start gap-3.5">
+                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#86868b] flex-shrink-0 shadow-xs">
                   {f.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-neutral-900 leading-tight">{t[f.titleKey]}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5 leading-tight">{t[f.descKey]}</p>
+                  <p className="text-[14px] font-semibold text-[#1d1d1f]">{t[f.titleKey]}</p>
+                  <p className="text-[13px] text-[#86868b] mt-0.5 leading-snug">{t[f.descKey]}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white border border-neutral-200 rounded-xl px-4 py-3.5 shadow-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+        <div className="flex items-center gap-3 bg-white rounded-apple px-4 py-3.5 shadow-xs border border-[#d2d2d7]/50">
+          <div className="w-2 h-2 rounded-full bg-[#34c759] flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-neutral-900 leading-tight">
+            <p className="text-[13px] font-semibold text-[#1d1d1f]">
               {locale === "ko" ? "이메일 인증으로 신뢰를 보장합니다" : "Trust verified by email"}
             </p>
-            <p className="text-xs text-neutral-400 leading-tight">
+            <p className="text-[12px] text-[#86868b]">
               {locale === "ko" ? "인증된 멤버만 파트너 목록에 표시됩니다" : "Only verified members appear in the partner list"}
             </p>
           </div>
         </div>
       </div>
 
-      {/* ── 오른쪽 패널 (폼) ── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 min-h-screen bg-white">
+      {/* ── Right panel (form) ── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-5 py-12">
         <div className="lg:hidden flex items-center gap-2.5 mb-10">
           <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-bold">K</span>
+            <span className="text-white text-[11px] font-black">K</span>
           </div>
-          <span className="font-bold text-[15px] tracking-tight text-neutral-900">KoriBridge</span>
+          <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1d1d1f]">KoriBridge</span>
         </div>
 
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-[340px]">
           <div className="flex justify-end mb-6">
             <button
               onClick={toggleLocale}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-surface-muted border border-neutral-200 hover:bg-neutral-100 transition text-neutral-600"
+              className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-[#f5f5f7] hover:bg-[#e8e8ed] transition text-[#6e6e73]"
             >
               {locale === "ko" ? "EN" : "한"}
             </button>
@@ -252,31 +220,31 @@ export default function AuthPage() {
 
           <div className="mb-7">
             {mode === "reset" && (
-              <button onClick={() => switchMode("login")} className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-700 transition-colors mb-5">
+              <button onClick={() => switchMode("login")} className="flex items-center gap-1.5 text-[13px] text-[#86868b] hover:text-[#0071e3] transition-colors mb-5">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
                 {t.resetBack}
               </button>
             )}
-            <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">
+            <h1 className="text-[28px] font-bold text-[#1d1d1f] tracking-[-0.025em]">
               {mode === "login" ? t.authLoginTitle : mode === "signup" ? t.authSignupTitle : t.authResetTitle}
             </h1>
-            <p className="text-sm text-neutral-400 mt-1.5">
+            <p className="text-[15px] text-[#86868b] mt-1.5">
               {mode === "login" ? t.authLoginDesc : mode === "signup" ? t.authSignupDesc : t.authResetDesc}
             </p>
           </div>
 
           {mode !== "reset" && (
-            <div className="flex bg-surface-muted border border-neutral-200 rounded-xl p-1 mb-6">
+            <div className="flex bg-[#f5f5f7] rounded-full p-1 mb-6">
               {["login", "signup"].map((m) => (
                 <button
                   key={m}
                   onClick={() => switchMode(m)}
-                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-150 ${
+                  className={`flex-1 py-2 text-[13px] font-semibold rounded-full transition-all duration-200 ${
                     mode === m
-                      ? "bg-white text-neutral-900 shadow-xs border border-neutral-150"
-                      : "text-neutral-400 hover:text-neutral-700"
+                      ? "bg-white text-[#1d1d1f] shadow-xs"
+                      : "text-[#86868b] hover:text-[#1d1d1f]"
                   }`}
                 >
                   {m === "login" ? t.signIn : t.signUp}
@@ -287,82 +255,70 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "reset" && (
-              <p className="text-sm text-neutral-500">{t.resetDesc}</p>
+              <p className="text-[14px] text-[#86868b]">{t.resetDesc}</p>
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.email}</label>
+              <label className="block text-[13px] font-medium text-[#1d1d1f] mb-1.5">{t.email}</label>
               <input
-                type="email"
-                className="input-field"
+                type="email" className="input-field"
                 placeholder={t.emailPlaceholder}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
+                value={email} onChange={(e) => setEmail(e.target.value)}
+                required autoComplete="email"
               />
             </div>
 
             {mode !== "reset" && (
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.password}</label>
+                <label className="block text-[13px] font-medium text-[#1d1d1f] mb-1.5">{t.password}</label>
                 <input
-                  type="password"
-                  className="input-field"
+                  type="password" className="input-field"
                   placeholder={t.passwordPlaceholder}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  required autoComplete={mode === "login" ? "current-password" : "new-password"}
                 />
               </div>
             )}
 
             {mode === "signup" && (
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t.confirmPassword}</label>
+                <label className="block text-[13px] font-medium text-[#1d1d1f] mb-1.5">{t.confirmPassword}</label>
                 <input
-                  type="password"
-                  className="input-field"
+                  type="password" className="input-field"
                   placeholder={t.confirmPasswordPlaceholder}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  autoComplete="new-password"
+                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                  required autoComplete="new-password"
                 />
               </div>
             )}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+              <div className="bg-[#fff2f2] text-[#c0182b] text-[13px] px-4 py-3 rounded-apple">
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-3 rounded-xl">
+              <div className="bg-[#f0fff4] text-[#1a7f37] text-[13px] px-4 py-3 rounded-apple">
                 {message}
               </div>
             )}
 
-            <button type="submit" className="btn-primary py-3.5" disabled={loading}>
-              {loading
-                ? t.loading
-                : mode === "login"
-                ? t.signIn
-                : mode === "signup"
-                ? t.signUp
+            <button type="submit" className="btn-primary py-3.5 text-[15px]" disabled={loading}>
+              {loading ? t.loading
+                : mode === "login" ? t.signIn
+                : mode === "signup" ? t.signUp
                 : t.sendReset}
             </button>
 
             {mode === "login" && (
               <>
-                <label className="flex items-center gap-2 text-sm text-neutral-500 cursor-pointer select-none">
+                <label className="flex items-center gap-2 text-[13px] text-[#86868b] cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-neutral-300 text-primary-500 focus:ring-primary-500/20"
+                    className="h-4 w-4 rounded border-[#d2d2d7] text-[#0071e3] focus:ring-[#0071e3]/20"
                   />
                   {t.rememberMe}
                 </label>
@@ -370,7 +326,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => switchMode("reset")}
-                    className="text-sm text-neutral-400 hover:text-primary-500 transition-colors"
+                    className="text-[13px] text-[#86868b] hover:text-[#0071e3] transition-colors"
                   >
                     {t.forgotPassword}
                   </button>
@@ -381,14 +337,14 @@ export default function AuthPage() {
             {mode !== "reset" && (
               <>
                 <div className="relative flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-neutral-150" />
-                  <span className="text-xs text-neutral-400 font-medium">{locale === "ko" ? "또는" : "or"}</span>
-                  <div className="flex-1 h-px bg-neutral-150" />
+                  <div className="flex-1 h-px bg-[#d2d2d7]/60" />
+                  <span className="text-[12px] text-[#86868b]">{locale === "ko" ? "또는" : "or"}</span>
+                  <div className="flex-1 h-px bg-[#d2d2d7]/60" />
                 </div>
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="w-full py-3.5 px-4 bg-white border border-neutral-200 rounded-xl text-neutral-700 font-semibold text-sm hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-150 flex items-center justify-center gap-3 shadow-xs"
+                  className="w-full py-3 px-4 bg-[#f5f5f7] hover:bg-[#e8e8ed] rounded-full text-[#1d1d1f] font-medium text-[14px] transition-all duration-200 flex items-center justify-center gap-3"
                 >
                   <GoogleIcon />
                   {t.googleSignIn}
@@ -396,10 +352,10 @@ export default function AuthPage() {
               </>
             )}
 
-            <div className="flex items-center justify-center gap-3 pt-1 text-xs text-neutral-400">
-              <a href="/terms" className="hover:text-neutral-600 underline transition-colors">{t.terms}</a>
-              <span className="text-neutral-200">·</span>
-              <a href="/privacy" className="hover:text-neutral-600 underline transition-colors">{t.privacy}</a>
+            <div className="flex items-center justify-center gap-3 pt-1 text-[12px] text-[#86868b]">
+              <a href="/terms" className="hover:text-[#0071e3] transition-colors">{t.terms}</a>
+              <span className="text-[#d2d2d7]">·</span>
+              <a href="/privacy" className="hover:text-[#0071e3] transition-colors">{t.privacy}</a>
             </div>
           </form>
         </div>
