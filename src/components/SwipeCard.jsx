@@ -2,12 +2,14 @@ import React from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
+import { useLocale } from "../hooks/useLocale";
 
 export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
   const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0, 1, 1, 1, 0]);
   const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
+  const { t } = useLocale();
 
   const handleDragEnd = (e, info) => {
     if (info.offset.x > 120) onSwipeRight();
@@ -73,7 +75,7 @@ export default function SwipeCard({ profile, score, reasons = [], onSwipeLeft, o
           )}
           {profile.opening_question && (
             <div className="rounded-xl bg-surface-bg border border-neutral-150 px-3 py-2">
-              <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide">Opening Question</p>
+              <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide">{t.chatOpeningQuestionLabel}</p>
               <p className="text-sm text-neutral-700 font-semibold line-clamp-2 mt-0.5">{profile.opening_question}</p>
             </div>
           )}

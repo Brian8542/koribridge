@@ -100,6 +100,10 @@ const KO = {
   reporting: '신고 중...', reportBtn: '신고하기',
   blockBtn: '차단하기',
   blocked: '님을 차단했습니다.', blockFailed: '차단에 실패했습니다.',
+  blockSuccessMsg: '사용자가 차단되었습니다.',
+  blockErrorMsg: '차단 처리 중 오류가 발생했습니다.',
+  blockConfirmStandalone: '이 사용자를 차단하시겠습니까?',
+  blockDescription: '차단 후 서로의 프로필을 볼 수 없습니다.',
   reportDone: '신고가 접수되었습니다.', reportFailed: '신고 접수에 실패했습니다.',
   // delete account
   deleteAccount: '회원 탈퇴',
@@ -427,6 +431,10 @@ const EN = {
   reporting: 'Reporting...', reportBtn: 'Report',
   blockBtn: 'Block',
   blocked: ' has been blocked.', blockFailed: 'Failed to block user.',
+  blockSuccessMsg: 'User blocked.',
+  blockErrorMsg: 'Failed to block user.',
+  blockConfirmStandalone: 'Block this user?',
+  blockDescription: 'You won\'t be able to see each other\'s profiles after blocking.',
   reportDone: 'Report submitted.', reportFailed: 'Failed to submit report.',
   // delete account
   deleteAccount: 'Delete Account',
