@@ -349,6 +349,7 @@ export default function HomePage() {
         avatar_url: avatar_url || profileForm.avatar_url || "",
         interests: profileForm.interests,
         is_public: profileForm.is_public,
+        is_verified: !!user?.email_confirmed_at,
         conversation_goal: profileForm.conversation_goal,
         communication_style: profileForm.communication_style,
         opening_question: profileForm.opening_question.trim(),
