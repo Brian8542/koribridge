@@ -1,14 +1,18 @@
 import React from "react";
+import { useLocale } from "../hooks/useLocale";
 
 export default function ConfirmModal({
   message,
   description,
-  confirmLabel = "확인",
-  cancelLabel = "취소",
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   danger = false,
 }) {
+  const { t } = useLocale();
+  const resolvedConfirm = confirmLabel ?? t.confirm;
+  const resolvedCancel = cancelLabel ?? t.cancel;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/40 backdrop-blur-sm px-4">
       <div className="bg-white rounded-2xl shadow-modal p-6 w-full max-w-sm border border-neutral-100">
@@ -20,7 +24,7 @@ export default function ConfirmModal({
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl bg-surface-muted border border-neutral-200 text-neutral-600 text-sm font-semibold hover:bg-neutral-100 transition-colors"
           >
-            {cancelLabel}
+            {resolvedCancel}
           </button>
           <button
             type="button"
@@ -29,7 +33,7 @@ export default function ConfirmModal({
               danger ? "bg-primary-500 hover:bg-primary-600" : "bg-neutral-900 hover:bg-neutral-700"
             }`}
           >
-            {confirmLabel}
+            {resolvedConfirm}
           </button>
         </div>
       </div>

@@ -2,9 +2,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { formatTime } from "../utils/formatters";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
+import { useLocale } from "../hooks/useLocale";
 
 function ConversationItem({ conv, userId, isOnline }) {
   const navigate = useNavigate();
+  const { t } = useLocale();
 
   return (
     <button
@@ -48,7 +50,9 @@ function ConversationItem({ conv, userId, isOnline }) {
               )}
             </svg>
           )}
-          <p className="text-xs text-neutral-500 truncate">{conv.lastMessage.content}</p>
+          <p className="text-xs text-neutral-500 truncate">
+            {conv.lastMessage.image_url ? t.msgImagePlaceholder : conv.lastMessage.content}
+          </p>
         </div>
       </div>
 

@@ -37,6 +37,7 @@ export default function BlockButton({ targetId, onBlockSuccess }) {
           message={t.blockConfirmStandalone}
           description={t.blockDescription}
           confirmLabel={t.blockBtn}
+          cancelLabel={t.cancel}
           onConfirm={handleBlockConfirm}
           onCancel={() => setShowConfirm(false)}
           danger

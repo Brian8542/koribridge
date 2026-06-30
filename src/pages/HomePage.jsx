@@ -190,7 +190,7 @@ export default function HomePage() {
 
         const { data: msgs, error: msgsError } = await supabase
           .from("messages")
-          .select("id, sender_id, receiver_id, content, created_at, read_at")
+          .select("id, sender_id, receiver_id, content, image_url, created_at, read_at")
           .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
           .order("created_at", { ascending: false });
 
@@ -236,7 +236,7 @@ export default function HomePage() {
         (payload) => {
           const msg = payload.new;
           if (notifGranted.current && document.visibilityState !== "visible") {
-            new Notification(t.newMsgNotif, { body: msg.content, icon: "/favicon.ico" });
+            new Notification(t.newMsgNotif, { body: msg.image_url ? t.msgImagePlaceholder : msg.content, icon: "/favicon.ico" });
           }
           setConversations((prev) => {
             const partnerId = msg.sender_id;

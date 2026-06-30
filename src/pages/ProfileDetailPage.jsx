@@ -23,7 +23,7 @@ export default function ProfileDetailPage() {
   const navigate = useNavigate();
   const { user, profile: myProfile } = useAuth();
   const onlineIds = useOnlineUsers(user?.id);
-  const { t, levelLabel } = useLocale();
+  const { t, levelLabel, locale } = useLocale();
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +69,7 @@ export default function ProfileDetailPage() {
   const isOnline = onlineIds.has(profile.id);
   const match = getMatchScore(myProfile, profile);
   const matchPercentage = match.percentage;
-  const lastActive = formatRelativeTime(profile.last_seen_at || profile.updated_at || profile.created_at);
+  const lastActive = formatRelativeTime(profile.last_seen_at || profile.updated_at || profile.created_at, locale);
   const commonInterests = (myProfile?.interests || []).filter((i) => (profile.interests || []).includes(i));
   const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
   const styleLabel = getProfileOptionLabel(COMMUNICATION_STYLES, profile.communication_style);
