@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
 import { useLocale } from "../hooks/useLocale";
+import { useToast } from "../components/Toast";
 import { getMatchScore } from "../utils/matching";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
 import { formatRelativeTime } from "../utils/formatters";
 import ReportModal from "../components/ReportModal";
 import BlockButton from "../components/BlockButton";
+import ReferenceModal from "../components/ReferenceModal";
 
 const LEVEL_STYLE = {
   고급: "badge-level-고급",
@@ -25,10 +27,18 @@ export default function ProfileDetailPage() {
   const onlineIds = useOnlineUsers(user?.id);
   const { t, levelLabel, locale } = useLocale();
 
+  const { showToast } = useToast();
+
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isReportOpen, setIsReportOpen] = useState(false);
+
+  const [references, setReferences] = useState([]);
+  const [refsLoading, setRefsLoading] = useState(true);
+  const [myRef, setMyRef] = useState(null);
+  const [hasConversation, setHasConversation] = useState(false);
+  const [isRefModalOpen, setIsRefModalOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -42,6 +52,39 @@ export default function ProfileDetailPage() {
     };
     load();
   }, [id, user, t.profileFetchError]);
+
+  const loadRefs = useCallback(async () => {
+    if (!id) return;
+    setRefsLoading(true);
+    const [{ data: refs }, { data: convCheck }, { data: mine }] = await Promise.all([
+      supabase
+        .from("user_references")
+        .select("id, author_id, rating, content, created_at, author:profiles!author_id(display_name, avatar_url, nationality)")
+        .eq("target_id", id)
+        .order("created_at", { ascending: false }),
+      user
+        ? supabase
+            .from("messages")
+            .select("id")
+            .or(`and(sender_id.eq.${user.id},receiver_id.eq.${id}),and(sender_id.eq.${id},receiver_id.eq.${user.id})`)
+            .limit(1)
+        : Promise.resolve({ data: [] }),
+      user
+        ? supabase
+            .from("user_references")
+            .select("*")
+            .eq("author_id", user.id)
+            .eq("target_id", id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+    setReferences(refs || []);
+    setHasConversation((convCheck || []).length > 0);
+    setMyRef(mine || null);
+    setRefsLoading(false);
+  }, [id, user]);
+
+  useEffect(() => { loadRefs(); }, [loadRefs]);
 
   if (loading) {
     return (
@@ -73,6 +116,12 @@ export default function ProfileDetailPage() {
   const commonInterests = (myProfile?.interests || []).filter((i) => (profile.interests || []).includes(i));
   const goalLabel = getProfileOptionLabel(CONVERSATION_GOALS, profile.conversation_goal);
   const styleLabel = getProfileOptionLabel(COMMUNICATION_STYLES, profile.communication_style);
+
+  const avgRating = references.length > 0
+    ? references.reduce((sum, r) => sum + r.rating, 0) / references.length
+    : 0;
+  const isSelf = user?.id === profile.id;
+  const canWriteRef = !isSelf && hasConversation;
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] pb-10">
@@ -117,6 +166,14 @@ export default function ProfileDetailPage() {
           {matchPercentage > 0 && (
             <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20">
               {t.matchLabel} {matchPercentage}{t.matchSuffix}
+            </span>
+          )}
+          {references.length > 0 && (
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              {avgRating.toFixed(1)} · {references.length}{t.refReviews}
             </span>
           )}
         </div>
@@ -270,31 +327,138 @@ export default function ProfileDetailPage() {
           </div>
         )}
 
-        <button
-          onClick={() => navigate(`/chat/${profile.id}`)}
-          className="btn-primary w-full py-4 text-[15px] font-semibold flex items-center justify-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-          </svg>
-          {t.startChat}
-        </button>
-
-        <div className="pt-3 border-t border-[#d2d2d7]/40 flex flex-col gap-3">
+        {!isSelf && (
           <button
-            onClick={() => setIsReportOpen(true)}
-            className="w-full py-2 text-[13px] font-semibold text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+            onClick={() => navigate(`/chat/${profile.id}`)}
+            className="btn-primary w-full py-4 text-[15px] font-semibold flex items-center justify-center gap-2"
           >
-            {t.reportUser}
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+            </svg>
+            {t.startChat}
           </button>
-          <BlockButton targetId={profile.id} onBlockSuccess={() => navigate("/home")} />
+        )}
+
+        {canWriteRef && (
+          <button
+            onClick={() => setIsRefModalOpen(true)}
+            className="w-full py-3 rounded-full border border-[#0071e3] text-[#0071e3] text-[14px] font-semibold hover:bg-[#e8f4ff] transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            {myRef ? t.refEditBtn : t.refWriteBtn}
+          </button>
+        )}
+
+        <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <p className="section-label">{t.refSectionTitle}</p>
+              {references.length > 0 && (
+                <span className="text-[12px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  {avgRating.toFixed(1)}
+                </span>
+              )}
+            </div>
+            {!refsLoading && (
+              <span className="text-[12px] text-[#86868b] font-medium">{references.length}{t.refReviews}</span>
+            )}
+          </div>
+
+          {refsLoading ? (
+            <div className="flex justify-center py-6">
+              <div className="w-6 h-6 border-2 border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
+            </div>
+          ) : references.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 rounded-apple bg-[#f5f5f7] flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-[#d2d2d7]" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              </div>
+              <p className="text-[14px] font-semibold text-[#1d1d1f]">{t.refEmpty}</p>
+              <p className="text-[12px] text-[#86868b] mt-1">{t.refEmptyDesc}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {references.map((ref) => {
+                const authorName = ref.author?.display_name || t.unknownUser;
+                const authorInitial = authorName[0]?.toUpperCase() || "?";
+                return (
+                  <div key={ref.id} className="border border-[#d2d2d7]/40 rounded-apple p-4 space-y-2">
+                    <div className="flex items-center gap-3">
+                      {isRealAvatar(ref.author?.avatar_url) ? (
+                        <img
+                          src={ref.author.avatar_url}
+                          alt={authorName}
+                          className="w-9 h-9 rounded-apple object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className={`w-9 h-9 rounded-apple flex items-center justify-center text-sm font-bold text-white flex-shrink-0 bg-gradient-to-br ${getAvatarGradient(ref.author?.avatar_url, ref.author_id)}`}>
+                          {authorInitial}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[13px] font-semibold text-[#1d1d1f] truncate">{authorName}</p>
+                          <p className="text-[11px] text-[#86868b] flex-shrink-0">
+                            {formatRelativeTime(ref.created_at, locale)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-0.5 mt-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <svg
+                              key={s}
+                              className={`w-3.5 h-3.5 ${s <= ref.rating ? "text-amber-400" : "text-[#d2d2d7]"}`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {ref.content && (
+                      <p className="text-[13px] text-[#1d1d1f] leading-relaxed">{ref.content}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
+
+        {!isSelf && (
+          <div className="pt-3 border-t border-[#d2d2d7]/40 flex flex-col gap-3">
+            <button
+              onClick={() => setIsReportOpen(true)}
+              className="w-full py-2 text-[13px] font-semibold text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+            >
+              {t.reportUser}
+            </button>
+            <BlockButton targetId={profile.id} onBlockSuccess={() => navigate("/home")} />
+          </div>
+        )}
       </div>
 
       {isReportOpen && (
         <ReportModal
           targetId={profile.id}
           onClose={() => setIsReportOpen(false)}
+        />
+      )}
+
+      {isRefModalOpen && (
+        <ReferenceModal
+          targetId={profile.id}
+          existingRef={myRef}
+          onClose={() => setIsRefModalOpen(false)}
+          onSaved={loadRefs}
         />
       )}
     </div>

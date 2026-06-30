@@ -185,7 +185,26 @@ export default function HomePage() {
           .eq("is_public", true)
           .neq("id", user.id)
           .order("created_at", { ascending: false });
-        if (!profilesError) setProfiles(allProfiles || []);
+
+        if (!profilesError && allProfiles) {
+          const { data: refRows } = await supabase
+            .from("user_references")
+            .select("target_id, rating");
+          const refMap = {};
+          (refRows || []).forEach((r) => {
+            if (!refMap[r.target_id]) refMap[r.target_id] = { count: 0, total: 0 };
+            refMap[r.target_id].count++;
+            refMap[r.target_id].total += r.rating;
+          });
+          setProfiles(allProfiles.map((p) => {
+            const s = refMap[p.id];
+            return s
+              ? { ...p, reference_count: s.count, avg_rating: s.total / s.count }
+              : { ...p, reference_count: 0, avg_rating: 0 };
+          }));
+        } else {
+          setProfiles(allProfiles || []);
+        }
         setProfilesLoading(false);
 
         const { data: msgs, error: msgsError } = await supabase

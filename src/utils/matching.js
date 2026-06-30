@@ -53,6 +53,19 @@ export function getMatchScore(me, other) {
     }
   }
 
+  // 5. 추천글 신뢰 지표 (국적/성별 무관, 추천글 수·별점만 반영)
+  const refCount = other.reference_count ?? 0;
+  const avgRating = other.avg_rating ?? 0;
+  if (refCount >= 5 && avgRating >= 4) {
+    score += 8;
+    reasons.push("추천글이 많은 파트너예요");
+  } else if (refCount >= 2 && avgRating >= 3.5) {
+    score += 5;
+    reasons.push("추천글이 있어요");
+  } else if (refCount >= 1) {
+    score += 3;
+  }
+
   const percentage = Math.min(score, 100);
   const fallbackReason = "관심사가 비슷해요";
   return {
