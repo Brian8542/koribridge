@@ -8,7 +8,7 @@ export default function NotFoundPage() {
   const { t } = useLocale();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-bg px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
       <Helmet><title>KoriBridge - {t.notFoundTitle}</title></Helmet>
 
       <div className="text-center max-w-sm">

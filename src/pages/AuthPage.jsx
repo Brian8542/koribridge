@@ -141,7 +141,7 @@ export default function AuthPage() {
 
   if (signupDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-surface-bg px-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
         <Helmet><title>KoriBridge - {t.emailVerifyTitle}</title></Helmet>
         <div className="bg-white border border-neutral-150 rounded-2xl shadow-card-md p-8 max-w-sm w-full text-center">
           <div className="w-14 h-14 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-5 shadow-card">
@@ -173,13 +173,13 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-surface-bg">
+    <div className="min-h-screen flex bg-white">
       <Helmet>
         <title>KoriBridge - {mode === "login" ? t.signIn : mode === "signup" ? t.signUp : t.resetPassword}</title>
       </Helmet>
 
       {/* ── 왼쪽 패널 (데스크탑) ── */}
-      <div className="hidden lg:flex flex-col justify-between w-[440px] xl:w-[480px] flex-shrink-0 bg-neutral-900 p-10">
+      <div className="hidden lg:flex flex-col justify-between w-[440px] xl:w-[480px] flex-shrink-0 bg-surface-bg border-r border-neutral-150 p-10">
         <div>
           <div className="flex items-center gap-2.5 mb-14">
             <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
@@ -187,14 +187,14 @@ export default function AuthPage() {
                 <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 9.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="white" />
               </svg>
             </div>
-            <span className="font-bold text-[15px] tracking-tight text-white">KoriBridge</span>
+            <span className="font-bold text-[15px] tracking-tight text-neutral-900">KoriBridge</span>
           </div>
 
-          <h2 className="font-extrabold tracking-[-0.025em] leading-tight text-white mb-3" style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.1rem)" }}>
+          <h2 className="font-extrabold tracking-[-0.025em] leading-tight text-neutral-900 mb-3" style={{ fontSize: "clamp(1.6rem, 2.8vw, 2.1rem)" }}>
             {locale === "ko" ? (
-              <>한국어, 세계와<br /><span className="text-primary-400">연결하다</span></>
+              <>한국과 세계를<br /><span className="text-primary-500">진심으로 잇다</span></>
             ) : (
-              <>Korean, Connect<br /><span className="text-primary-400">the World</span></>
+              <>Connect Korea<br /><span className="text-primary-500">to the World</span></>
             )}
           </h2>
           <p className="text-neutral-500 text-sm leading-relaxed mb-10">
@@ -206,25 +206,25 @@ export default function AuthPage() {
           <div className="space-y-4">
             {LEFT_FEATURES.map((f) => (
               <div key={f.titleKey} className="flex items-center gap-4">
-                <div className="w-9 h-9 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-neutral-400 flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200 shadow-xs flex items-center justify-center text-neutral-500 flex-shrink-0">
                   {f.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white leading-tight">{t[f.titleKey]}</p>
-                  <p className="text-xs text-neutral-500 mt-0.5 leading-tight">{t[f.descKey]}</p>
+                  <p className="text-sm font-semibold text-neutral-900 leading-tight">{t[f.titleKey]}</p>
+                  <p className="text-xs text-neutral-400 mt-0.5 leading-tight">{t[f.descKey]}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white/5 border border-white/8 rounded-xl px-4 py-3.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+        <div className="flex items-center gap-3 bg-white border border-neutral-200 rounded-xl px-4 py-3.5 shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-white leading-tight">
+            <p className="text-sm font-semibold text-neutral-900 leading-tight">
               {locale === "ko" ? "이메일 인증으로 신뢰를 보장합니다" : "Trust verified by email"}
             </p>
-            <p className="text-xs text-neutral-500 leading-tight">
+            <p className="text-xs text-neutral-400 leading-tight">
               {locale === "ko" ? "인증된 멤버만 파트너 목록에 표시됩니다" : "Only verified members appear in the partner list"}
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function AuthPage() {
       </div>
 
       {/* ── 오른쪽 패널 (폼) ── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 min-h-screen">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 py-12 min-h-screen bg-white">
         <div className="lg:hidden flex items-center gap-2.5 mb-10">
           <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
             <span className="text-white text-xs font-bold">K</span>

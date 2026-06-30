@@ -21,9 +21,9 @@
   }
 
   body {
-    font-family: "Inter", "Noto Sans KR", system-ui, -apple-system, sans-serif;
-    background-color: #F4F3EE;
-    color: #1A1916;
+    font-family: "Pretendard", "Inter", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+    background-color: #FFFFFF;
+    color: #18181B;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
@@ -37,8 +37,8 @@
   @media (pointer: fine) {
     ::-webkit-scrollbar       { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #C8C5BB; border-radius: 99px; }
-    ::-webkit-scrollbar-thumb:hover { background: #A09D94; }
+    ::-webkit-scrollbar-thumb { background: #D4D4D8; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #A1A1AA; }
   }
 }
 
@@ -133,7 +133,7 @@
   /* ── Section label ───────────────────────────── */
 
   .section-label {
-    @apply text-xs font-semibold uppercase tracking-widest text-primary-500;
+    @apply text-xs font-bold uppercase tracking-widest text-primary-500;
   }
 
   /* ── Online indicator ────────────────────────── */
@@ -147,20 +147,20 @@
   .skeleton {
     background: linear-gradient(
       90deg,
-      #E6E5DF 25%,
-      #EDECE7 50%,
-      #E6E5DF 75%
+      #F1F3F5 25%,
+      #F8F9FA 50%,
+      #F1F3F5 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
     border-radius: 6px;
   }
 
-  /* ── Light-mode overrides for pages with html:not(.dark) ── */
+  /* ── Light-mode base ────────────────────────── */
 
   html:not(.dark) body {
-    background-color: #F4F3EE;
-    color: #1A1916;
+    background-color: #FFFFFF;
+    color: #18181B;
   }
 
   html:not(.dark) .card {
@@ -179,7 +179,7 @@
 
   html.dark body {
     background-color: #111110;
-    color: #F4F3EE;
+    color: #F8F9FA;
   }
 
   html.dark .card {
