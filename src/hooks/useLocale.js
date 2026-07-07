@@ -445,6 +445,15 @@ const KO = {
   notifViewProfile: '프로필 보기',
   // onboarding
   profileCompletionBoost: '프로필을 완성하면 매칭 확률이 올라가요',
+  // photo gallery
+  photosSectionTitle: '프로필 사진',
+  photosSectionDesc: '사진을 최대 6장까지 올려보세요. 사진이 많을수록 첫 대화 확률이 올라가요.',
+  photosAddBtn: '사진 추가',
+  photosMaxReached: '사진은 최대 6장까지 올릴 수 있어요.',
+  photosUploadFailed: '사진 업로드에 실패했습니다.',
+  photosDeleteLabel: '사진 삭제',
+  photosMainBadge: '대표',
+  alreadyLiked: '이미 좋아요를 보낸 파트너예요.',
 };
 
 const EN = {
@@ -890,6 +899,15 @@ const EN = {
   notifViewProfile: 'View profile',
   // onboarding
   profileCompletionBoost: 'A complete profile gets you better matches',
+  // photo gallery
+  photosSectionTitle: 'Profile Photos',
+  photosSectionDesc: 'Upload up to 6 photos — more photos means more first conversations.',
+  photosAddBtn: 'Add photo',
+  photosMaxReached: 'You can upload up to 6 photos.',
+  photosUploadFailed: 'Failed to upload photo.',
+  photosDeleteLabel: 'Delete photo',
+  photosMainBadge: 'Main',
+  alreadyLiked: "You've already liked this partner.",
 };
 
 function partial(overrides) { return { ...EN, ...overrides }; }

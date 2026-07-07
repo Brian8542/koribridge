@@ -185,33 +185,4 @@
     @apply max-w-[980px] mx-auto;
   }
 
-  /* ── Dark-mode overrides (warm dark) ──────────────── */
-
-  html.dark body {
-    background-color: #191512;
-    color: #F3EEE6;
-  }
-
-  html.dark .card,
-  html.dark .card-sm,
-  html.dark .card-white {
-    background-color: #211C18;
-    color: #F3EEE6;
-  }
-
-  html.dark .input-field {
-    background-color: #2A241F;
-    border-color: #3E3934;
-    color: #F3EEE6;
-  }
-
-  html.dark .input-field::placeholder {
-    color: #8A837B;
-  }
-
-  html.dark .btn-secondary {
-    background-color: transparent;
-    border-color: #57514A;
-    color: #F3EEE6;
-  }
 }

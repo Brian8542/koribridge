@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
 import { useToast } from "../components/Toast";
 import { useOnlineUsers } from "../hooks/useOnlineUsers";
@@ -33,6 +32,7 @@ import NotificationBell from "../components/NotificationBell";
 import MatchModal from "../components/MatchModal";
 import { normalizePrompts } from "../utils/prompts";
 import { usePresenceHeartbeat } from "../hooks/usePresenceHeartbeat";
+import PhotoManager, { MAX_PHOTOS } from "../components/PhotoManager";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -84,7 +84,6 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
-  const { darkMode, toggleDarkMode } = useTheme();
   const { locale, t, levelLabel } = useLocale();
 
   const [myProfile, setMyProfile] = useState(null);
@@ -113,7 +112,7 @@ export default function HomePage() {
     display_name: "", nationality: "", native_language: "",
     learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [], is_public: true,
     conversation_goal: "culture_exchange", communication_style: "text_first", opening_question: "",
-    prompts: [],
+    prompts: [], photos: [],
   });
   const [matchPartner, setMatchPartner] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
@@ -170,6 +169,7 @@ export default function HomePage() {
             communication_style: me.communication_style || "text_first",
             opening_question: me.opening_question || "",
             prompts: normalizePrompts(me.prompts),
+            photos: Array.isArray(me.photos) ? me.photos.slice(0, MAX_PHOTOS) : [],
           });
         }
 
@@ -183,7 +183,7 @@ export default function HomePage() {
         if (fIds.size > 0) {
           const { data: favoriteProfiles } = await supabase
             .from("profiles")
-            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
+            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question, prompts, photos, last_seen_at")
             .in("id", Array.from(fIds));
           setFavorites(favoriteProfiles || []);
         } else {
@@ -200,7 +200,7 @@ export default function HomePage() {
 
         const { data: allProfiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, is_verified, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
+          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, is_verified, conversation_goal, communication_style, opening_question, prompts, photos, last_seen_at")
           .eq("is_public", true)
           .neq("id", user.id)
           .order("created_at", { ascending: false });
@@ -245,7 +245,7 @@ export default function HomePage() {
           if (partnerIds.length > 0) {
             const { data: partnerProfiles } = await supabase
               .from("profiles")
-              .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
+              .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question, prompts, photos, last_seen_at")
               .in("id", partnerIds);
             const partnerMap = new Map(partnerProfiles?.map((p) => [p.id, p]));
             const sorted = Array.from(byPartner.values())
@@ -357,6 +357,10 @@ export default function HomePage() {
     setProfileForm((prev) => ({ ...prev, prompts }));
   }, []);
 
+  const handlePhotosChange = useCallback((photos) => {
+    setProfileForm((prev) => ({ ...prev, photos }));
+  }, []);
+
   const toggleInterest = (interest) => {
     setProfileForm((prev) => {
       const has = prev.interests.includes(interest);
@@ -422,6 +426,7 @@ export default function HomePage() {
         communication_style: profileForm.communication_style,
         opening_question: profileForm.opening_question.trim(),
         prompts: normalizePrompts(profileForm.prompts),
+        photos: profileForm.photos.slice(0, MAX_PHOTOS),
       });
       if (error) throw error;
       showToast(t.profileSaveBtn, "success");
@@ -454,12 +459,6 @@ export default function HomePage() {
       setFavoriteIds((prev) => new Set(prev).add(profile.id));
       setFavorites((prev) => [...prev, profile]);
       showToast(t.favAdded, "success");
-      supabase.from("notifications").insert({
-        user_id: profile.id,
-        actor_id: user.id,
-        type: "like",
-        payload: { type: "profile" },
-      }).then(() => {});
     }
   }, [user?.id, favoriteIds, showToast, t.favRemoveFailed, t.favAddFailed, t.favRemoved, t.favAdded]);
 
@@ -508,12 +507,6 @@ export default function HomePage() {
       if (!error) {
         setFavoriteIds((prev) => new Set(prev).add(targetId));
         showToast(t.liked, "success");
-        supabase.from("notifications").insert({
-          user_id: targetId,
-          actor_id: user.id,
-          type: "like",
-          payload: likedContent || { type: "profile" },
-        }).then(() => {});
         const { data: mutual } = await supabase
           .from("favorites")
           .select("id")
@@ -522,12 +515,6 @@ export default function HomePage() {
           .maybeSingle();
         if (mutual) {
           const senderName = myProfile?.display_name || "";
-          supabase.from("notifications").insert({
-            user_id: targetId,
-            actor_id: user.id,
-            type: "match",
-            payload: {},
-          }).then(() => {});
           sendPushNotification({
             receiverId: targetId,
             title: t.pushMatchTitle,
@@ -833,6 +820,10 @@ export default function HomePage() {
           </div>
         </div>
 
+        <div className="card">
+          <PhotoManager userId={user?.id} photos={profileForm.photos} onChange={handlePhotosChange} />
+        </div>
+
         <div className="card space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -1078,14 +1069,6 @@ export default function HomePage() {
           <div className="flex items-center gap-1.5">
             <NotificationBell userId={user?.id} />
             <LanguageSelector />
-            <button type="button" onClick={toggleDarkMode} aria-label={darkMode ? "라이트 모드로 전환" : "다크 모드로 전환"}
-              className="w-9 h-9 rounded-lg bg-surface-bg hover:bg-surface-muted flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors">
-              {darkMode ? (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
-              ) : (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
-              )}
-            </button>
             <button type="button" onClick={signOut}
               className="h-9 px-3 rounded-lg bg-surface-bg hover:bg-surface-muted text-xs text-neutral-500 font-semibold hover:text-neutral-900 transition-colors border border-neutral-200">
               {t.logout}

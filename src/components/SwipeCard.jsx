@@ -17,10 +17,20 @@ function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) 
   const { t, levelLabel, locale } = useLocale();
   const prompts = normalizePrompts(profile.prompts);
   const firstPrompt = prompts[0];
+  const gallery = [
+    ...(isRealAvatar(profile.avatar_url) ? [profile.avatar_url] : []),
+    ...(Array.isArray(profile.photos) ? profile.photos : []),
+  ];
+  const [photoIdx, setPhotoIdx] = React.useState(0);
+  const currentPhoto = gallery.length > 0 ? gallery[photoIdx % gallery.length] : null;
 
   const handleDragEnd = (e, info) => {
     if (info.offset.x > 120) onSwipeRight({ type: "profile" });
     else if (info.offset.x < -120) onSwipeLeft();
+  };
+
+  const cyclePhoto = () => {
+    if (gallery.length > 1) setPhotoIdx((i) => (i + 1) % gallery.length);
   };
 
   return (
@@ -32,11 +42,11 @@ function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) 
       className="absolute w-full max-w-sm bg-white rounded-[24px] shadow-card-lg overflow-hidden cursor-grab active:cursor-grabbing"
     >
       <div className="flex flex-col max-h-[72vh]">
-        {/* 사진 — 카드의 대부분을 차지 */}
-        <div className="relative aspect-[4/5] bg-[#F3EEE6] overflow-hidden flex-shrink-0">
-          {isRealAvatar(profile.avatar_url) ? (
+        {/* 사진 — 카드의 대부분을 차지, 탭하면 다음 사진 */}
+        <div className="relative aspect-[4/5] bg-[#F3EEE6] overflow-hidden flex-shrink-0" onClick={cyclePhoto}>
+          {currentPhoto ? (
             <img
-              src={profile.avatar_url}
+              src={currentPhoto}
               alt={profile.display_name || ""}
               loading="lazy"
               className="w-full h-full object-cover"
@@ -44,6 +54,14 @@ function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) 
           ) : (
             <div className={`w-full h-full flex items-center justify-center text-7xl text-white font-display ${getAvatarGradient(profile.avatar_url, profile.id)}`}>
               {profile.display_name?.[0]?.toUpperCase()}
+            </div>
+          )}
+
+          {gallery.length > 1 && (
+            <div className="absolute top-2 inset-x-4 flex gap-1" aria-hidden="true">
+              {gallery.map((_, i) => (
+                <span key={i} className={`flex-1 h-0.5 rounded-full ${i === photoIdx ? "bg-white" : "bg-white/40"}`} />
+              ))}
             </div>
           )}
 
@@ -72,7 +90,7 @@ function SwipeCard({ profile, score, reasons = [], onSwipeLeft, onSwipeRight }) 
               <button
                 type="button"
                 aria-label={t.likePhotoBtn}
-                onClick={() => onSwipeRight({ type: "photo" })}
+                onClick={(e) => { e.stopPropagation(); onSwipeRight({ type: "photo", photo_index: photoIdx }); }}
                 className="w-12 h-12 rounded-full bg-[#FAF7F2] text-[#E8604C] flex items-center justify-center shadow-card flex-shrink-0 hover:scale-105 active:scale-[0.95] transition-transform duration-200"
               >
                 <HeartIcon className="w-6 h-6" />

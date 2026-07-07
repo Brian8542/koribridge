@@ -15,16 +15,60 @@ import BlockButton from "../components/BlockButton";
 import ReferenceModal from "../components/ReferenceModal";
 import { normalizePrompts, getPromptLabel } from "../utils/prompts";
 import { isRecentlyActive } from "../hooks/usePresenceHeartbeat";
+import MatchModal from "../components/MatchModal";
 
-function PromptCard({ prompt, locale }) {
+const HeartIcon = ({ className }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+  </svg>
+);
+
+function LikeHeartButton({ onLike, label, className = "" }) {
+  if (!onLike) return null;
   return (
-    <div className="bg-white rounded-[22px] shadow-card p-6">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-[#8A837B]">
-        {getPromptLabel(prompt.id, locale)}
-      </p>
-      <p className="font-display text-[20px] text-[#1E1B18] mt-2 leading-snug whitespace-pre-wrap">
-        {prompt.answer}
-      </p>
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onLike}
+      className={`w-11 h-11 rounded-full bg-[#FAF7F2] text-[#E8604C] flex items-center justify-center shadow-card hover:scale-105 active:scale-[0.95] transition-transform duration-200 ${className}`}
+    >
+      <HeartIcon className="w-5 h-5" />
+    </button>
+  );
+}
+
+function PromptCard({ prompt, locale, onLike, likeLabel }) {
+  return (
+    <div className="bg-white rounded-[22px] shadow-card p-6 flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#8A837B]">
+          {getPromptLabel(prompt.id, locale)}
+        </p>
+        <p className="font-display text-[20px] text-[#1E1B18] mt-2 leading-snug whitespace-pre-wrap">
+          {prompt.answer}
+        </p>
+      </div>
+      {onLike && (
+        <button
+          type="button"
+          aria-label={likeLabel}
+          onClick={onLike}
+          className="w-10 h-10 rounded-full border border-[#E5DED2] text-[#E8604C] flex items-center justify-center flex-shrink-0 hover:bg-[#FBEAE6] hover:border-[#E8604C]/40 active:scale-[0.95] transition-all duration-200"
+        >
+          <HeartIcon className="w-4.5 h-4.5 w-[18px] h-[18px]" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function PhotoCard({ url, index, name, onLike, likeLabel }) {
+  return (
+    <div className="bg-white rounded-[24px] shadow-card overflow-hidden relative">
+      <div className="aspect-[4/5] bg-[#F3EEE6]">
+        <img src={url} alt={`${name} 사진 ${index + 1}`} loading="lazy" className="w-full h-full object-cover" />
+      </div>
+      {onLike && <LikeHeartButton onLike={onLike} label={likeLabel} className="absolute bottom-4 right-4" />}
     </div>
   );
 }
@@ -54,6 +98,50 @@ export default function ProfileDetailPage() {
   const [myRef, setMyRef] = useState(null);
   const [hasConversation, setHasConversation] = useState(false);
   const [isRefModalOpen, setIsRefModalOpen] = useState(false);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [matchOpen, setMatchOpen] = useState(false);
+  const [meProfile, setMeProfile] = useState(null);
+
+  useEffect(() => {
+    if (!user?.id || !id || user.id === id) return;
+    supabase.from("favorites").select("id").eq("user_id", user.id).eq("partner_id", id).maybeSingle()
+      .then(({ data }) => setHasLiked(!!data));
+  }, [user?.id, id]);
+
+  const sendLike = useCallback(async (likedContent) => {
+    if (!user?.id || user.id === id) return;
+    if (hasLiked) {
+      showToast(t.alreadyLiked, "info");
+      return;
+    }
+    const { error: likeError } = await supabase.from("favorites").insert({
+      user_id: user.id,
+      partner_id: id,
+      liked_content: likedContent,
+    });
+    if (likeError) {
+      if (likeError.code === "23505") setHasLiked(true);
+      else showToast(t.favAddFailed, "error");
+      return;
+    }
+    setHasLiked(true);
+    showToast(t.liked, "success");
+    const { data: mutual } = await supabase
+      .from("favorites")
+      .select("id")
+      .eq("user_id", id)
+      .eq("partner_id", user.id)
+      .maybeSingle();
+    if (mutual) {
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      setMeProfile(me || { id: user.id });
+      setMatchOpen(true);
+    }
+  }, [user?.id, id, hasLiked, showToast, t.alreadyLiked, t.favAddFailed, t.liked]);
 
   useEffect(() => {
     const load = async () => {
@@ -126,6 +214,8 @@ export default function ProfileDetailPage() {
   const level = profile.language_level || "초급";
   const isOnline = onlineIds.has(profile.id) || isRecentlyActive(profile.last_seen_at);
   const prompts = normalizePrompts(profile.prompts);
+  const photos = Array.isArray(profile.photos) ? profile.photos : [];
+  const canLike = user?.id && user.id !== profile.id;
   const match = getMatchScore(myProfile, profile);
   const matchPercentage = match.percentage;
   const lastActive = formatRelativeTime(profile.last_seen_at || profile.updated_at || profile.created_at, locale);
@@ -225,10 +315,34 @@ export default function ProfileDetailPage() {
                 </p>
               </div>
             </div>
+            {canLike && (
+              <LikeHeartButton
+                onLike={() => sendLike({ type: "photo", photo_index: 0 })}
+                label={t.likePhotoBtn}
+                className="absolute bottom-4 right-4"
+              />
+            )}
           </div>
         </div>
 
-        {prompts[0] && <PromptCard prompt={prompts[0]} locale={locale} />}
+        {prompts[0] && (
+          <PromptCard
+            prompt={prompts[0]}
+            locale={locale}
+            likeLabel={t.likePromptBtn}
+            onLike={canLike ? () => sendLike({ type: "prompt", prompt_id: prompts[0].id, answer: prompts[0].answer.slice(0, 120) }) : null}
+          />
+        )}
+
+        {photos[0] && (
+          <PhotoCard
+            url={photos[0]}
+            index={1}
+            name={profile.display_name}
+            likeLabel={t.likePhotoBtn}
+            onLike={canLike ? () => sendLike({ type: "photo", photo_index: 1 }) : null}
+          />
+        )}
 
         <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -267,7 +381,24 @@ export default function ProfileDetailPage() {
           )}
         </div>
 
-        {prompts[1] && <PromptCard prompt={prompts[1]} locale={locale} />}
+        {prompts[1] && (
+          <PromptCard
+            prompt={prompts[1]}
+            locale={locale}
+            likeLabel={t.likePromptBtn}
+            onLike={canLike ? () => sendLike({ type: "prompt", prompt_id: prompts[1].id, answer: prompts[1].answer.slice(0, 120) }) : null}
+          />
+        )}
+
+        {photos[1] && (
+          <PhotoCard
+            url={photos[1]}
+            index={2}
+            name={profile.display_name}
+            likeLabel={t.likePhotoBtn}
+            onLike={canLike ? () => sendLike({ type: "photo", photo_index: 2 }) : null}
+          />
+        )}
 
         {(goalLabel || styleLabel || profile.opening_question) && (
           <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5 space-y-3">
@@ -326,7 +457,25 @@ export default function ProfileDetailPage() {
           </div>
         )}
 
-        {prompts[2] && <PromptCard prompt={prompts[2]} locale={locale} />}
+        {prompts[2] && (
+          <PromptCard
+            prompt={prompts[2]}
+            locale={locale}
+            likeLabel={t.likePromptBtn}
+            onLike={canLike ? () => sendLike({ type: "prompt", prompt_id: prompts[2].id, answer: prompts[2].answer.slice(0, 120) }) : null}
+          />
+        )}
+
+        {photos.slice(2).map((url, i) => (
+          <PhotoCard
+            key={url}
+            url={url}
+            index={i + 3}
+            name={profile.display_name}
+            likeLabel={t.likePhotoBtn}
+            onLike={canLike ? () => sendLike({ type: "photo", photo_index: i + 3 }) : null}
+          />
+        ))}
 
         {profile.bio && (
           <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5">
@@ -467,6 +616,14 @@ export default function ProfileDetailPage() {
           existingRef={myRef}
           onClose={() => setIsRefModalOpen(false)}
           onSaved={loadRefs}
+        />
+      )}
+
+      {matchOpen && (
+        <MatchModal
+          me={meProfile || myProfile}
+          partner={profile}
+          onClose={() => setMatchOpen(false)}
         />
       )}
     </div>

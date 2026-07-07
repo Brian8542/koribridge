@@ -10,6 +10,7 @@ import { getProfileCompletion } from "../utils/profileCompletion";
 import ProfileCompletionCard from "../components/ProfileCompletionCard";
 import PromptEditor from "../components/PromptEditor";
 import { normalizePrompts } from "../utils/prompts";
+import PhotoManager, { MAX_PHOTOS } from "../components/PhotoManager";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -41,6 +42,7 @@ export default function ProfileSetupPage() {
     communication_style: "text_first",
     opening_question: "",
     prompts: [],
+    photos: [],
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -59,6 +61,10 @@ export default function ProfileSetupPage() {
 
   const handlePromptsChange = useCallback((prompts) => {
     setForm((prev) => ({ ...prev, prompts }));
+  }, []);
+
+  const handlePhotosChange = useCallback((photos) => {
+    setForm((prev) => ({ ...prev, photos }));
   }, []);
 
   const toggleInterest = (interest) => {
@@ -150,6 +156,7 @@ export default function ProfileSetupPage() {
         communication_style: form.communication_style,
         opening_question: form.opening_question.trim(),
         prompts: normalizePrompts(form.prompts),
+        photos: form.photos.slice(0, MAX_PHOTOS),
         is_verified: !!user.email_confirmed_at,
       });
 
@@ -217,6 +224,10 @@ export default function ProfileSetupPage() {
                 />
               ))}
             </div>
+          </div>
+
+          <div className="card">
+            <PhotoManager userId={user?.id} photos={form.photos} onChange={handlePhotosChange} />
           </div>
 
           <div className="card space-y-4">

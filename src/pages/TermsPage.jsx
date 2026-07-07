@@ -85,6 +85,17 @@ export default function TermsPage() {
             ))}
           </div>
 
+          {/* 법률 검토 필요: 사업자등록 완료 후 상호·대표자·사업자등록번호·소재지를 실제 정보로 교체할 것 */}
+          <section className="mt-10 pt-8 border-t border-[#E5DED2]/50">
+            <h2 className="text-[17px] font-semibold text-[#1E1B18] mb-3">부칙 · 운영자 및 문의처</h2>
+            <ul className="space-y-2 text-[14px] text-[#6E675F] leading-relaxed">
+              <li>서비스명: KoriBridge (코리브리지)</li>
+              <li>운영: KoriBridge 운영팀 (사업자 등록 절차 진행 중)</li>
+              <li>문의 이메일: <a href="mailto:brian8542@gmail.com" className="text-[#4A1D3F] hover:underline">brian8542@gmail.com</a></li>
+              <li>본 약관은 2026년 7월 7일부터 시행됩니다.</li>
+            </ul>
+          </section>
+
           <div className="mt-10 pt-8 border-t border-[#E5DED2]/50 flex gap-3">
             <button
               onClick={() => navigate("/privacy")}

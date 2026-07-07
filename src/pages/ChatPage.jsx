@@ -412,12 +412,21 @@ export default function ChatPage() {
     const src = tgt === "ko" ? "en" : "ko";
     setTranslationLoading((p) => ({ ...p, [msg.id]: true }));
     try {
-      const res = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(msg.content)}&langpair=${src}|${tgt}`
-      );
-      const r = await res.json();
-      if (r.responseStatus !== 200) throw new Error(r.responseDetails || "translate failed");
-      setTranslations((p) => ({ ...p, [msg.id]: r.responseData?.translatedText || "N/A" }));
+      let translated = "";
+      const { data, error } = await supabase.functions.invoke("translate", {
+        body: { text: msg.content, source: src, target: tgt },
+      });
+      if (!error && data?.translated) {
+        translated = data.translated;
+      } else {
+        const res = await fetch(
+          `https://api.mymemory.translated.net/get?q=${encodeURIComponent(msg.content)}&langpair=${src}|${tgt}`
+        );
+        const r = await res.json();
+        if (r.responseStatus !== 200) throw new Error(r.responseDetails || "translate failed");
+        translated = r.responseData?.translatedText || "N/A";
+      }
+      setTranslations((p) => ({ ...p, [msg.id]: translated }));
       setVisibleTranslation((p) => ({ ...p, [msg.id]: true }));
     } catch {
       setTranslations((p) => ({ ...p, [msg.id]: "N/A" }));

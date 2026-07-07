@@ -81,8 +81,8 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1E1B18]">
       <Helmet>
-        <title>KoriBridge - 요금제 | 여성 완전 무료</title>
-        <meta name="description" content="KoriBridge 요금제 안내. 여성 회원은 모든 기능을 영구 무료로 이용하세요." />
+        <title>KoriBridge - 요금제 | 얼리 액세스 전원 무료</title>
+        <meta name="description" content="KoriBridge 요금제 안내. 얼리 액세스 기간에는 모든 회원이 프리미엄 기능을 무료로 이용합니다." />
       </Helmet>
 
       {/* Launch banner */}
@@ -118,10 +118,10 @@ export default function PricingPage() {
         <h1 className="font-display leading-[1.14] text-[#1E1B18]"
           style={{ fontSize: "clamp(2.4rem, 5vw, 3.6rem)" }}>
           투명한 요금제.<br />
-          <span className="text-[#4A1D3F]">여성은 완전 무료.</span>
+          <span className="text-[#4A1D3F]">지금은 전원 무료.</span>
         </h1>
         <p className="mt-5 text-[17px] text-[#8A837B] max-w-sm mx-auto leading-relaxed">
-          숨겨진 비용 없이 투명하게.<br />여성 회원은 모든 기능을 영구 무료로 이용하세요.
+          숨겨진 비용 없이 투명하게.<br />얼리 액세스 기간에는 모든 회원이 프리미엄 기능을 무료로 이용합니다.
         </p>
       </section>
 
@@ -131,11 +131,11 @@ export default function PricingPage() {
           <div className="flex flex-col lg:flex-row lg:items-center gap-8">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-[12px] font-semibold px-3 py-1 rounded-full bg-[#4A1D3F] text-white">여성 회원 혜택</span>
-                <span className="text-[12px] font-semibold px-3 py-1 rounded-full bg-[#F3EEE6] text-[#1E1B18]">영구 무료</span>
+                <span className="text-[12px] font-semibold px-3 py-1 rounded-full bg-[#4A1D3F] text-white">얼리 액세스 혜택</span>
+                <span className="text-[12px] font-semibold px-3 py-1 rounded-full bg-[#F3EEE6] text-[#1E1B18]">기간 한정 무료</span>
               </div>
-              <h2 className="font-display text-[32px] text-[#1E1B18] mb-2">여성 회원 · 모든 기능 무료</h2>
-              <p className="text-[15px] text-[#8A837B] mb-6">여성 회원이라면 Pro 기능을 포함한 모든 프리미엄 기능을 영구 무료로</p>
+              <h2 className="font-display text-[32px] text-[#1E1B18] mb-2">얼리 액세스 · 모든 기능 무료</h2>
+              <p className="text-[15px] text-[#8A837B] mb-6">지금 가입하면 Pro 기능을 포함한 모든 프리미엄 기능을 무료로</p>
               <button onClick={goToAuth} className="inline-flex items-center gap-2 px-7 py-3 bg-[#4A1D3F] text-white text-[15px] font-medium rounded-full hover:bg-[#3B1732] transition-all duration-200">
                 지금 가입하기 ›
               </button>
