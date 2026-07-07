@@ -445,11 +445,21 @@ export default function HomePage() {
       setFavorites((prev) => prev.filter((item) => item.id !== profile.id));
       showToast(t.favRemoved, "success");
     } else {
-      const { error } = await supabase.from("favorites").insert({ user_id: user.id, partner_id: profile.id });
+      const { error } = await supabase.from("favorites").insert({
+        user_id: user.id,
+        partner_id: profile.id,
+        liked_content: { type: "profile" },
+      });
       if (error) { showToast(t.favAddFailed, "error"); return; }
       setFavoriteIds((prev) => new Set(prev).add(profile.id));
       setFavorites((prev) => [...prev, profile]);
       showToast(t.favAdded, "success");
+      supabase.from("notifications").insert({
+        user_id: profile.id,
+        actor_id: user.id,
+        type: "like",
+        payload: { type: "profile" },
+      }).then(() => {});
     }
   }, [user?.id, favoriteIds, showToast, t.favRemoveFailed, t.favAddFailed, t.favRemoved, t.favAdded]);
 

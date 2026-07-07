@@ -274,7 +274,7 @@ export default function SplashScreen() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-32 pb-12 px-5 bg-white text-center">
+      <section className="pt-32 pb-12 px-5 bg-[#FAF7F2] text-center">
         <div className="max-w-[980px] mx-auto">
           <div
             className="inline-flex items-center gap-1.5 text-[#4A1D3F] text-[13px] font-medium mb-6"
@@ -391,7 +391,7 @@ export default function SplashScreen() {
       </section>
 
       {/* ── FEATURE 2: 실시간 채팅 (white bg) ── */}
-      <section className="py-24 md:py-36 px-5 bg-white">
+      <section className="py-24 md:py-36 px-5 bg-[#FAF7F2]">
         <div className="max-w-[980px] mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <FadeInSection delay={120} className="flex justify-center md:justify-start order-2 md:order-1">
@@ -474,7 +474,7 @@ export default function SplashScreen() {
       </section>
 
       {/* ── HOW IT WORKS (white bg, center-aligned) ── */}
-      <section className="py-24 md:py-32 px-5 bg-white">
+      <section className="py-24 md:py-32 px-5 bg-[#FAF7F2]">
         <div className="max-w-[980px] mx-auto text-center">
           <FadeInSection>
             <p className="section-label mb-4">{locale === "ko" ? "시작 방법" : "How It Works"}</p>
@@ -548,7 +548,7 @@ export default function SplashScreen() {
       </section>
 
       {/* ── REVIEWS (white bg) ── */}
-      <section className="py-24 md:py-32 px-5 bg-white">
+      <section className="py-24 md:py-32 px-5 bg-[#FAF7F2]">
         <div className="max-w-[980px] mx-auto">
           <FadeInSection className="text-center mb-16">
             <p className="section-label mb-4">{t.reviewsSectionTag}</p>

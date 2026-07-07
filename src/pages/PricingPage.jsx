@@ -96,7 +96,7 @@ export default function PricingPage() {
       <nav className="bg-white/90 backdrop-blur-xl border-b border-[#E5DED2]/40 px-5 h-14 flex items-center sticky top-0 z-40">
         <div className="max-w-[980px] mx-auto w-full flex items-center justify-between">
           <button onClick={() => navigate("/")} className="flex items-center gap-2 group">
-            <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-full bg-[#4A1D3F] flex items-center justify-center">
               <span className="text-white text-[11px] font-black">K</span>
             </div>
             <span className="font-semibold text-[14px] text-[#1E1B18] group-hover:text-[#4A1D3F] transition-colors">KoriBridge</span>
