@@ -13,6 +13,21 @@ import { formatRelativeTime } from "../utils/formatters";
 import ReportModal from "../components/ReportModal";
 import BlockButton from "../components/BlockButton";
 import ReferenceModal from "../components/ReferenceModal";
+import { normalizePrompts, getPromptLabel } from "../utils/prompts";
+import { isRecentlyActive } from "../hooks/usePresenceHeartbeat";
+
+function PromptCard({ prompt, locale }) {
+  return (
+    <div className="bg-white rounded-[22px] shadow-card p-6">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-[#8A837B]">
+        {getPromptLabel(prompt.id, locale)}
+      </p>
+      <p className="font-display text-[20px] text-[#1E1B18] mt-2 leading-snug whitespace-pre-wrap">
+        {prompt.answer}
+      </p>
+    </div>
+  );
+}
 
 const LEVEL_STYLE = {
   고급: "badge-level-고급",
@@ -88,10 +103,10 @@ export default function ProfileDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7]">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-2 border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
-          <p className="text-[13px] text-[#86868b] font-medium">{t.profileLoading}</p>
+          <div className="w-10 h-10 border-2 border-[#E5DED2] border-t-[#4A1D3F] rounded-full animate-spin" />
+          <p className="text-[13px] text-[#8A837B] font-medium">{t.profileLoading}</p>
         </div>
       </div>
     );
@@ -99,9 +114,9 @@ export default function ProfileDetailPage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f7] px-6">
-        <div className="bg-white rounded-apple-lg p-8 max-w-md w-full text-center shadow-card border border-[#d2d2d7]/40">
-          <p className="text-[#ff3b30] font-semibold">{error || t.profileNotFound}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF7F2] px-6">
+        <div className="bg-white rounded-apple-lg p-8 max-w-md w-full text-center shadow-card border border-[#E5DED2]/40">
+          <p className="text-[#C4402E] font-semibold">{error || t.profileNotFound}</p>
           <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">{t.back}</button>
         </div>
       </div>
@@ -109,7 +124,8 @@ export default function ProfileDetailPage() {
   }
 
   const level = profile.language_level || "초급";
-  const isOnline = onlineIds.has(profile.id);
+  const isOnline = onlineIds.has(profile.id) || isRecentlyActive(profile.last_seen_at);
+  const prompts = normalizePrompts(profile.prompts);
   const match = getMatchScore(myProfile, profile);
   const matchPercentage = match.percentage;
   const lastActive = formatRelativeTime(profile.last_seen_at || profile.updated_at || profile.created_at, locale);
@@ -124,17 +140,17 @@ export default function ProfileDetailPage() {
   const canWriteRef = !isSelf && hasConversation;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] pb-10">
+    <div className="min-h-screen bg-[#FAF7F2] pb-10">
       <Helmet><title>KoriBridge - {profile.display_name || t.tabProfile}</title></Helmet>
 
-      <div className="bg-white/90 backdrop-blur-xl border-b border-[#d2d2d7]/40 px-5 py-4 flex items-center justify-between sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="text-[#86868b] hover:text-[#1d1d1f] transition p-1 -ml-1">
+      <div className="bg-white/90 backdrop-blur-xl border-b border-[#E5DED2]/40 px-5 py-4 flex items-center justify-between sticky top-0 z-10">
+        <button onClick={() => navigate(-1)} aria-label={t.back} className="text-[#8A837B] hover:text-[#1E1B18] transition p-1 -ml-1">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <p className="text-[13px] font-semibold text-[#1d1d1f]">{t.tabProfile}</p>
-        <button onClick={() => setIsReportOpen(true)} className="text-[#86868b] hover:text-[#1d1d1f] p-1 transition" title={t.reportUser}>
+        <p className="text-[13px] font-semibold text-[#1E1B18]">{t.tabProfile}</p>
+        <button onClick={() => setIsReportOpen(true)} aria-label={t.reportUser} className="text-[#8A837B] hover:text-[#1E1B18] p-1 transition" title={t.reportUser}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
@@ -147,7 +163,7 @@ export default function ProfileDetailPage() {
           <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
             profile.is_verified
               ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-              : "bg-[#f5f5f7] text-[#86868b] border border-[#d2d2d7]"
+              : "bg-[#F3EEE6] text-[#8A837B] border border-[#E5DED2]"
           }`}>
             {profile.is_verified ? (
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -164,7 +180,7 @@ export default function ProfileDetailPage() {
             {levelLabel(level)}
           </span>
           {matchPercentage > 0 && (
-            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20">
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#F1E9EE] text-[#4A1D3F] border border-[#4A1D3F]/20">
               {t.matchLabel} {matchPercentage}{t.matchSuffix}
             </span>
           )}
@@ -178,75 +194,63 @@ export default function ProfileDetailPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-6 text-center">
-          <div className="relative inline-block">
+        <div className="bg-white rounded-[24px] shadow-card overflow-hidden">
+          <div className="relative aspect-[4/5] bg-[#F3EEE6]">
             {isRealAvatar(profile.avatar_url) ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.display_name}
-                className="w-24 h-24 rounded-apple object-cover"
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div className={`w-24 h-24 rounded-apple bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-4xl font-bold text-white`}>
+              <div className={`w-full h-full ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-8xl font-display text-white`}>
                 {profile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
-            <span className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${isOnline ? "bg-emerald-500" : "bg-[#d2d2d7]"}`} />
-          </div>
-
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <h1 className="text-[21px] font-bold text-[#1d1d1f] tracking-[-0.02em]">{profile.display_name}</h1>
-            {profile.is_verified && (
-              <span className="bg-emerald-500 text-white p-1 rounded-full" title={t.verifiedUser}>
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-              </span>
-            )}
-          </div>
-          <p className="text-[#86868b] text-[14px] mt-0.5">{profile.nationality}</p>
-          <p className={`text-[12px] mt-1 font-semibold ${isOnline ? "text-emerald-600" : "text-[#86868b]"}`}>
-            {isOnline ? t.onlineNow : lastActive}
-          </p>
-
-          <div className="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
-            {profile.bio && profile.bio.trim().length >= 20 && (
-              <span className="text-[11px] bg-[#f5f5f7] text-[#86868b] px-2.5 py-1 rounded-full font-medium">
-                {t.profileCompleteBio}
-              </span>
-            )}
-            {isRealAvatar(profile.avatar_url) && (
-              <span className="text-[11px] bg-[#f5f5f7] text-[#86868b] px-2.5 py-1 rounded-full font-medium">
-                {t.profileCompletePhoto}
-              </span>
-            )}
-            {profile.interests?.length > 0 && (
-              <span className="text-[11px] bg-[#f5f5f7] text-[#86868b] px-2.5 py-1 rounded-full font-medium">
-                {t.profileCompleteInterests}
-              </span>
-            )}
+            <div className="absolute bottom-0 inset-x-0 bg-[#1E1B18]/45 px-5 pt-8 pb-4">
+              <div className="flex items-center gap-2">
+                <h1 className="font-display text-[28px] text-white leading-tight truncate">{profile.display_name}</h1>
+                {profile.is_verified && (
+                  <span className="bg-[#5B8A72] text-white p-1 rounded-full flex-shrink-0" title={t.verifiedUser}>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-white/85 text-[14px]">{profile.nationality}</p>
+                <span className="w-1 h-1 rounded-full bg-white/50" aria-hidden="true" />
+                <p className={`text-[12px] font-semibold flex items-center gap-1.5 ${isOnline ? "text-[#A8D3BC]" : "text-white/70"}`}>
+                  {isOnline && <span className="w-1.5 h-1.5 rounded-full bg-[#8FB3A0]" aria-hidden="true" />}
+                  {isOnline ? t.activeNow : lastActive}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-5 space-y-4">
+        {prompts[0] && <PromptCard prompt={prompts[0]} locale={locale} />}
+
+        <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#f5f5f7] rounded-apple p-3.5">
-              <p className="text-[11px] text-[#86868b] mb-1 font-semibold uppercase tracking-wide">{t.nativeLangLabel}</p>
-              <p className="text-[14px] font-bold text-[#1d1d1f]">{profile.native_language}</p>
+            <div className="bg-[#F3EEE6] rounded-apple p-3.5">
+              <p className="text-[11px] text-[#8A837B] mb-1 font-semibold uppercase tracking-wide">{t.nativeLangLabel}</p>
+              <p className="text-[14px] font-bold text-[#1E1B18]">{profile.native_language}</p>
             </div>
-            <div className="bg-[#e8f4ff] rounded-apple p-3.5">
-              <p className="text-[11px] text-[#86868b] mb-1 font-semibold uppercase tracking-wide">{t.learningLangLabel}</p>
-              <p className="text-[14px] font-bold text-[#0071e3]">{profile.learning_language}</p>
+            <div className="bg-[#F1E9EE] rounded-apple p-3.5">
+              <p className="text-[11px] text-[#8A837B] mb-1 font-semibold uppercase tracking-wide">{t.learningLangLabel}</p>
+              <p className="text-[14px] font-bold text-[#4A1D3F]">{profile.learning_language}</p>
             </div>
           </div>
 
           {matchPercentage > 0 && (
             <div>
               <div className="flex items-center justify-between text-[12px] mb-1.5">
-                <span className="text-[#86868b] font-semibold">{t.matchScoreLabel}</span>
-                <span className="text-[#0071e3] font-bold">{matchPercentage}%</span>
+                <span className="text-[#8A837B] font-semibold">{t.matchScoreLabel}</span>
+                <span className="text-[#4A1D3F] font-bold">{matchPercentage}%</span>
               </div>
-              <div className="h-1.5 bg-[#f5f5f7] rounded-full overflow-hidden">
+              <div className="h-1.5 bg-[#F3EEE6] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#0071e3] rounded-full transition-all duration-700"
+                  className="h-full bg-[#4A1D3F] rounded-full transition-all duration-700"
                   style={{ width: `${matchPercentage}%` }}
                 />
               </div>
@@ -263,33 +267,35 @@ export default function ProfileDetailPage() {
           )}
         </div>
 
+        {prompts[1] && <PromptCard prompt={prompts[1]} locale={locale} />}
+
         {(goalLabel || styleLabel || profile.opening_question) && (
-          <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-5 space-y-3">
+          <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5 space-y-3">
             {(goalLabel || styleLabel) && (
               <div className="flex flex-wrap gap-2">
                 {goalLabel && (
-                  <span className="text-[12px] bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 px-3 py-1.5 rounded-full font-semibold">
+                  <span className="text-[12px] bg-[#F1E9EE] text-[#4A1D3F] border border-[#4A1D3F]/20 px-3 py-1.5 rounded-full font-semibold">
                     {goalLabel}
                   </span>
                 )}
                 {styleLabel && (
-                  <span className="text-[12px] bg-[#f5f5f7] text-[#1d1d1f] border border-[#d2d2d7] px-3 py-1.5 rounded-full font-semibold">
+                  <span className="text-[12px] bg-[#F3EEE6] text-[#1E1B18] border border-[#E5DED2] px-3 py-1.5 rounded-full font-semibold">
                     {styleLabel}
                   </span>
                 )}
               </div>
             )}
             {profile.opening_question && (
-              <div className="rounded-apple bg-[#f5f5f7] p-4">
-                <p className="text-[10px] text-[#86868b] font-semibold uppercase tracking-wider mb-1">Opening Question</p>
-                <p className="text-[14px] text-[#1d1d1f] font-semibold">{profile.opening_question}</p>
+              <div className="rounded-apple bg-[#F3EEE6] p-4">
+                <p className="text-[10px] text-[#8A837B] font-semibold uppercase tracking-wider mb-1">Opening Question</p>
+                <p className="text-[14px] text-[#1E1B18] font-semibold">{profile.opening_question}</p>
               </div>
             )}
           </div>
         )}
 
         {profile.interests?.length > 0 && (
-          <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-5">
+          <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5">
             <p className="section-label mb-3">{t.interestsLabel}</p>
             <div className="flex flex-wrap gap-2">
               {profile.interests.map((interest) => (
@@ -297,8 +303,8 @@ export default function ProfileDetailPage() {
                   key={interest}
                   className={`text-[12px] px-3 py-1.5 rounded-full font-semibold transition-colors ${
                     commonInterests.includes(interest)
-                      ? "bg-[#0071e3] text-white"
-                      : "bg-[#f5f5f7] text-[#1d1d1f]"
+                      ? "bg-[#4A1D3F] text-white"
+                      : "bg-[#F3EEE6] text-[#1E1B18]"
                   }`}
                 >
                   #{interest}
@@ -306,13 +312,13 @@ export default function ProfileDetailPage() {
               ))}
             </div>
             {commonInterests.length > 0 && (
-              <div className="mt-3 p-3 bg-[#e8f4ff] rounded-apple flex items-center gap-2.5 border border-[#0071e3]/20">
-                <svg className="w-4 h-4 text-[#0071e3] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <div className="mt-3 p-3 bg-[#F1E9EE] rounded-apple flex items-center gap-2.5 border border-[#4A1D3F]/20">
+                <svg className="w-4 h-4 text-[#4A1D3F] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                 </svg>
-                <p className="text-[12px] text-[#1d1d1f] font-medium">
+                <p className="text-[12px] text-[#1E1B18] font-medium">
                   <span className="font-bold">{profile.display_name}</span>{t.commonInterestsNimwa}{" "}
-                  <span className="text-[#0071e3] font-bold">{commonInterests.length}</span>
+                  <span className="text-[#4A1D3F] font-bold">{commonInterests.length}</span>
                   {t.commonInterestsSuffix}
                 </p>
               </div>
@@ -320,10 +326,12 @@ export default function ProfileDetailPage() {
           </div>
         )}
 
+        {prompts[2] && <PromptCard prompt={prompts[2]} locale={locale} />}
+
         {profile.bio && (
-          <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-5">
+          <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5">
             <p className="section-label mb-2">{t.bioLabel}</p>
-            <p className="text-[14px] text-[#1d1d1f] leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
+            <p className="text-[14px] text-[#1E1B18] leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
           </div>
         )}
 
@@ -342,7 +350,7 @@ export default function ProfileDetailPage() {
         {canWriteRef && (
           <button
             onClick={() => setIsRefModalOpen(true)}
-            className="w-full py-3 rounded-full border border-[#0071e3] text-[#0071e3] text-[14px] font-semibold hover:bg-[#e8f4ff] transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-full border border-[#4A1D3F] text-[#4A1D3F] text-[14px] font-semibold hover:bg-[#F1E9EE] transition-colors flex items-center justify-center gap-2"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -351,7 +359,7 @@ export default function ProfileDetailPage() {
           </button>
         )}
 
-        <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card p-5">
+        <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <p className="section-label">{t.refSectionTitle}</p>
@@ -365,23 +373,23 @@ export default function ProfileDetailPage() {
               )}
             </div>
             {!refsLoading && (
-              <span className="text-[12px] text-[#86868b] font-medium">{references.length}{t.refReviews}</span>
+              <span className="text-[12px] text-[#8A837B] font-medium">{references.length}{t.refReviews}</span>
             )}
           </div>
 
           {refsLoading ? (
             <div className="flex justify-center py-6">
-              <div className="w-6 h-6 border-2 border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#E5DED2] border-t-[#4A1D3F] rounded-full animate-spin" />
             </div>
           ) : references.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-12 h-12 rounded-apple bg-[#f5f5f7] flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-[#d2d2d7]" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-12 h-12 rounded-apple bg-[#F3EEE6] flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-[#E5DED2]" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
-              <p className="text-[14px] font-semibold text-[#1d1d1f]">{t.refEmpty}</p>
-              <p className="text-[12px] text-[#86868b] mt-1">{t.refEmptyDesc}</p>
+              <p className="text-[14px] font-semibold text-[#1E1B18]">{t.refEmpty}</p>
+              <p className="text-[12px] text-[#8A837B] mt-1">{t.refEmptyDesc}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -389,7 +397,7 @@ export default function ProfileDetailPage() {
                 const authorName = ref.author?.display_name || t.unknownUser;
                 const authorInitial = authorName[0]?.toUpperCase() || "?";
                 return (
-                  <div key={ref.id} className="border border-[#d2d2d7]/40 rounded-apple p-4 space-y-2">
+                  <div key={ref.id} className="border border-[#E5DED2]/40 rounded-apple p-4 space-y-2">
                     <div className="flex items-center gap-3">
                       {isRealAvatar(ref.author?.avatar_url) ? (
                         <img
@@ -398,14 +406,14 @@ export default function ProfileDetailPage() {
                           className="w-9 h-9 rounded-apple object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className={`w-9 h-9 rounded-apple flex items-center justify-center text-sm font-bold text-white flex-shrink-0 bg-gradient-to-br ${getAvatarGradient(ref.author?.avatar_url, ref.author_id)}`}>
+                        <div className={`w-9 h-9 rounded-apple flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${getAvatarGradient(ref.author?.avatar_url, ref.author_id)}`}>
                           {authorInitial}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-[13px] font-semibold text-[#1d1d1f] truncate">{authorName}</p>
-                          <p className="text-[11px] text-[#86868b] flex-shrink-0">
+                          <p className="text-[13px] font-semibold text-[#1E1B18] truncate">{authorName}</p>
+                          <p className="text-[11px] text-[#8A837B] flex-shrink-0">
                             {formatRelativeTime(ref.created_at, locale)}
                           </p>
                         </div>
@@ -413,7 +421,7 @@ export default function ProfileDetailPage() {
                           {[1, 2, 3, 4, 5].map((s) => (
                             <svg
                               key={s}
-                              className={`w-3.5 h-3.5 ${s <= ref.rating ? "text-amber-400" : "text-[#d2d2d7]"}`}
+                              className={`w-3.5 h-3.5 ${s <= ref.rating ? "text-amber-400" : "text-[#E5DED2]"}`}
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -424,7 +432,7 @@ export default function ProfileDetailPage() {
                       </div>
                     </div>
                     {ref.content && (
-                      <p className="text-[13px] text-[#1d1d1f] leading-relaxed">{ref.content}</p>
+                      <p className="text-[13px] text-[#1E1B18] leading-relaxed">{ref.content}</p>
                     )}
                   </div>
                 );
@@ -434,10 +442,10 @@ export default function ProfileDetailPage() {
         </div>
 
         {!isSelf && (
-          <div className="pt-3 border-t border-[#d2d2d7]/40 flex flex-col gap-3">
+          <div className="pt-3 border-t border-[#E5DED2]/40 flex flex-col gap-3">
             <button
               onClick={() => setIsReportOpen(true)}
-              className="w-full py-2 text-[13px] font-semibold text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+              className="w-full py-2 text-[13px] font-semibold text-[#8A837B] hover:text-[#1E1B18] transition-colors"
             >
               {t.reportUser}
             </button>

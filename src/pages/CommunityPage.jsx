@@ -117,7 +117,7 @@ function CommunityPage({ currentUser, blockedIds }) {
         <button
           onClick={() => setLangFilter("")}
           className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all ${
-            !langFilter ? "bg-[#1d1d1f] text-white" : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+            !langFilter ? "bg-[#1E1B18] text-white" : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
           }`}
         >
           {t.communityAllLangs}
@@ -127,7 +127,7 @@ function CommunityPage({ currentUser, blockedIds }) {
             key={l}
             onClick={() => setLangFilter(l)}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all ${
-              langFilter === l ? "bg-[#0071e3] text-white" : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+              langFilter === l ? "bg-[#4A1D3F] text-white" : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
             }`}
           >
             {l}
@@ -139,30 +139,30 @@ function CommunityPage({ currentUser, blockedIds }) {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-apple border border-[#d2d2d7]/40 p-4 animate-pulse">
+            <div key={i} className="bg-white rounded-apple border border-[#E5DED2]/40 p-4 animate-pulse">
               <div className="flex gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-[#f5f5f7]" />
+                <div className="w-10 h-10 rounded-full bg-[#F3EEE6]" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3.5 bg-[#f5f5f7] rounded-full w-28" />
-                  <div className="h-3 bg-[#f5f5f7] rounded-full w-16" />
+                  <div className="h-3.5 bg-[#F3EEE6] rounded-full w-28" />
+                  <div className="h-3 bg-[#F3EEE6] rounded-full w-16" />
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="h-3.5 bg-[#f5f5f7] rounded-full" />
-                <div className="h-3.5 bg-[#f5f5f7] rounded-full w-4/5" />
+                <div className="h-3.5 bg-[#F3EEE6] rounded-full" />
+                <div className="h-3.5 bg-[#F3EEE6] rounded-full w-4/5" />
               </div>
             </div>
           ))}
         </div>
       ) : posts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 bg-[#f5f5f7] rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-[#86868b]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-[#F3EEE6] rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-[#8A837B]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
             </svg>
           </div>
-          <p className="text-[16px] font-semibold text-[#1d1d1f] mb-1">{t.communityEmpty}</p>
-          <p className="text-[13px] text-[#86868b]">{t.communityEmptyDesc}</p>
+          <p className="text-[16px] font-semibold text-[#1E1B18] mb-1">{t.communityEmpty}</p>
+          <p className="text-[13px] text-[#8A837B]">{t.communityEmptyDesc}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -179,7 +179,7 @@ function CommunityPage({ currentUser, blockedIds }) {
           {hasMore && (
             <button
               onClick={() => fetchPosts(false)}
-              className="w-full py-3 text-[14px] font-semibold text-[#0071e3] hover:text-[#0077ed] transition-colors"
+              className="w-full py-3 text-[14px] font-semibold text-[#4A1D3F] hover:text-[#3B1732] transition-colors"
             >
               {t.communityLoadMore}
             </button>
@@ -190,7 +190,7 @@ function CommunityPage({ currentUser, blockedIds }) {
       {/* FAB — fixed above bottom nav */}
       <button
         onClick={() => setShowComposer(true)}
-        className="fixed bottom-[76px] right-5 z-30 w-14 h-14 bg-[#0071e3] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0077ed] active:scale-95 transition-all"
+        className="fixed bottom-[76px] right-5 z-30 w-14 h-14 bg-[#4A1D3F] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#3B1732] active:scale-95 transition-all"
         aria-label={t.communityNewPost}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

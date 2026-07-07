@@ -12,19 +12,22 @@ import { formatTime } from "../utils/formatters";
 import { startChat } from "../utils/analytics";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { sendPushNotification } from "../utils/pushNotifications";
+import { usePresenceHeartbeat, isRecentlyActive } from "../hooks/usePresenceHeartbeat";
+import { getConversationStartersFromProfile } from "../utils/prompts";
 
 const MSG_SELECT =
   "id, sender_id, receiver_id, content, image_url, voice_url, message_type, created_at, read_at, edited_at";
 
-function getConversationStarters(partner) {
+function getConversationStarters(partner, locale = "ko") {
   const nativeLanguage = partner?.native_language || "모국어";
   const learningLanguage = partner?.learning_language || "한국어";
-  return [
+  const promptStarters = getConversationStartersFromProfile(partner, locale)
+    .filter((s) => s !== partner?.opening_question);
+  return [...promptStarters.slice(0, 2),
     `${nativeLanguage}로 자연스럽게 인사하는 표현을 알려줄 수 있어요?`,
     `${learningLanguage}를 공부하면서 가장 어려웠던 부분이 뭐예요?`,
-    "요즘 자주 쓰는 일상 표현 하나만 추천해 줄래요?",
     "서로 틀린 문장을 편하게 고쳐주는 방식으로 대화해볼까요?",
-  ];
+  ].slice(0, 4);
 }
 
 function getLearningPrompts(partner) {
@@ -90,16 +93,16 @@ const VoicePlayer = React.memo(function VoicePlayer({ url, isMine }) {
         type="button"
         onClick={toggle}
         className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-          isMine ? "bg-white/20 hover:bg-white/30" : "bg-[#e8f4ff] hover:bg-[#d6ecff]"
+          isMine ? "bg-white/20 hover:bg-white/30" : "bg-[#F1E9EE] hover:bg-[#E7DBE2]"
         }`}
       >
         {playing ? (
-          <svg className={`w-4 h-4 ${isMine ? "text-white" : "text-[#0071e3]"}`} fill="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 ${isMine ? "text-white" : "text-[#4A1D3F]"}`} fill="currentColor" viewBox="0 0 24 24">
             <rect x="6" y="4" width="4" height="16" rx="1" />
             <rect x="14" y="4" width="4" height="16" rx="1" />
           </svg>
         ) : (
-          <svg className={`w-4 h-4 ml-0.5 ${isMine ? "text-white" : "text-[#0071e3]"}`} fill="currentColor" viewBox="0 0 24 24">
+          <svg className={`w-4 h-4 ml-0.5 ${isMine ? "text-white" : "text-[#4A1D3F]"}`} fill="currentColor" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7L8 5z" />
           </svg>
         )}
@@ -110,7 +113,7 @@ const VoicePlayer = React.memo(function VoicePlayer({ url, isMine }) {
           onClick={handleSeek}
         >
           <div
-            className={`h-full rounded-full transition-all duration-100 ${isMine ? "bg-white" : "bg-[#0071e3]"}`}
+            className={`h-full rounded-full transition-all duration-100 ${isMine ? "bg-white" : "bg-[#4A1D3F]"}`}
             style={{ width: `${progress * 100}%` }}
           />
         </div>
@@ -129,7 +132,8 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const onlineIds = useOnlineUsers(user?.id);
-  const { t } = useLocale();
+  usePresenceHeartbeat(user?.id);
+  const { t, locale } = useLocale();
 
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -211,7 +215,7 @@ export default function ChatPage() {
       setChatLoading(true);
       try {
         const pr = await supabase.from("profiles")
-          .select("id, display_name, nationality, native_language, learning_language, avatar_url, conversation_goal, communication_style, opening_question")
+          .select("id, display_name, nationality, native_language, learning_language, avatar_url, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
           .eq("id", partnerId).maybeSingle();
         const mr = await supabase.from("messages")
           .select(MSG_SELECT)
@@ -224,6 +228,13 @@ export default function ChatPage() {
         setMessages(sorted);
         setHasOlderMsgs((mr.data?.length || 0) === MSGS_LIMIT);
         startChat(partnerId);
+        try {
+          const starter = sessionStorage.getItem(`kb-starter-${partnerId}`);
+          if (starter) {
+            setNewMessage(starter);
+            sessionStorage.removeItem(`kb-starter-${partnerId}`);
+          }
+        } catch {}
         await markRead();
         await loadCorrections(sorted.map((m) => m.id));
       } catch {
@@ -525,7 +536,7 @@ export default function ChatPage() {
   if (loading || chatLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-surface-bg">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-2 border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-[#E5DED2] border-t-[#4A1D3F] rounded-full animate-spin" />
         <p className="text-sm text-neutral-400 font-medium">{t.chatLoading}</p>
       </div>
     </div>
@@ -552,14 +563,14 @@ export default function ChatPage() {
   if (!user || !partner) return (
     <div className="min-h-screen flex items-center justify-center bg-surface-bg px-6">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-card border border-neutral-150">
-        <p className="text-[#ff3b30] font-semibold">{t.chatNotFound}</p>
+        <p className="text-[#C4402E] font-semibold">{t.chatNotFound}</p>
         <button onClick={() => navigate(-1)} className="mt-6 btn-secondary">{t.goBack}</button>
       </div>
     </div>
   );
 
-  const isPartnerOnline = onlineIds.has(partner?.id);
-  const conversationStarters = getConversationStarters(partner);
+  const isPartnerOnline = onlineIds.has(partner?.id) || isRecentlyActive(partner?.last_seen_at);
+  const conversationStarters = getConversationStarters(partner, locale);
   const learningPrompts = getLearningPrompts(partner);
   const applyStarter = (text) => {
     setNewMessage(text);
@@ -572,7 +583,7 @@ export default function ChatPage() {
 
       {/* 채팅 헤더 */}
       <div className="bg-white border-b border-neutral-150 shadow-nav px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <button onClick={() => navigate(-1)} className="text-neutral-500 hover:text-neutral-900 flex-shrink-0 transition p-1 -ml-1">
+        <button onClick={() => navigate(-1)} aria-label={t.goBack} className="text-neutral-500 hover:text-neutral-900 flex-shrink-0 transition p-1 -ml-1">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
@@ -581,7 +592,7 @@ export default function ChatPage() {
           {isRealAvatar(partner.avatar_url) ? (
             <img src={partner.avatar_url} alt="" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getAvatarGradient(partner.avatar_url, partner.id)} flex items-center justify-center text-sm font-bold text-white flex-shrink-0`}>
+            <div className={`w-10 h-10 rounded-xl ${getAvatarGradient(partner.avatar_url, partner.id)} flex items-center justify-center text-sm font-bold text-white flex-shrink-0`}>
               {partner.display_name?.[0]?.toUpperCase() || "?"}
             </div>
           )}
@@ -593,7 +604,7 @@ export default function ChatPage() {
             </div>
           </div>
         </button>
-        <button onClick={() => setReportOpen(true)} className="text-neutral-400 hover:text-neutral-700 flex-shrink-0 p-2 transition" title={t.reportUser}>
+        <button onClick={() => setReportOpen(true)} aria-label={t.reportUser} className="text-neutral-400 hover:text-neutral-700 flex-shrink-0 p-2 transition" title={t.reportUser}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
           </svg>
@@ -620,9 +631,9 @@ export default function ChatPage() {
                 <button
                   type="button"
                   onClick={() => applyStarter(partner.opening_question)}
-                  className="mt-5 w-full rounded-xl border border-[#0071e3]/20 bg-[#e8f4ff] px-4 py-3 text-left transition hover:border-[#0071e3]/40 hover:bg-[#d6ecff]"
+                  className="mt-5 w-full rounded-xl border border-[#4A1D3F]/20 bg-[#F1E9EE] px-4 py-3 text-left transition hover:border-[#4A1D3F]/40 hover:bg-[#E7DBE2]"
                 >
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-[#0071e3]">{t.chatOpeningQuestionLabel}</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide text-[#4A1D3F]">{t.chatOpeningQuestionLabel}</span>
                   <span className="mt-1 block text-sm font-bold text-neutral-900">{partner.opening_question}</span>
                 </button>
               )}
@@ -674,7 +685,7 @@ export default function ChatPage() {
                     onDoubleClick={() => isMine && !msg.image_url && !isVoice && startEditMessage(msg)}
                     className={
                       "rounded-2xl overflow-hidden text-sm cursor-default shadow-xs " +
-                      (isMine ? "bg-[#0071e3] text-white" : "bg-white border border-[#e8e8ed] text-[#1d1d1f]")
+                      (isMine ? "bg-[#4A1D3F] text-white" : "bg-white border border-[#F3EEE6] text-[#1E1B18]")
                     }
                   >
                     {msg.image_url && (
@@ -707,16 +718,17 @@ export default function ChatPage() {
                       </span>
                       <div className="flex items-center gap-2 flex-wrap justify-end">
                         {isMine && (
-                          <span className={msg.read_at ? (isMine ? "text-white/80" : "text-blue-400") : ""}>
+                          <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${msg.read_at ? "text-white" : "text-white/50"}`}>
                             {msg.read_at ? (
-                              <svg className="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <svg className="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l4 4 3-3.5m2.5-3l4 4-7 7" />
                               </svg>
                             ) : (
-                              <svg className="w-3 h-3 inline" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <svg className="w-3 h-3 inline" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                               </svg>
                             )}
+                            {msg.read_at ? t.readLabel : t.sentLabel}
                           </span>
                         )}
                         {!msg.image_url && !isVoice && editingMessageId !== msg.id && (
@@ -727,7 +739,7 @@ export default function ChatPage() {
                         )}
                         {!msg.image_url && !isVoice && (
                           <button onClick={() => translateMessage(msg)}
-                            className={"text-xs " + (isMine ? "text-white/60 hover:text-white" : "text-[#0071e3] hover:text-[#0077ed]")}>
+                            className={"text-xs " + (isMine ? "text-white/60 hover:text-white" : "text-[#4A1D3F] hover:text-[#3B1732]")}>
                             {tLoad ? t.translating : tTxt ? (tVis ? t.hideTranslation : t.translateBtn) : t.translateBtn}
                           </button>
                         )}
@@ -853,22 +865,22 @@ export default function ChatPage() {
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar max-w-3xl mx-auto">
           {["😀", "😂", "🥰", "😮", "😢", "😡", "👍", "🙌", "✨", "❤️"].map((emoji) => (
             <button key={emoji} onClick={() => handleEmojiClick(emoji)} disabled={isRecording}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#f5f5f7] rounded-full hover:bg-[#e8f4ff] text-sm transition-colors disabled:opacity-40">
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#F3EEE6] rounded-full hover:bg-[#F1E9EE] text-sm transition-colors disabled:opacity-40">
               {emoji}
             </button>
           ))}
         </div>
 
         {isRecording && (
-          <div className="flex items-center gap-3 mb-2 px-4 py-2.5 rounded-apple bg-[#e8f4ff] border border-[#0071e3]/20 max-w-3xl mx-auto">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0071e3] animate-pulse flex-shrink-0" />
-            <span className="text-[13px] font-bold text-[#0071e3]">{t.voiceRecording}</span>
+          <div className="flex items-center gap-3 mb-2 px-4 py-2.5 rounded-apple bg-[#F1E9EE] border border-[#4A1D3F]/20 max-w-3xl mx-auto">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#4A1D3F] animate-pulse flex-shrink-0" />
+            <span className="text-[13px] font-bold text-[#4A1D3F]">{t.voiceRecording}</span>
             <span className="text-sm font-mono text-primary-400 ml-auto">{fmtSecs(recordingTime)}</span>
           </div>
         )}
 
         <form onSubmit={sendMessage} className="flex gap-2 max-w-3xl mx-auto items-end">
-          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading || isRecording}
+          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={imageUploading || isRecording} aria-label="이미지 첨부"
             className="flex-shrink-0 w-11 h-11 rounded-xl bg-surface-bg border border-neutral-200 flex items-center justify-center hover:bg-surface-muted disabled:opacity-50 mb-0.5 transition-colors">
             {imageUploading
               ? <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
@@ -880,7 +892,7 @@ export default function ChatPage() {
           </button>
           <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleImageSelect} />
 
-          <button
+          <button aria-label={t.voiceMemo}
             type="button"
             onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); startRecording(); }}
             onPointerUp={stopRecording}
@@ -888,7 +900,7 @@ export default function ChatPage() {
             disabled={voiceUploading || imageUploading}
             className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center mb-0.5 transition-all select-none touch-none border ${
               isRecording
-                ? "bg-[#0071e3] text-white border-[#0071e3] scale-110"
+                ? "bg-[#4A1D3F] text-white border-[#4A1D3F] scale-110"
                 : "bg-surface-bg border-neutral-200 hover:bg-surface-muted text-neutral-500"
             } disabled:opacity-50`}
             title={t.voiceHint}
@@ -912,15 +924,15 @@ export default function ChatPage() {
               disabled={isRecording}
             />
             {newMessage.length > 800 && (
-              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-[#0071e3] font-semibold" : "text-neutral-400"}`}>
+              <p className={`text-xs text-right pr-1 ${newMessage.length > MAX_MSG_LENGTH ? "text-[#4A1D3F] font-semibold" : "text-neutral-400"}`}>
                 {newMessage.length}/{MAX_MSG_LENGTH}
               </p>
             )}
           </div>
 
-          <button type="submit"
+          <button type="submit" aria-label="메시지 보내기"
             disabled={sendLoading || !newMessage.trim() || newMessage.length > MAX_MSG_LENGTH || isRecording}
-            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-xl bg-[#0071e3] text-white flex items-center justify-center hover:bg-[#0077ed] active:scale-95 transition-all duration-150 disabled:opacity-50">
+            className="flex-shrink-0 mb-0.5 w-11 h-11 rounded-xl bg-[#4A1D3F] text-white flex items-center justify-center hover:bg-[#3B1732] active:scale-95 transition-all duration-150 disabled:opacity-50">
             {sendLoading
               ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : (

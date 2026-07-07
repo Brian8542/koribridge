@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -8,6 +8,8 @@ import { AVATAR_GRADIENTS, getAvatarGradient } from "../utils/avatarUtils";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS, INTERESTS, MAX_INTERESTS } from "../utils/profileOptions";
 import { getProfileCompletion } from "../utils/profileCompletion";
 import ProfileCompletionCard from "../components/ProfileCompletionCard";
+import PromptEditor from "../components/PromptEditor";
+import { normalizePrompts } from "../utils/prompts";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -38,6 +40,7 @@ export default function ProfileSetupPage() {
     conversation_goal: "culture_exchange",
     communication_style: "text_first",
     opening_question: "",
+    prompts: [],
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -53,6 +56,10 @@ export default function ProfileSetupPage() {
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handlePromptsChange = useCallback((prompts) => {
+    setForm((prev) => ({ ...prev, prompts }));
+  }, []);
 
   const toggleInterest = (interest) => {
     setForm((prev) => {
@@ -142,6 +149,7 @@ export default function ProfileSetupPage() {
         conversation_goal: form.conversation_goal,
         communication_style: form.communication_style,
         opening_question: form.opening_question.trim(),
+        prompts: normalizePrompts(form.prompts),
         is_verified: !!user.email_confirmed_at,
       });
 
@@ -155,15 +163,15 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
+    <div className="min-h-screen bg-[#FAF7F2]">
       <Helmet><title>KoriBridge - {t.setupTitle}</title></Helmet>
 
-      <div className="bg-white border-b border-[#d2d2d7]/40 px-6 pt-12 pb-8 text-center">
-        <div className="w-10 h-10 rounded-apple bg-primary-500 flex items-center justify-center mx-auto mb-4">
-          <span className="text-white text-sm font-bold">K</span>
+      <div className="bg-white border-b border-[#E5DED2]/40 px-6 pt-12 pb-8 text-center">
+        <div className="w-10 h-10 rounded-full bg-[#4A1D3F] flex items-center justify-center mx-auto mb-4">
+          <span className="text-[#FAF7F2] text-sm font-display">K</span>
         </div>
-        <h1 className="text-[28px] font-bold text-[#1d1d1f] tracking-[-0.025em]">{t.setupTitle}</h1>
-        <p className="text-[#86868b] text-[14px] mt-1.5">{t.setupDesc}</p>
+        <h1 className="font-display text-[30px] text-[#1E1B18]">{t.setupTitle}</h1>
+        <p className="text-[#8A837B] text-[14px] mt-1.5">{t.setupDesc}</p>
       </div>
 
       <div className="px-4 py-6 max-w-lg mx-auto">
@@ -173,27 +181,27 @@ export default function ProfileSetupPage() {
           <div className="card flex flex-col items-center gap-4 py-8">
             <div className="relative">
               {avatarPreview ? (
-                <img src={avatarPreview} alt="preview" className="w-32 h-32 rounded-apple object-cover ring-4 ring-[#0071e3]/20 shadow-card" />
+                <img src={avatarPreview} alt="preview" className="w-32 h-32 rounded-apple object-cover ring-4 ring-[#4A1D3F]/20 shadow-card" />
               ) : form.avatar_url.startsWith("gradient:") ? (
-                <div className={`w-32 h-32 rounded-apple bg-gradient-to-br ${getAvatarGradient(form.avatar_url)} flex items-center justify-center text-6xl font-black text-white shadow-card`}>
+                <div className={`w-32 h-32 rounded-apple ${getAvatarGradient(form.avatar_url)} flex items-center justify-center text-6xl font-black text-white shadow-card`}>
                   {form.display_name?.[0]?.toUpperCase() || "?"}
                 </div>
               ) : (
-                <div className="w-32 h-32 rounded-apple bg-[#f5f5f7] border-2 border-dashed border-[#d2d2d7] flex items-center justify-center">
-                  <svg className="w-10 h-10 text-[#86868b]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <div className="w-32 h-32 rounded-apple bg-[#F3EEE6] border-2 border-dashed border-[#E5DED2] flex items-center justify-center">
+                  <svg className="w-10 h-10 text-[#8A837B]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                   </svg>
                 </div>
               )}
-              <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#0071e3] hover:bg-[#0077ed] flex items-center justify-center cursor-pointer shadow-card border-2 border-white transition-colors">
+              <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#4A1D3F] hover:bg-[#3B1732] flex items-center justify-center cursor-pointer shadow-card border-2 border-white transition-colors">
                 <span className="text-white text-lg leading-none font-bold">+</span>
                 <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
               </label>
             </div>
             <div className="text-center">
-              <p className="text-[14px] font-semibold text-[#1d1d1f]">{t.avatarLabel}</p>
-              <p className="text-[12px] text-[#86868b] mt-0.5">{t.avatarLimit}</p>
+              <p className="text-[14px] font-semibold text-[#1E1B18]">{t.avatarLabel}</p>
+              <p className="text-[12px] text-[#8A837B] mt-0.5">{t.avatarLimit}</p>
             </div>
             <div className="flex flex-wrap gap-2 justify-center" style={{ maxWidth: 288 }}>
               {AVATAR_GRADIENTS.map((gradient, idx) => (
@@ -201,9 +209,9 @@ export default function ProfileSetupPage() {
                   key={idx}
                   type="button"
                   onClick={() => handleGradientSelect(idx)}
-                  className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
+                  className={`w-9 h-9 rounded-full ${gradient} flex-shrink-0 transition-all duration-150 ${
                     form.avatar_url === `gradient:${idx}` && !avatarPreview
-                      ? "ring-2 ring-offset-2 ring-[#0071e3] scale-110 shadow-md"
+                      ? "ring-2 ring-offset-2 ring-[#4A1D3F] scale-110 shadow-md"
                       : "opacity-70 hover:opacity-100 hover:scale-110"
                   }`}
                 />
@@ -213,7 +221,7 @@ export default function ProfileSetupPage() {
 
           <div className="card space-y-4">
             <div>
-              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.nickname}</label>
+              <label className="block text-[13px] font-semibold text-[#1E1B18] mb-1.5">{t.nickname}</label>
               <input
                 type="text"
                 className="input-field"
@@ -226,14 +234,14 @@ export default function ProfileSetupPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.nationality}</label>
+                <label className="block text-[13px] font-semibold text-[#1E1B18] mb-1.5">{t.nationality}</label>
                 <select className="input-field" value={form.nationality} onChange={(e) => handleChange("nationality", e.target.value)}>
                   <option value="">{t.select}</option>
                   {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.nativeLanguage}</label>
+                <label className="block text-[13px] font-semibold text-[#1E1B18] mb-1.5">{t.nativeLanguage}</label>
                 <select className="input-field" value={form.native_language} onChange={(e) => handleChange("native_language", e.target.value)}>
                   <option value="">{t.select}</option>
                   {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -242,7 +250,7 @@ export default function ProfileSetupPage() {
             </div>
 
             <div>
-              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.learningLanguage}</label>
+              <label className="block text-[13px] font-semibold text-[#1E1B18] mb-1.5">{t.learningLanguage}</label>
               <select className="input-field" value={form.learning_language} onChange={(e) => handleChange("learning_language", e.target.value)}>
                 <option value="">{t.select}</option>
                 {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -250,7 +258,7 @@ export default function ProfileSetupPage() {
             </div>
 
             <div>
-              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-1.5">{t.languageLevel}</label>
+              <label className="block text-[13px] font-semibold text-[#1E1B18] mb-1.5">{t.languageLevel}</label>
               <div className="flex gap-2">
                 {["초급", "중급", "고급"].map((level) => (
                   <button
@@ -259,8 +267,8 @@ export default function ProfileSetupPage() {
                     onClick={() => handleChange("language_level", level)}
                     className={`flex-1 py-2.5 rounded-full text-[13px] font-semibold transition-all duration-150 ${
                       form.language_level === level
-                        ? "bg-[#0071e3] text-white"
-                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                        ? "bg-[#4A1D3F] text-white"
+                        : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                     }`}
                   >
                     {levelLabel(level)}
@@ -272,7 +280,7 @@ export default function ProfileSetupPage() {
 
           <div className="card space-y-4">
             <div>
-              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-2">대화 목적</label>
+              <label className="block text-[13px] font-semibold text-[#1E1B18] mb-2">대화 목적</label>
               <div className="grid grid-cols-2 gap-2">
                 {CONVERSATION_GOALS.map((goal) => (
                   <button
@@ -281,8 +289,8 @@ export default function ProfileSetupPage() {
                     onClick={() => handleChange("conversation_goal", goal.value)}
                     className={`rounded-full px-3 py-2.5 text-[13px] font-semibold transition-all ${
                       form.conversation_goal === goal.value
-                        ? "bg-[#0071e3] text-white"
-                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                        ? "bg-[#4A1D3F] text-white"
+                        : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                     }`}
                   >
                     {goal.label}
@@ -292,7 +300,7 @@ export default function ProfileSetupPage() {
             </div>
 
             <div>
-              <label className="block text-[13px] font-semibold text-[#1d1d1f] mb-2">선호 대화 방식</label>
+              <label className="block text-[13px] font-semibold text-[#1E1B18] mb-2">선호 대화 방식</label>
               <div className="grid grid-cols-2 gap-2">
                 {COMMUNICATION_STYLES.map((style) => (
                   <button
@@ -301,8 +309,8 @@ export default function ProfileSetupPage() {
                     onClick={() => handleChange("communication_style", style.value)}
                     className={`rounded-full px-3 py-2.5 text-[13px] font-semibold transition-all ${
                       form.communication_style === style.value
-                        ? "bg-[#0071e3] text-white"
-                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                        ? "bg-[#4A1D3F] text-white"
+                        : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                     }`}
                   >
                     {style.label}
@@ -313,8 +321,8 @@ export default function ProfileSetupPage() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[13px] font-semibold text-[#1d1d1f]">첫 대화 질문</label>
-                <span className={`text-[12px] ${form.opening_question.length > 120 ? "text-[#0071e3]" : "text-[#86868b]"}`}>
+                <label className="block text-[13px] font-semibold text-[#1E1B18]">첫 대화 질문</label>
+                <span className={`text-[12px] ${form.opening_question.length > 120 ? "text-[#4A1D3F]" : "text-[#8A837B]"}`}>
                   {form.opening_question.length}/140
                 </span>
               </div>
@@ -331,8 +339,8 @@ export default function ProfileSetupPage() {
 
           <div className="card">
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-[13px] font-semibold text-[#1d1d1f]">{t.interests}</label>
-              <span className={`text-[12px] font-semibold ${form.interests.length >= MAX_INTERESTS ? "text-[#0071e3]" : "text-[#86868b]"}`}>
+              <label className="block text-[13px] font-semibold text-[#1E1B18]">{t.interests}</label>
+              <span className={`text-[12px] font-semibold ${form.interests.length >= MAX_INTERESTS ? "text-[#4A1D3F]" : "text-[#8A837B]"}`}>
                 {form.interests.length}/{MAX_INTERESTS}
               </span>
             </div>
@@ -344,10 +352,10 @@ export default function ProfileSetupPage() {
                   onClick={() => toggleInterest(interest)}
                   className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all duration-150 ${
                     form.interests.includes(interest)
-                      ? "bg-[#0071e3] text-white"
+                      ? "bg-[#4A1D3F] text-white"
                       : form.interests.length >= MAX_INTERESTS
-                        ? "bg-[#f5f5f7] text-[#d2d2d7] cursor-not-allowed"
-                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                        ? "bg-[#F3EEE6] text-[#E5DED2] cursor-not-allowed"
+                        : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                   }`}
                 >
                   {interest}
@@ -357,9 +365,13 @@ export default function ProfileSetupPage() {
           </div>
 
           <div className="card">
+            <PromptEditor prompts={form.prompts} onChange={handlePromptsChange} />
+          </div>
+
+          <div className="card">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[13px] font-semibold text-[#1d1d1f]">{t.bio}</label>
-              <span className={`text-[12px] ${form.bio.length > 450 ? "text-[#0071e3]" : "text-[#86868b]"}`}>
+              <label className="block text-[13px] font-semibold text-[#1E1B18]">{t.bio}</label>
+              <span className={`text-[12px] ${form.bio.length > 450 ? "text-[#4A1D3F]" : "text-[#8A837B]"}`}>
                 {form.bio.length}/500
               </span>
             </div>
@@ -374,7 +386,7 @@ export default function ProfileSetupPage() {
           </div>
 
           {error && (
-            <div className="rounded-apple border border-[#ff3b30]/20 bg-[#fff2f2] px-4 py-3 text-[13px] text-[#ff3b30]">
+            <div className="rounded-apple border border-[#C4402E]/20 bg-[#FBEAE6] px-4 py-3 text-[13px] text-[#C4402E]">
               {error}
             </div>
           )}

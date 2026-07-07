@@ -408,6 +408,43 @@ const KO = {
   communityCorrection: '교정',
   communityReportPost: '게시물 신고',
   communityDeletePost: '게시물 삭제',
+  // profile prompts
+  promptsSectionTitle: '나의 이야기',
+  promptsSectionDesc: '질문을 골라 나만의 이야기를 들려주세요. 프로필이 훨씬 매력적으로 보여요. (최대 3개)',
+  promptAnswerPlaceholder: '답변을 입력하세요... (최대 300자)',
+  promptAddBtn: '이야기 추가하기',
+  promptRemoveBtn: '삭제',
+  promptSelectLabel: '질문을 선택하세요',
+  promptMaxReached: '이야기는 최대 3개까지 작성할 수 있어요.',
+  promptChangeQuestion: '질문 바꾸기',
+  // targeted likes
+  likedYourPrompt: '님이 당신의 답변을 좋아합니다',
+  likedYourPhoto: '님이 당신의 사진을 좋아합니다',
+  likedYourProfile: '님이 당신의 프로필을 좋아합니다',
+  likePhotoBtn: '사진에 좋아요 보내기',
+  likePromptBtn: '이 답변에 좋아요 보내기',
+  passBtn: '패스',
+  // match
+  matchTitle: '매칭 성사!',
+  matchDescPrefix: '',
+  matchDescSuffix: '님과 서로 좋아요를 보냈어요. 지금 첫인사를 건네보세요.',
+  matchStartersTitle: '이렇게 시작해 보세요',
+  matchLaterBtn: '나중에 하기',
+  // presence
+  activeNow: '지금 활동 중',
+  // read receipts
+  readLabel: '읽음',
+  sentLabel: '전송됨',
+  // notifications
+  notifTitle: '알림',
+  notifEmpty: '아직 알림이 없어요',
+  notifEmptyDesc: '새 좋아요와 매칭 소식이 여기에 표시됩니다.',
+  notifMarkAllRead: '모두 읽음',
+  notifMatchSuffix: '님과 매칭됐어요! 대화를 시작해 보세요.',
+  notifBellLabel: '알림 열기',
+  notifViewProfile: '프로필 보기',
+  // onboarding
+  profileCompletionBoost: '프로필을 완성하면 매칭 확률이 올라가요',
 };
 
 const EN = {
@@ -816,6 +853,43 @@ const EN = {
   communityCorrection: 'Correction',
   communityReportPost: 'Report Post',
   communityDeletePost: 'Delete Post',
+  // profile prompts
+  promptsSectionTitle: 'My Story',
+  promptsSectionDesc: 'Pick a question and share your story — profiles with answers get far more replies. (max 3)',
+  promptAnswerPlaceholder: 'Write your answer... (max 300 chars)',
+  promptAddBtn: 'Add a story',
+  promptRemoveBtn: 'Remove',
+  promptSelectLabel: 'Choose a question',
+  promptMaxReached: 'You can write up to 3 stories.',
+  promptChangeQuestion: 'Change question',
+  // targeted likes
+  likedYourPrompt: ' liked your answer',
+  likedYourPhoto: ' liked your photo',
+  likedYourProfile: ' liked your profile',
+  likePhotoBtn: 'Like this photo',
+  likePromptBtn: 'Like this answer',
+  passBtn: 'Pass',
+  // match
+  matchTitle: "It's a match!",
+  matchDescPrefix: 'You and ',
+  matchDescSuffix: ' liked each other. Send the first hello now.',
+  matchStartersTitle: 'Try one of these openers',
+  matchLaterBtn: 'Maybe later',
+  // presence
+  activeNow: 'Active now',
+  // read receipts
+  readLabel: 'Read',
+  sentLabel: 'Sent',
+  // notifications
+  notifTitle: 'Notifications',
+  notifEmpty: 'No notifications yet',
+  notifEmptyDesc: 'New likes and matches will show up here.',
+  notifMarkAllRead: 'Mark all read',
+  notifMatchSuffix: ' — you matched! Say hello.',
+  notifBellLabel: 'Open notifications',
+  notifViewProfile: 'View profile',
+  // onboarding
+  profileCompletionBoost: 'A complete profile gets you better matches',
 };
 
 function partial(overrides) { return { ...EN, ...overrides }; }

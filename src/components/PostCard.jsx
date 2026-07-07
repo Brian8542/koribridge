@@ -55,7 +55,7 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
   return (
     <>
       <article
-        className="bg-white rounded-apple border border-[#d2d2d7]/40 p-4 cursor-pointer hover:shadow-sm transition-shadow"
+        className="bg-white rounded-apple border border-[#E5DED2]/40 p-4 cursor-pointer hover:shadow-sm transition-shadow"
         onClick={handleCardClick}
       >
         {/* Header */}
@@ -63,20 +63,20 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
           <img
             src={post.author?.avatar_url || `https://api.dicebear.com/8.x/thumbs/svg?seed=${post.author_id}`}
             alt=""
-            className="w-10 h-10 rounded-full object-cover flex-shrink-0 bg-[#f5f5f7]"
+            className="w-10 h-10 rounded-full object-cover flex-shrink-0 bg-[#F3EEE6]"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[14px] font-semibold text-[#1d1d1f] truncate">
+              <span className="text-[14px] font-semibold text-[#1E1B18] truncate">
                 {post.author?.display_name || t.unknownUser}
               </span>
               {post.language && (
-                <span className="bg-[#e8f4ff] text-[#0071e3] text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0">
+                <span className="bg-[#F1E9EE] text-[#4A1D3F] text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0">
                   {post.language}
                 </span>
               )}
             </div>
-            <span className="text-[12px] text-[#86868b]">
+            <span className="text-[12px] text-[#8A837B]">
               {postTimeAgo(post.created_at, locale)}
             </span>
           </div>
@@ -85,7 +85,7 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
           <div className="relative flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={handleMenuToggle}
-              className="p-1.5 rounded-full text-[#86868b] hover:bg-[#f5f5f7] transition-colors"
+              className="p-1.5 rounded-full text-[#8A837B] hover:bg-[#F3EEE6] transition-colors"
               aria-label="more"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -95,18 +95,18 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-8 z-20 bg-white rounded-apple border border-[#d2d2d7]/60 shadow-lg min-w-[140px] py-1 overflow-hidden">
+                <div className="absolute right-0 top-8 z-20 bg-white rounded-apple border border-[#E5DED2]/60 shadow-lg min-w-[140px] py-1 overflow-hidden">
                   {isOwn ? (
                     <button
                       onClick={() => { setMenuOpen(false); setShowDeleteConfirm(true); }}
-                      className="w-full px-4 py-2.5 text-left text-[13px] text-[#ff3b30] hover:bg-[#f5f5f7] transition-colors"
+                      className="w-full px-4 py-2.5 text-left text-[13px] text-[#C4402E] hover:bg-[#F3EEE6] transition-colors"
                     >
                       {t.communityDeletePost}
                     </button>
                   ) : (
                     <button
                       onClick={() => { setMenuOpen(false); setShowReport(true); }}
-                      className="w-full px-4 py-2.5 text-left text-[13px] text-[#ff3b30] hover:bg-[#f5f5f7] transition-colors"
+                      className="w-full px-4 py-2.5 text-left text-[13px] text-[#C4402E] hover:bg-[#F3EEE6] transition-colors"
                     >
                       {t.communityReportPost}
                     </button>
@@ -118,13 +118,13 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
         </div>
 
         {/* Content */}
-        <p className="text-[14px] text-[#1d1d1f] leading-relaxed mb-3 whitespace-pre-wrap break-words">
+        <p className="text-[14px] text-[#1E1B18] leading-relaxed mb-3 whitespace-pre-wrap break-words">
           {post.content}
         </p>
 
         {/* Image */}
         {post.image_url && (
-          <div className="mb-3 rounded-[14px] overflow-hidden bg-[#f5f5f7]">
+          <div className="mb-3 rounded-[14px] overflow-hidden bg-[#F3EEE6]">
             <img
               src={post.image_url}
               alt=""
@@ -134,11 +134,11 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
         )}
 
         {/* Footer actions */}
-        <div className="flex items-center gap-4 pt-2 border-t border-[#f5f5f7]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-4 pt-2 border-t border-[#F3EEE6]" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={handleLike}
             className={`flex items-center gap-1.5 text-[13px] font-semibold transition-colors ${
-              liked ? "text-[#ff3b30]" : "text-[#86868b] hover:text-[#ff3b30]"
+              liked ? "text-[#C4402E]" : "text-[#8A837B] hover:text-[#C4402E]"
             }`}
           >
             <svg className="w-4 h-4" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@ function PostCard({ post, currentUserId, onLike, onDelete, onOpen }) {
 
           <button
             onClick={() => onOpen(post)}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-[#86868b] hover:text-[#0071e3] transition-colors"
+            className="flex items-center gap-1.5 text-[13px] font-semibold text-[#8A837B] hover:text-[#4A1D3F] transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

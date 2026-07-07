@@ -28,6 +28,11 @@ import ProfileCompletionCard from "../components/ProfileCompletionCard";
 import AnnouncementBanner from "../components/AnnouncementBanner";
 import AdvancedFiltersModal from "../components/AdvancedFiltersModal";
 import CommunityPage from "./CommunityPage";
+import PromptEditor from "../components/PromptEditor";
+import NotificationBell from "../components/NotificationBell";
+import MatchModal from "../components/MatchModal";
+import { normalizePrompts } from "../utils/prompts";
+import { usePresenceHeartbeat } from "../hooks/usePresenceHeartbeat";
 
 const LANGUAGES = [
   "한국어", "영어", "베트남어", "태국어", "필리핀어(타갈로그)",
@@ -108,7 +113,9 @@ export default function HomePage() {
     display_name: "", nationality: "", native_language: "",
     learning_language: "", language_level: "초급", bio: "", avatar_url: "", interests: [], is_public: true,
     conversation_goal: "culture_exchange", communication_style: "text_first", opening_question: "",
+    prompts: [],
   });
+  const [matchPartner, setMatchPartner] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -123,6 +130,7 @@ export default function HomePage() {
   const [loadRetryKey, setLoadRetryKey] = useState(0);
 
   const { permission: pushPermission, subscribed: pushSubscribed, loading: pushLoading, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications(user?.id);
+  usePresenceHeartbeat(user?.id);
   const notifGranted = useRef(false);
   const bottomNavRef = useRef(null);
   const profileCompletion = useMemo(() => getProfileCompletion({
@@ -161,6 +169,7 @@ export default function HomePage() {
             conversation_goal: me.conversation_goal || "culture_exchange",
             communication_style: me.communication_style || "text_first",
             opening_question: me.opening_question || "",
+            prompts: normalizePrompts(me.prompts),
           });
         }
 
@@ -174,7 +183,7 @@ export default function HomePage() {
         if (fIds.size > 0) {
           const { data: favoriteProfiles } = await supabase
             .from("profiles")
-            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question")
+            .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
             .in("id", Array.from(fIds));
           setFavorites(favoriteProfiles || []);
         } else {
@@ -191,7 +200,7 @@ export default function HomePage() {
 
         const { data: allProfiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, is_verified, conversation_goal, communication_style, opening_question")
+          .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, is_verified, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
           .eq("is_public", true)
           .neq("id", user.id)
           .order("created_at", { ascending: false });
@@ -236,7 +245,7 @@ export default function HomePage() {
           if (partnerIds.length > 0) {
             const { data: partnerProfiles } = await supabase
               .from("profiles")
-              .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question")
+              .select("id, display_name, nationality, native_language, learning_language, language_level, avatar_url, bio, interests, conversation_goal, communication_style, opening_question, prompts, last_seen_at")
               .in("id", partnerIds);
             const partnerMap = new Map(partnerProfiles?.map((p) => [p.id, p]));
             const sorted = Array.from(byPartner.values())
@@ -344,6 +353,10 @@ export default function HomePage() {
 
   const handleProfileChange = (field, value) => setProfileForm((prev) => ({ ...prev, [field]: value }));
 
+  const handlePromptsChange = useCallback((prompts) => {
+    setProfileForm((prev) => ({ ...prev, prompts }));
+  }, []);
+
   const toggleInterest = (interest) => {
     setProfileForm((prev) => {
       const has = prev.interests.includes(interest);
@@ -408,6 +421,7 @@ export default function HomePage() {
         conversation_goal: profileForm.conversation_goal,
         communication_style: profileForm.communication_style,
         opening_question: profileForm.opening_question.trim(),
+        prompts: normalizePrompts(profileForm.prompts),
       });
       if (error) throw error;
       showToast(t.profileSaveBtn, "success");
@@ -473,12 +487,23 @@ export default function HomePage() {
     showToast(t.reportDone, "success");
   };
 
-  const handleSwipe = async (targetId, direction) => {
+  const handleSwipe = async (targetId, direction, likedContent = null) => {
+    const targetProfile = profiles.find((p) => p.id === targetId);
     if (direction === "right" && !favoriteIds.has(targetId)) {
-      const { error } = await supabase.from("favorites").insert({ user_id: user.id, partner_id: targetId });
+      const { error } = await supabase.from("favorites").insert({
+        user_id: user.id,
+        partner_id: targetId,
+        liked_content: likedContent || { type: "profile" },
+      });
       if (!error) {
         setFavoriteIds((prev) => new Set(prev).add(targetId));
         showToast(t.liked, "success");
+        supabase.from("notifications").insert({
+          user_id: targetId,
+          actor_id: user.id,
+          type: "like",
+          payload: likedContent || { type: "profile" },
+        }).then(() => {});
         const { data: mutual } = await supabase
           .from("favorites")
           .select("id")
@@ -487,6 +512,12 @@ export default function HomePage() {
           .maybeSingle();
         if (mutual) {
           const senderName = myProfile?.display_name || "";
+          supabase.from("notifications").insert({
+            user_id: targetId,
+            actor_id: user.id,
+            type: "match",
+            payload: {},
+          }).then(() => {});
           sendPushNotification({
             receiverId: targetId,
             title: t.pushMatchTitle,
@@ -494,6 +525,7 @@ export default function HomePage() {
             url: `/chat/${user.id}`,
             type: "match",
           });
+          if (targetProfile) setMatchPartner(targetProfile);
         }
       }
     }
@@ -512,7 +544,7 @@ export default function HomePage() {
             {isRealAvatar(myProfile.avatar_url) ? (
               <img src={myProfile.avatar_url} alt={t.tabProfile} className="w-11 h-11 rounded-xl object-cover" />
             ) : (
-              <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-lg font-bold text-white`}>
+              <div className={`w-11 h-11 rounded-xl ${getAvatarGradient(myProfile.avatar_url, myProfile.id)} flex items-center justify-center text-lg font-bold text-white`}>
                 {myProfile.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
@@ -534,8 +566,8 @@ export default function HomePage() {
       {recommendedProfiles.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-bold text-neutral-900">{t.aiRecommended}</span>
-            <span className="badge bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 text-[11px]">{t.recommendedBadge}</span>
+            <span className="font-display text-[18px] text-neutral-900">{t.aiRecommended}</span>
+            <span className="badge bg-[#F1E9EE] text-[#4A1D3F] border border-[#4A1D3F]/20 text-[11px]">{t.recommendedBadge}</span>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {recommendedProfiles.map((profile) => (
@@ -561,9 +593,9 @@ export default function HomePage() {
       />
 
       <div>
-        <p className="text-sm font-bold text-neutral-900 mb-4">
+        <p className="font-display text-[18px] text-neutral-900 mb-4">
           {t.allPartners}{" "}
-          <span className="text-[#0071e3] font-semibold">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
+          <span className="text-[#4A1D3F] font-semibold">({filteredProfiles.length}{locale === "ko" ? t.people : ""})</span>
         </p>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {profilesLoading ? (
@@ -622,7 +654,7 @@ export default function HomePage() {
   const renderSwipeContent = () => (
     <div className="flex flex-col items-center min-h-[65vh]">
       <div className="w-full max-w-sm mb-6 text-center">
-        <h2 className="text-lg font-bold text-neutral-900">{t.tabSwipe}</h2>
+        <h2 className="font-display text-[20px] text-neutral-900">{t.tabSwipe}</h2>
         <p className="text-sm text-neutral-400 mt-1">{t.swipeDesc}</p>
       </div>
       <div className="relative w-full flex-1 flex items-center justify-center">
@@ -638,7 +670,7 @@ export default function HomePage() {
                 score={match.score}
                 reasons={match.reasons}
                 onSwipeLeft={() => handleSwipe(profile.id, "left")}
-                onSwipeRight={() => handleSwipe(profile.id, "right")}
+                onSwipeRight={(likedContent) => handleSwipe(profile.id, "right", likedContent)}
               />
             );
           })
@@ -659,11 +691,11 @@ export default function HomePage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-neutral-900">{t.favorites}</h2>
+          <h2 className="font-display text-[20px] text-neutral-900">{t.favorites}</h2>
           <p className="text-sm text-neutral-400 mt-0.5">{t.favoritesDesc}</p>
         </div>
         {favorites.length > 0 && (
-          <button type="button" onClick={() => setTab("home")} className="text-[13px] text-[#0071e3] font-semibold hover:text-[#0077ed] transition-colors">
+          <button type="button" onClick={() => setTab("home")} className="text-[13px] text-[#4A1D3F] font-semibold hover:text-[#3B1732] transition-colors">
             {t.morePartners}
           </button>
         )}
@@ -701,7 +733,7 @@ export default function HomePage() {
   const renderChatListContent = () => (
     <div className="space-y-2.5">
       <div className="mb-4">
-        <h2 className="text-base font-bold text-neutral-900">{t.tabChat}</h2>
+        <h2 className="font-display text-[20px] text-neutral-900">{t.tabChat}</h2>
       </div>
       {convoLoading ? (
         Array.from({ length: 4 }).map((_, i) => (
@@ -745,7 +777,7 @@ export default function HomePage() {
   const renderProfileContent = () => (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-neutral-900">{t.profileEdit}</h2>
+        <h2 className="font-display text-[22px] text-neutral-900">{t.profileEdit}</h2>
         <button type="button" onClick={() => setTab("home")} className="text-sm text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" transform="scale(-1,1) translate(-24,0)" />
@@ -761,15 +793,15 @@ export default function HomePage() {
         <div className="card flex flex-col items-center gap-4 py-8">
           <div className="relative">
             {avatarPreview ? (
-              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-[#0071e3]/20 shadow-lg" />
+              <img src={avatarPreview} alt="preview" className="w-28 h-28 rounded-3xl object-cover ring-4 ring-[#4A1D3F]/20 shadow-lg" />
             ) : isRealAvatar(profileForm.avatar_url) ? (
-              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-[#0071e3]/20 shadow-lg" />
+              <img src={profileForm.avatar_url} alt={t.tabProfile} className="w-28 h-28 rounded-3xl object-cover ring-4 ring-[#4A1D3F]/20 shadow-lg" />
             ) : (
-              <div className={`w-28 h-28 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profileForm.avatar_url, user?.id)} flex items-center justify-center text-5xl font-black text-white shadow-lg`}>
+              <div className={`w-28 h-28 rounded-3xl ${getAvatarGradient(profileForm.avatar_url, user?.id)} flex items-center justify-center text-5xl font-black text-white shadow-lg`}>
                 {profileForm.display_name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
-            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#0071e3] hover:bg-[#0077ed] flex items-center justify-center cursor-pointer shadow-lg border-2 border-white transition-colors">
+            <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#4A1D3F] hover:bg-[#3B1732] flex items-center justify-center cursor-pointer shadow-lg border-2 border-white transition-colors">
               <span className="text-white text-xl leading-none font-bold select-none">+</span>
               <input type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden" onChange={handleAvatarChange} />
             </label>
@@ -781,9 +813,9 @@ export default function HomePage() {
                 key={idx}
                 type="button"
                 onClick={() => handleGradientSelect(idx)}
-                className={`w-9 h-9 rounded-full bg-gradient-to-br ${gradient} flex-shrink-0 transition-all duration-150 ${
+                className={`w-9 h-9 rounded-full ${gradient} flex-shrink-0 transition-all duration-150 ${
                   profileForm.avatar_url === `gradient:${idx}` && !avatarPreview
-                    ? "ring-2 ring-offset-2 ring-[#0071e3] scale-110 shadow-md"
+                    ? "ring-2 ring-offset-2 ring-[#4A1D3F] scale-110 shadow-md"
                     : "opacity-70 hover:opacity-100 hover:scale-110"
                 }`}
               />
@@ -831,7 +863,7 @@ export default function HomePage() {
                 <button type="button" key={level} onClick={() => handleProfileChange("language_level", level)}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 ${
                     profileForm.language_level === level
-                      ? "bg-[#0071e3] text-white"
+                      ? "bg-[#4A1D3F] text-white"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}>
                   {levelLabel(level)}
@@ -851,7 +883,7 @@ export default function HomePage() {
               aria-checked={profileForm.is_public}
               onClick={() => handleProfileChange("is_public", !profileForm.is_public)}
               className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                profileForm.is_public ? "bg-[#0071e3]" : "bg-[#d2d2d7]"
+                profileForm.is_public ? "bg-[#4A1D3F]" : "bg-[#E5DED2]"
               }`}
             >
               <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -872,7 +904,7 @@ export default function HomePage() {
                   onClick={() => handleProfileChange("conversation_goal", goal.value)}
                   className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
                     profileForm.conversation_goal === goal.value
-                      ? "bg-[#0071e3] text-white"
+                      ? "bg-[#4A1D3F] text-white"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
@@ -892,7 +924,7 @@ export default function HomePage() {
                   onClick={() => handleProfileChange("communication_style", style.value)}
                   className={`rounded-xl px-3 py-2 text-sm font-bold transition-all ${
                     profileForm.communication_style === style.value
-                      ? "bg-[#0071e3] text-white"
+                      ? "bg-[#4A1D3F] text-white"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
                   }`}
                 >
@@ -905,7 +937,7 @@ export default function HomePage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-bold text-neutral-700">{t.openingQuestionLabel}</label>
-              <span className={`text-[12px] ${profileForm.opening_question.length > 120 ? "text-[#0071e3]" : "text-neutral-400"}`}>
+              <span className={`text-[12px] ${profileForm.opening_question.length > 120 ? "text-[#4A1D3F]" : "text-neutral-400"}`}>
                 {profileForm.opening_question.length}/140
               </span>
             </div>
@@ -937,7 +969,7 @@ export default function HomePage() {
                 disabled={pushLoading}
                 onClick={pushSubscribed ? unsubscribePush : subscribePush}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
-                  pushSubscribed ? "bg-[#0071e3]" : "bg-[#d2d2d7]"
+                  pushSubscribed ? "bg-[#4A1D3F]" : "bg-[#E5DED2]"
                 }`}
               >
                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -951,7 +983,7 @@ export default function HomePage() {
         <div className="card">
           <div className="flex items-center justify-between mb-3">
             <label className="block text-sm font-bold text-neutral-700">{t.interests}</label>
-            <span className={`text-[12px] font-semibold ${profileForm.interests.length >= MAX_INTERESTS ? "text-[#0071e3]" : "text-neutral-400"}`}>
+            <span className={`text-[12px] font-semibold ${profileForm.interests.length >= MAX_INTERESTS ? "text-[#4A1D3F]" : "text-neutral-400"}`}>
               {profileForm.interests.length}/{MAX_INTERESTS}
             </span>
           </div>
@@ -960,7 +992,7 @@ export default function HomePage() {
               <button type="button" key={interest} onClick={() => toggleInterest(interest)}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
                   profileForm.interests.includes(interest)
-                    ? "bg-[#0071e3] text-white"
+                    ? "bg-[#4A1D3F] text-white"
                     : profileForm.interests.length >= MAX_INTERESTS
                       ? "bg-surface-muted text-neutral-300 cursor-not-allowed"
                       : "bg-surface-muted text-neutral-600 hover:bg-neutral-100"
@@ -972,9 +1004,13 @@ export default function HomePage() {
         </div>
 
         <div className="card">
+          <PromptEditor prompts={profileForm.prompts} onChange={handlePromptsChange} />
+        </div>
+
+        <div className="card">
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-sm font-bold text-neutral-700">{t.bio}</label>
-            <span className={`text-[12px] ${profileForm.bio.length > 450 ? "text-[#0071e3]" : "text-neutral-400"}`}>
+            <span className={`text-[12px] ${profileForm.bio.length > 450 ? "text-[#4A1D3F]" : "text-neutral-400"}`}>
               {profileForm.bio.length}/500
             </span>
           </div>
@@ -1000,7 +1036,7 @@ export default function HomePage() {
       </div>
 
       <div className="pt-2 text-center">
-        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-neutral-300 hover:text-[#0071e3] underline transition-colors">
+        <button type="button" onClick={() => setShowDeleteModal(true)} className="text-xs text-neutral-300 hover:text-[#4A1D3F] underline transition-colors">
           {t.deleteAccountBtn}
         </button>
       </div>
@@ -1024,14 +1060,15 @@ export default function HomePage() {
       <div className="bg-white border-b border-neutral-150 shadow-nav px-5 pt-4 pb-3 sticky top-0 z-40">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-xs font-bold">K</span>
+            <div className="w-7 h-7 rounded-full bg-[#4A1D3F] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#FAF7F2] text-xs font-display">K</span>
             </div>
-            <h1 className="text-base font-bold text-neutral-900 tracking-tight">{t.homeTitle}</h1>
+            <h1 className="font-display text-[18px] text-[#1E1B18]">{t.homeTitle}</h1>
           </div>
           <div className="flex items-center gap-1.5">
+            <NotificationBell userId={user?.id} />
             <LanguageSelector />
-            <button type="button" onClick={toggleDarkMode}
+            <button type="button" onClick={toggleDarkMode} aria-label={darkMode ? "라이트 모드로 전환" : "다크 모드로 전환"}
               className="w-9 h-9 rounded-lg bg-surface-bg hover:bg-surface-muted flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors">
               {darkMode ? (
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
@@ -1053,13 +1090,13 @@ export default function HomePage() {
             </svg>
             <input
               type="text"
-              className="w-full pl-10 pr-9 h-10 rounded-xl bg-surface-bg border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#0071e3]/10 transition-all"
+              className="w-full pl-10 pr-9 h-10 rounded-xl bg-surface-bg border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#4A1D3F]/10 transition-all"
               placeholder={t.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery("")}
+              <button onClick={() => setSearchQuery("")} aria-label="검색어 지우기"
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-neutral-200 text-neutral-500 text-xs flex items-center justify-center hover:bg-neutral-300 transition-colors">
                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1091,10 +1128,10 @@ export default function HomePage() {
                 key={item.key}
                 type="button"
                 onClick={() => setTab(item.key)}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all duration-150 ${active ? "text-[#0071e3]" : "text-[#86868b] hover:text-[#1d1d1f]"}`}
+                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all duration-150 ${active ? "text-[#4A1D3F]" : "text-[#8A837B] hover:text-[#1E1B18]"}`}
               >
                 {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#0071e3] rounded-b-full" />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#4A1D3F] rounded-b-full" />
                 )}
                 <span className="transition-colors duration-150">
                   {NAV_ICONS[item.key]}
@@ -1103,7 +1140,7 @@ export default function HomePage() {
                   {item.label}
                 </span>
                 {item.badge > 0 && (
-                  <span className="absolute top-2 right-[calc(50%-16px)] min-w-[16px] h-4 px-1 rounded-full bg-[#0071e3] text-[9px] text-white flex items-center justify-center font-bold">
+                  <span className="absolute top-2 right-[calc(50%-16px)] min-w-[16px] h-4 px-1 rounded-full bg-[#4A1D3F] text-[9px] text-white flex items-center justify-center font-bold">
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 )}
@@ -1131,7 +1168,7 @@ export default function HomePage() {
               </button>
               <button type="button"
                 onClick={() => setBlockConfirm({ targetId: reportModal.profileId, displayName: reportModal.displayName })}
-                className="w-full rounded-full bg-[#0071e3] text-white py-3 text-[13px] font-semibold hover:bg-[#0077ed] transition-colors">
+                className="w-full rounded-full bg-[#4A1D3F] text-white py-3 text-[13px] font-semibold hover:bg-[#3B1732] transition-colors">
                 {t.blockBtn}
               </button>
               <button type="button" onClick={() => { setReportModal(null); setReportReason(""); }}
@@ -1155,6 +1192,14 @@ export default function HomePage() {
       )}
 
       {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
+
+      {matchPartner && (
+        <MatchModal
+          me={myProfile}
+          partner={matchPartner}
+          onClose={() => setMatchPartner(null)}
+        />
+      )}
 
       {isFilterModalOpen && (
         <AdvancedFiltersModal

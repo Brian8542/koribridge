@@ -66,17 +66,17 @@ function AdvancedFiltersModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1d1d1f]/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E1B18]/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-t-[28px] sm:rounded-apple-lg w-full sm:max-w-lg max-h-[90vh] flex flex-col shadow-xl border border-[#d2d2d7]/40">
+      <div className="bg-white rounded-t-[28px] sm:rounded-apple-lg w-full sm:max-w-lg max-h-[90vh] flex flex-col shadow-xl border border-[#E5DED2]/40">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#d2d2d7]/40 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#E5DED2]/40 flex-shrink-0">
           <div>
-            <h2 className="text-[17px] font-bold text-[#1d1d1f]">{t.filterTitle}</h2>
-            <p className="text-[12px] text-[#86868b] mt-0.5">{t.filterIntro}</p>
+            <h2 className="text-[17px] font-bold text-[#1E1B18]">{t.filterTitle}</h2>
+            <p className="text-[12px] text-[#8A837B] mt-0.5">{t.filterIntro}</p>
           </div>
-          <button onClick={onClose} className="text-[#86868b] hover:text-[#1d1d1f] p-1 -mr-1 transition">
+          <button onClick={onClose} className="text-[#8A837B] hover:text-[#1E1B18] p-1 -mr-1 transition">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -88,7 +88,7 @@ function AdvancedFiltersModal({
 
           {/* 배우고 싶은 언어 */}
           <div>
-            <label className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide block mb-2">{t.filterLanguage}</label>
+            <label className="text-[12px] font-semibold text-[#8A837B] uppercase tracking-wide block mb-2">{t.filterLanguage}</label>
             <select
               className="input-field"
               value={pending.languageFilter}
@@ -101,7 +101,7 @@ function AdvancedFiltersModal({
 
           {/* 모국어 */}
           <div>
-            <label className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide block mb-2">{t.filterNativeLang}</label>
+            <label className="text-[12px] font-semibold text-[#8A837B] uppercase tracking-wide block mb-2">{t.filterNativeLang}</label>
             <select
               className="input-field"
               value={pending.nativeLangFilter}
@@ -114,7 +114,7 @@ function AdvancedFiltersModal({
 
           {/* 국적 */}
           <div>
-            <label className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide block mb-2">{t.filterNationality}</label>
+            <label className="text-[12px] font-semibold text-[#8A837B] uppercase tracking-wide block mb-2">{t.filterNationality}</label>
             <select
               className="input-field"
               value={pending.nationalityFilter}
@@ -127,7 +127,7 @@ function AdvancedFiltersModal({
 
           {/* 언어 수준 */}
           <div>
-            <label className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide block mb-2">{t.filterLevel}</label>
+            <label className="text-[12px] font-semibold text-[#8A837B] uppercase tracking-wide block mb-2">{t.filterLevel}</label>
             <div className="flex gap-2">
               {LEVELS.map((level) => (
                 <button
@@ -136,8 +136,8 @@ function AdvancedFiltersModal({
                   onClick={() => set("levelFilter", pending.levelFilter === level ? "" : level)}
                   className={`flex-1 py-2 rounded-full text-[13px] font-semibold transition-all ${
                     pending.levelFilter === level
-                      ? "bg-[#0071e3] text-white"
-                      : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                      ? "bg-[#4A1D3F] text-white"
+                      : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                   }`}
                 >
                   {levelLabel(level)}
@@ -149,9 +149,9 @@ function AdvancedFiltersModal({
           {/* 관심사 */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide">{t.filterInterests}</label>
+              <label className="text-[12px] font-semibold text-[#8A837B] uppercase tracking-wide">{t.filterInterests}</label>
               {pending.interestFilter.length > 0 && (
-                <span className="text-[11px] text-[#0071e3] font-semibold">
+                <span className="text-[11px] text-[#4A1D3F] font-semibold">
                   {pending.interestFilter.length}{t.interestsCount}
                 </span>
               )}
@@ -166,8 +166,8 @@ function AdvancedFiltersModal({
                     onClick={() => toggleInterest(interest)}
                     className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all duration-150 ${
                       active
-                        ? "bg-[#0071e3] text-white"
-                        : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                        ? "bg-[#4A1D3F] text-white"
+                        : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                     }`}
                   >
                     {interestLabel(interest)}
@@ -180,13 +180,13 @@ function AdvancedFiltersModal({
           {/* 인증 회원만 */}
           <div className="flex items-center justify-between py-1">
             <div>
-              <p className="text-[14px] font-semibold text-[#1d1d1f]">{t.filterVerifiedOnly}</p>
+              <p className="text-[14px] font-semibold text-[#1E1B18]">{t.filterVerifiedOnly}</p>
             </div>
             <button
               type="button"
               onClick={() => set("verifiedOnly", !pending.verifiedOnly)}
               className={`relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
-                pending.verifiedOnly ? "bg-[#0071e3]" : "bg-[#d2d2d7]"
+                pending.verifiedOnly ? "bg-[#4A1D3F]" : "bg-[#E5DED2]"
               }`}
             >
               <span
@@ -199,20 +199,20 @@ function AdvancedFiltersModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 pb-6 pt-4 border-t border-[#d2d2d7]/40 flex gap-3 flex-shrink-0">
+        <div className="px-6 pb-6 pt-4 border-t border-[#E5DED2]/40 flex gap-3 flex-shrink-0">
           <button
             onClick={handleReset}
-            className="flex-1 py-3 rounded-full bg-[#f5f5f7] text-[#1d1d1f] text-[14px] font-semibold hover:bg-[#e8e8ed] transition-colors"
+            className="flex-1 py-3 rounded-full bg-[#F3EEE6] text-[#1E1B18] text-[14px] font-semibold hover:bg-[#F3EEE6] transition-colors"
           >
             {t.filterResetBtn}
           </button>
           <button
             onClick={() => { onApply(pending); onClose(); }}
-            className="flex-[2] py-3 rounded-full bg-[#0071e3] text-white text-[14px] font-semibold hover:bg-[#0077ed] transition-colors relative"
+            className="flex-[2] py-3 rounded-full bg-[#4A1D3F] text-white text-[14px] font-semibold hover:bg-[#3B1732] transition-colors relative"
           >
             {t.filterApplyBtn}
             {activeCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#ff3b30] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#C4402E] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {activeCount}
               </span>
             )}

@@ -36,8 +36,8 @@ const PhoneMockup = React.memo(({ children, dark = false, className = "" }) => (
   <div className={`relative flex-shrink-0 ${className}`} style={{
     width: 260, height: 534,
     borderRadius: 44,
-    background: dark ? "#1c1c1e" : "#ffffff",
-    border: `10px solid ${dark ? "#3a3a3c" : "#d2d2d7"}`,
+    background: dark ? "#211C18" : "#ffffff",
+    border: `10px solid ${dark ? "#3E3934" : "#E5DED2"}`,
     boxShadow: "0 40px 88px rgba(0,0,0,0.20), 0 8px 24px rgba(0,0,0,0.10)",
     overflow: "hidden",
   }}>
@@ -53,29 +53,29 @@ const PhoneMockup = React.memo(({ children, dark = false, className = "" }) => (
 
 /* ─── Browse/swipe screen mockup ─── */
 const BrowseScreen = React.memo(() => (
-  <div className="h-full flex flex-col bg-[#f5f5f7]">
-    <div className="px-4 pt-3 pb-2 bg-white border-b border-[#f0f0f5]">
-      <p className="text-[11px] font-semibold text-[#1d1d1f] tracking-tight">파트너 탐색</p>
+  <div className="h-full flex flex-col bg-[#F3EEE6]">
+    <div className="px-4 pt-3 pb-2 bg-white border-b border-[#F3EEE6]">
+      <p className="text-[11px] font-semibold text-[#1E1B18] tracking-tight">파트너 탐색</p>
     </div>
     <div className="flex-1 p-3 flex flex-col gap-2 overflow-hidden">
       {[
-        { initials: "LN", grad: "from-blue-400 to-indigo-500", name: "Linh N.", flag: "🇻🇳", level: "초급", levelColor: "text-emerald-700 bg-emerald-50", tags: ["K-pop","드라마"] },
-        { initials: "DK", grad: "from-amber-400 to-orange-400", name: "Daniyal K.", flag: "🇰🇿", level: "중급", levelColor: "text-amber-700 bg-amber-50", tags: ["음식","여행"] },
-        { initials: "MS", grad: "from-rose-400 to-pink-500", name: "Maria S.", flag: "🇧🇷", level: "초급", levelColor: "text-emerald-700 bg-emerald-50", tags: ["K-drama"] },
+        { initials: "LN", grad: "bg-[#7D4E6E]", name: "Linh N.", flag: "베트남", level: "초급", levelColor: "text-emerald-700 bg-emerald-50", tags: ["K-pop","드라마"] },
+        { initials: "DK", grad: "bg-[#B0764A]", name: "Daniyal K.", flag: "카자흐스탄", level: "중급", levelColor: "text-amber-700 bg-amber-50", tags: ["음식","여행"] },
+        { initials: "MS", grad: "bg-[#E8604C]", name: "Maria S.", flag: "브라질", level: "초급", levelColor: "text-emerald-700 bg-emerald-50", tags: ["K-drama"] },
       ].map((p) => (
         <div key={p.name} className="bg-white rounded-[18px] p-3 flex items-center gap-2.5 shadow-xs">
-          <div className={`w-9 h-9 rounded-[12px] bg-gradient-to-br ${p.grad} flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0`}>
+          <div className={`w-9 h-9 rounded-[12px] ${p.grad} flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0`}>
             {p.initials}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <span className="text-[11px] font-semibold text-[#1d1d1f]">{p.name}</span>
-              <span className="text-[11px]">{p.flag}</span>
+              <span className="text-[11px] font-semibold text-[#1E1B18]">{p.name}</span>
+              <span className="text-[9px] text-[#8A837B]">{p.flag}</span>
               <span className={`ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${p.levelColor}`}>{p.level}</span>
             </div>
             <div className="flex gap-1 mt-1 flex-wrap">
               {p.tags.map(tag => (
-                <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-[#f5f5f7] text-[#6e6e73] rounded-full">{tag}</span>
+                <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-[#F3EEE6] text-[#6E675F] rounded-full">{tag}</span>
               ))}
             </div>
           </div>
@@ -83,7 +83,7 @@ const BrowseScreen = React.memo(() => (
       ))}
     </div>
     <div className="px-3 pb-3">
-      <div className="bg-[#0071e3] rounded-full py-2 text-center text-[11px] font-semibold text-white">대화 시작하기</div>
+      <div className="bg-[#4A1D3F] rounded-full py-2 text-center text-[11px] font-semibold text-white">대화 시작하기</div>
     </div>
   </div>
 ));
@@ -91,29 +91,29 @@ const BrowseScreen = React.memo(() => (
 /* ─── Chat screen mockup ─── */
 const ChatScreen = React.memo(() => (
   <div className="h-full flex flex-col bg-white">
-    <div className="px-4 py-2.5 border-b border-[#f5f5f7] flex items-center gap-2">
-      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-[10px] font-bold">A</div>
+    <div className="px-4 py-2.5 border-b border-[#F3EEE6] flex items-center gap-2">
+      <div className="w-7 h-7 rounded-full bg-[#7D4E6E] flex items-center justify-center text-white text-[10px] font-bold">A</div>
       <div>
-        <p className="text-[11px] font-semibold text-[#1d1d1f]">Aisha K. 🇰🇿</p>
+        <p className="text-[11px] font-semibold text-[#1E1B18]">Aisha K.</p>
         <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#34c759]" />
-          <p className="text-[9px] text-[#86868b]">온라인</p>
+          <div className="w-1.5 h-1.5 rounded-full bg-[#5B8A72]" />
+          <p className="text-[9px] text-[#8A837B]">온라인</p>
         </div>
       </div>
     </div>
     <div className="flex-1 p-3 space-y-2 overflow-hidden">
       <div className="flex justify-end">
-        <div className="bg-[#0071e3] text-white text-[10px] leading-relaxed rounded-[14px] rounded-tr-[4px] px-2.5 py-1.5 max-w-[150px]">
-          안녕하세요! 한국어 연습할 수 있을까요? 😊
+        <div className="bg-[#4A1D3F] text-white text-[10px] leading-relaxed rounded-[14px] rounded-tr-[4px] px-2.5 py-1.5 max-w-[150px]">
+          안녕하세요! 한국어 연습할 수 있을까요?
         </div>
       </div>
       <div className="flex justify-start">
-        <div className="bg-[#f5f5f7] text-[#1d1d1f] text-[10px] leading-relaxed rounded-[14px] rounded-tl-[4px] px-2.5 py-1.5 max-w-[150px]">
-          물론이죠! 저도 카자흐어 배우고 싶어요 ✨
+        <div className="bg-[#F3EEE6] text-[#1E1B18] text-[10px] leading-relaxed rounded-[14px] rounded-tl-[4px] px-2.5 py-1.5 max-w-[150px]">
+          물론이죠! 저도 카자흐어 배우고 싶어요
         </div>
       </div>
       <div className="flex justify-end">
-        <div className="bg-[#0071e3] rounded-[14px] rounded-tr-[4px] px-2.5 py-1.5 flex items-center gap-1.5">
+        <div className="bg-[#4A1D3F] rounded-[14px] rounded-tr-[4px] px-2.5 py-1.5 flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center flex-shrink-0">
             <div className="w-0 h-0 border-t-[4px] border-b-[4px] border-l-[6px] border-transparent border-l-white ml-px" />
           </div>
@@ -126,21 +126,21 @@ const ChatScreen = React.memo(() => (
         </div>
       </div>
       <div className="flex justify-start">
-        <div className="bg-[#f5f5f7] text-[#1d1d1f] text-[10px] leading-relaxed rounded-[14px] rounded-tl-[4px] px-2.5 py-1.5 max-w-[150px]">
-          발음이 정말 좋아요! 👏
+        <div className="bg-[#F3EEE6] text-[#1E1B18] text-[10px] leading-relaxed rounded-[14px] rounded-tl-[4px] px-2.5 py-1.5 max-w-[150px]">
+          발음이 정말 좋아요!
         </div>
       </div>
       <div className="flex justify-start">
-        <div className="border border-[#0071e3]/30 bg-[#0071e3]/5 rounded-[14px] rounded-tl-[4px] px-2.5 py-1.5 max-w-[170px]">
-          <p className="text-[9px] text-[#0071e3] font-semibold mb-0.5">교정 제안</p>
-          <p className="text-[9px] text-[#1d1d1f] line-through opacity-50">나는 학교에 갔다</p>
-          <p className="text-[9px] text-[#1d1d1f] font-medium">학교에 갔어요 ✓</p>
+        <div className="border border-[#4A1D3F]/30 bg-[#4A1D3F]/5 rounded-[14px] rounded-tl-[4px] px-2.5 py-1.5 max-w-[170px]">
+          <p className="text-[9px] text-[#4A1D3F] font-semibold mb-0.5">교정 제안</p>
+          <p className="text-[9px] text-[#1E1B18] line-through opacity-50">나는 학교에 갔다</p>
+          <p className="text-[9px] text-[#1E1B18] font-medium">학교에 갔어요 ✓</p>
         </div>
       </div>
     </div>
-    <div className="px-3 py-2 border-t border-[#f5f5f7] flex items-center gap-2">
-      <div className="flex-1 bg-[#f5f5f7] rounded-full px-3 py-1.5 text-[10px] text-[#86868b]">메시지 입력...</div>
-      <div className="w-6 h-6 rounded-full bg-[#0071e3] flex items-center justify-center flex-shrink-0">
+    <div className="px-3 py-2 border-t border-[#F3EEE6] flex items-center gap-2">
+      <div className="flex-1 bg-[#F3EEE6] rounded-full px-3 py-1.5 text-[10px] text-[#8A837B]">메시지 입력...</div>
+      <div className="w-6 h-6 rounded-full bg-[#4A1D3F] flex items-center justify-center flex-shrink-0">
         <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
         </svg>
@@ -151,18 +151,18 @@ const ChatScreen = React.memo(() => (
 
 /* ─── Safety / verified profile screen ─── */
 const SafetyScreen = React.memo(() => (
-  <div className="h-full flex flex-col bg-[#f5f5f7] p-4">
+  <div className="h-full flex flex-col bg-[#F3EEE6] p-4">
     <div className="bg-white rounded-[22px] p-4 flex flex-col items-center gap-3">
       <div className="relative">
-        <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-2xl font-bold">L</div>
-        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0071e3] border-2 border-white flex items-center justify-center">
+        <div className="w-16 h-16 rounded-[20px] bg-[#5B8A72] flex items-center justify-center text-white text-2xl font-bold">L</div>
+        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#4A1D3F] border-2 border-white flex items-center justify-center">
           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
       </div>
       <div className="text-center">
-        <p className="text-[13px] font-bold text-[#1d1d1f]">Linh Nguyen 🇻🇳</p>
+        <p className="text-[13px] font-bold text-[#1E1B18]">Linh Nguyen</p>
         <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-semibold rounded-full">
           <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -172,15 +172,24 @@ const SafetyScreen = React.memo(() => (
       </div>
       <div className="w-full space-y-2">
         {[
-          { icon: "🛡️", label: "신고 시스템", desc: "부적절한 사용자 즉시 신고" },
-          { icon: "🚫", label: "차단 기능", desc: "원하지 않는 연락 차단" },
-          { icon: "✉️", label: "이메일 인증", desc: "허위 프로필 원천 차단" },
+          {
+            icon: <svg className="w-4 h-4 text-[#4A1D3F]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>,
+            label: "신고 시스템", desc: "부적절한 사용자 즉시 신고",
+          },
+          {
+            icon: <svg className="w-4 h-4 text-[#4A1D3F]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728A9 9 0 015.636 5.636" /></svg>,
+            label: "차단 기능", desc: "원하지 않는 연락 차단",
+          },
+          {
+            icon: <svg className="w-4 h-4 text-[#4A1D3F]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>,
+            label: "이메일 인증", desc: "허위 프로필 원천 차단",
+          },
         ].map(item => (
-          <div key={item.label} className="flex items-center gap-2.5 bg-[#f5f5f7] rounded-[12px] px-3 py-2">
-            <span className="text-base flex-shrink-0">{item.icon}</span>
+          <div key={item.label} className="flex items-center gap-2.5 bg-[#F3EEE6] rounded-[12px] px-3 py-2">
+            <span className="flex-shrink-0">{item.icon}</span>
             <div>
-              <p className="text-[10px] font-semibold text-[#1d1d1f]">{item.label}</p>
-              <p className="text-[9px] text-[#86868b]">{item.desc}</p>
+              <p className="text-[10px] font-semibold text-[#1E1B18]">{item.label}</p>
+              <p className="text-[9px] text-[#8A837B]">{item.desc}</p>
             </div>
           </div>
         ))}
@@ -189,9 +198,10 @@ const SafetyScreen = React.memo(() => (
   </div>
 ));
 
-const MARQUEE_FLAGS = [
-  "🇰🇷","🇻🇳","🇰🇿","🇺🇿","🇵🇭","🇮🇩","🇲🇾","🇹🇭","🇨🇳","🇯🇵","🇧🇷",
-  "🇮🇳","🇺🇸","🇫🇷","🇩🇪","🇬🇧","🇲🇽","🇸🇦","🇳🇱","🇷🇺","🇺🇦","🇲🇳",
+const MARQUEE_COUNTRIES = [
+  "Korea", "Vietnam", "Kazakhstan", "Uzbekistan", "Philippines", "Indonesia",
+  "Malaysia", "Thailand", "China", "Japan", "Brazil", "India", "USA",
+  "France", "Germany", "UK", "Mexico", "Netherlands", "Ukraine", "Mongolia",
 ];
 
 export default function SplashScreen() {
@@ -223,7 +233,7 @@ export default function SplashScreen() {
   ];
 
   return (
-    <div className="bg-white text-[#1d1d1f] min-h-screen overflow-x-hidden">
+    <div className="bg-[#FAF7F2] text-[#1E1B18] min-h-screen overflow-x-hidden">
       <Helmet>
         <title>KoriBridge — {locale === "ko" ? "한국과 세계를 잇다" : "Connect Korea to the World"}</title>
         <meta name="description" content={locale === "ko"
@@ -234,28 +244,28 @@ export default function SplashScreen() {
       {/* ── NAV ── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/85 backdrop-blur-xl border-b border-[#d2d2d7]/50"
+          ? "bg-white/85 backdrop-blur-xl border-b border-[#E5DED2]/50"
           : "bg-transparent"
       }`}>
         <div className="max-w-[980px] mx-auto px-5 h-14 flex items-center justify-between gap-4">
           <button onClick={goToAuth} className="flex items-center gap-2.5 flex-shrink-0 group">
-            <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-[11px] font-black">K</span>
+            <div className="w-7 h-7 rounded-full bg-[#4A1D3F] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#FAF7F2] text-[11px] font-display">K</span>
             </div>
-            <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">KoriBridge</span>
+            <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1E1B18] group-hover:text-[#4A1D3F] transition-colors">KoriBridge</span>
           </button>
 
           <div className="hidden md:flex items-center gap-6">
-            <button onClick={goPricing} className="text-[13px] text-[#86868b] hover:text-[#1d1d1f] transition-colors">{locale === "ko" ? "프리미엄" : "Premium"}</button>
-            <button onClick={goToTerms} className="text-[13px] text-[#86868b] hover:text-[#1d1d1f] transition-colors">{t.terms}</button>
+            <button onClick={goPricing} className="text-[13px] text-[#8A837B] hover:text-[#1E1B18] transition-colors">{locale === "ko" ? "프리미엄" : "Premium"}</button>
+            <button onClick={goToTerms} className="text-[13px] text-[#8A837B] hover:text-[#1E1B18] transition-colors">{t.terms}</button>
           </div>
 
           <div className="flex items-center gap-3 flex-shrink-0">
             <LanguageSelector />
-            <button onClick={goToAuth} className="hidden sm:block text-[13px] text-[#86868b] hover:text-[#1d1d1f] transition-colors">{t.login}</button>
+            <button onClick={goToAuth} className="hidden sm:block text-[13px] text-[#8A837B] hover:text-[#1E1B18] transition-colors">{t.login}</button>
             <button
               onClick={goToAuth}
-              className="px-4 py-1.5 bg-[#0071e3] text-white text-[13px] font-medium rounded-full hover:bg-[#0077ed] transition-all duration-200 active:scale-[0.97]"
+              className="px-4 py-1.5 bg-[#4A1D3F] text-white text-[13px] font-medium rounded-full hover:bg-[#3B1732] transition-all duration-200 active:scale-[0.97]"
             >
               {locale === "ko" ? "시작하기" : "Get started"}
             </button>
@@ -267,15 +277,15 @@ export default function SplashScreen() {
       <section className="pt-32 pb-12 px-5 bg-white text-center">
         <div className="max-w-[980px] mx-auto">
           <div
-            className="inline-flex items-center gap-1.5 text-[#0071e3] text-[13px] font-medium mb-6"
+            className="inline-flex items-center gap-1.5 text-[#4A1D3F] text-[13px] font-medium mb-6"
             style={{ animation: "fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.05s both" }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#34c759] flex-shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#5B8A72] flex-shrink-0" />
             {locale === "ko" ? "완전 무료 · 이메일 인증 · 광고 없음" : "Completely free · Email verified · No ads"}
           </div>
 
           <h1
-            className="font-bold tracking-[-0.04em] leading-[1.07] text-[#1d1d1f] text-balance"
+            className="font-display leading-[1.14] text-[#1E1B18] text-balance"
             style={{
               fontSize: "clamp(2.8rem, 7vw, 5rem)",
               animation: "fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.10s both",
@@ -289,7 +299,7 @@ export default function SplashScreen() {
           </h1>
 
           <p
-            className="mt-6 text-[19px] text-[#86868b] leading-relaxed max-w-[560px] mx-auto text-balance"
+            className="mt-6 text-[19px] text-[#8A837B] leading-relaxed max-w-[560px] mx-auto text-balance"
             style={{ animation: "fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.18s both" }}
           >
             {locale === "ko"
@@ -303,13 +313,13 @@ export default function SplashScreen() {
           >
             <button
               onClick={goToAuth}
-              className="px-7 py-3 bg-[#0071e3] text-white text-[17px] font-medium rounded-full hover:bg-[#0077ed] transition-all duration-200 active:scale-[0.97]"
+              className="px-7 py-3 bg-[#4A1D3F] text-white text-[17px] font-medium rounded-full hover:bg-[#3B1732] transition-all duration-200 active:scale-[0.97]"
             >
               {locale === "ko" ? "지금 무료로 시작하기" : "Start for Free"}
             </button>
             <button
               onClick={goToAuth}
-              className="text-[17px] text-[#0071e3] hover:underline transition-colors flex items-center gap-1"
+              className="text-[17px] text-[#4A1D3F] hover:underline transition-colors flex items-center gap-1"
             >
               {locale === "ko" ? "파트너 둘러보기" : "Browse Partners"}
               <span className="text-[20px] leading-none">›</span>
@@ -329,42 +339,42 @@ export default function SplashScreen() {
       </section>
 
       {/* ── FLAG MARQUEE ── */}
-      <section className="py-4 bg-[#f5f5f7] overflow-hidden border-y border-[#d2d2d7]/30">
+      <section className="py-4 bg-[#F3EEE6] overflow-hidden border-y border-[#E5DED2]/30">
         <div
           className="flex items-center"
           style={{ animation: "marquee 30s linear infinite", width: "max-content" }}
         >
-          {[...MARQUEE_FLAGS, ...MARQUEE_FLAGS].map((f, i) => (
-            <span key={i} className="text-2xl flex-shrink-0 px-4 leading-none select-none opacity-60">{f}</span>
+          {[...MARQUEE_COUNTRIES, ...MARQUEE_COUNTRIES].map((c, i) => (
+            <span key={i} className="font-display text-[17px] text-[#8A837B] flex-shrink-0 px-6 leading-none select-none">{c}</span>
           ))}
         </div>
-        <p className="text-center text-[12px] text-[#86868b] tracking-[0.10em] uppercase mt-3">
+        <p className="text-center text-[12px] text-[#8A837B] tracking-[0.10em] uppercase mt-3">
           {locale === "ko" ? "127개국 멤버들과 함께하세요" : "Members from 127 countries"}
         </p>
       </section>
 
       {/* ── FEATURE 1: 파트너 매칭 (f5f5f7 bg) ── */}
-      <section className="py-24 md:py-36 px-5 bg-[#f5f5f7]">
+      <section className="py-24 md:py-36 px-5 bg-[#F3EEE6]">
         <div className="max-w-[980px] mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <FadeInSection>
               <p className="section-label mb-4">
                 {locale === "ko" ? "파트너 매칭" : "Partner Matching"}
               </p>
-              <h2 className="font-bold tracking-[-0.035em] leading-[1.08] text-[#1d1d1f]"
+              <h2 className="font-display leading-[1.16] text-[#1E1B18]"
                 style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
                 {locale === "ko"
                   ? <>딱 맞는 파트너를<br />바로 찾습니다.</>
                   : <>Find the perfect<br />partner instantly.</>}
               </h2>
-              <p className="mt-5 text-[17px] text-[#86868b] leading-relaxed">
+              <p className="mt-5 text-[17px] text-[#8A837B] leading-relaxed">
                 {locale === "ko"
                   ? "국적, 모국어, 학습 언어, 관심사를 기반으로 AI가 가장 잘 맞는 파트너를 추천합니다."
                   : "AI recommends the best-matched partners based on nationality, native language, learning goal, and interests."}
               </p>
               <button
                 onClick={goToAuth}
-                className="mt-7 inline-flex items-center gap-1 text-[17px] text-[#0071e3] hover:underline transition-colors"
+                className="mt-7 inline-flex items-center gap-1 text-[17px] text-[#4A1D3F] hover:underline transition-colors"
               >
                 {locale === "ko" ? "파트너 탐색하기" : "Explore partners"}
                 <span className="text-[20px] leading-none">›</span>
@@ -394,13 +404,13 @@ export default function SplashScreen() {
               <p className="section-label mb-4">
                 {locale === "ko" ? "실시간 채팅" : "Real-Time Chat"}
               </p>
-              <h2 className="font-bold tracking-[-0.035em] leading-[1.08] text-[#1d1d1f]"
+              <h2 className="font-display leading-[1.16] text-[#1E1B18]"
                 style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
                 {locale === "ko"
                   ? <>대화하고, 듣고,<br />바로 성장하세요.</>
                   : <>Chat, listen,<br />and grow together.</>}
               </h2>
-              <p className="mt-5 text-[17px] text-[#86868b] leading-relaxed">
+              <p className="mt-5 text-[17px] text-[#8A837B] leading-relaxed">
                 {locale === "ko"
                   ? "텍스트 채팅부터 음성 메모, 이미지 공유까지. 파트너가 내 문장을 직접 교정해 주고 번역도 제공합니다."
                   : "From text and voice memos to image sharing. Your partner corrects your sentences directly and provides translations."}
@@ -412,12 +422,12 @@ export default function SplashScreen() {
                   { label: locale === "ko" ? "교정 제안 & 즉시 번역" : "Correction suggestions & instant translation" },
                 ].map(f => (
                   <div key={f.label} className="flex items-center gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#0071e3]/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-2.5 h-2.5 text-[#0071e3]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <div className="w-5 h-5 rounded-full bg-[#4A1D3F]/10 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-2.5 h-2.5 text-[#4A1D3F]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                       </svg>
                     </div>
-                    <span className="text-[15px] text-[#1d1d1f]">{f.label}</span>
+                    <span className="text-[15px] text-[#1E1B18]">{f.label}</span>
                   </div>
                 ))}
               </div>
@@ -427,27 +437,27 @@ export default function SplashScreen() {
       </section>
 
       {/* ── FEATURE 3: 안전 & 인증 (f5f5f7 bg) ── */}
-      <section className="py-24 md:py-36 px-5 bg-[#f5f5f7]">
+      <section className="py-24 md:py-36 px-5 bg-[#F3EEE6]">
         <div className="max-w-[980px] mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <FadeInSection>
               <p className="section-label mb-4">
                 {locale === "ko" ? "안전 & 신뢰" : "Safety & Trust"}
               </p>
-              <h2 className="font-bold tracking-[-0.035em] leading-[1.08] text-[#1d1d1f]"
+              <h2 className="font-display leading-[1.16] text-[#1E1B18]"
                 style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
                 {locale === "ko"
                   ? <>신뢰할 수 있는<br />사람들만 모입니다.</>
                   : <>Only people you<br />can truly trust.</>}
               </h2>
-              <p className="mt-5 text-[17px] text-[#86868b] leading-relaxed">
+              <p className="mt-5 text-[17px] text-[#8A837B] leading-relaxed">
                 {locale === "ko"
                   ? "이메일 인증으로 허위 프로필을 원천 차단합니다. 부적절한 행동은 즉시 신고·차단할 수 있습니다."
                   : "Email verification blocks fake profiles at the source. Report and block inappropriate users instantly."}
               </p>
               <button
                 onClick={goToAuth}
-                className="mt-7 inline-flex items-center gap-1 text-[17px] text-[#0071e3] hover:underline transition-colors"
+                className="mt-7 inline-flex items-center gap-1 text-[17px] text-[#4A1D3F] hover:underline transition-colors"
               >
                 {locale === "ko" ? "지금 인증하기" : "Get verified now"}
                 <span className="text-[20px] leading-none">›</span>
@@ -468,7 +478,7 @@ export default function SplashScreen() {
         <div className="max-w-[980px] mx-auto text-center">
           <FadeInSection>
             <p className="section-label mb-4">{locale === "ko" ? "시작 방법" : "How It Works"}</p>
-            <h2 className="font-bold tracking-[-0.035em] leading-[1.08] text-[#1d1d1f]"
+            <h2 className="font-display leading-[1.16] text-[#1E1B18]"
               style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
               {t.howTitle}
             </h2>
@@ -487,13 +497,13 @@ export default function SplashScreen() {
               },
             ].map((step, i) => (
               <FadeInSection key={step.num} delay={i * 100}>
-                <div className="text-center p-6 bg-[#f5f5f7] rounded-apple-lg h-full">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#1d1d1f] mx-auto mb-5 shadow-card">
+                <div className="text-center p-6 bg-[#F3EEE6] rounded-apple-lg h-full">
+                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#1E1B18] mx-auto mb-5 shadow-card">
                     {step.icon}
                   </div>
-                  <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-widest mb-3">STEP {step.num}</p>
-                  <h3 className="text-[17px] font-semibold text-[#1d1d1f] mb-2">{step.title}</h3>
-                  <p className="text-[14px] text-[#86868b] leading-relaxed">{step.desc}</p>
+                  <p className="text-[11px] font-semibold text-[#8A837B] uppercase tracking-widest mb-3">STEP {step.num}</p>
+                  <h3 className="text-[17px] font-semibold text-[#1E1B18] mb-2">{step.title}</h3>
+                  <p className="text-[14px] text-[#8A837B] leading-relaxed">{step.desc}</p>
                 </div>
               </FadeInSection>
             ))}
@@ -502,11 +512,11 @@ export default function SplashScreen() {
       </section>
 
       {/* ── STATS (f5f5f7 bg) ── */}
-      <section className="py-24 md:py-32 px-5 bg-[#f5f5f7]">
+      <section className="py-24 md:py-32 px-5 bg-[#F3EEE6]">
         <div className="max-w-[980px] mx-auto text-center">
           <FadeInSection>
             <p className="section-label mb-4">{t.statsSectionTag}</p>
-            <h2 className="font-bold tracking-[-0.035em] leading-[1.08] text-[#1d1d1f]"
+            <h2 className="font-display leading-[1.16] text-[#1E1B18]"
               style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
               {t.statsSectionTitle}
             </h2>
@@ -514,8 +524,8 @@ export default function SplashScreen() {
 
           {statsLoading ? (
             <div className="mt-12 flex items-center justify-center gap-3">
-              <div className="w-5 h-5 border-2 border-[#d2d2d7] border-t-[#86868b] rounded-full animate-spin" />
-              <span className="text-[15px] text-[#86868b]">{t.loading}</span>
+              <div className="w-5 h-5 border-2 border-[#E5DED2] border-t-[#8A837B] rounded-full animate-spin" />
+              <span className="text-[15px] text-[#8A837B]">{t.loading}</span>
             </div>
           ) : (
             <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -527,8 +537,8 @@ export default function SplashScreen() {
               ].map(stat => (
                 <FadeInSection key={stat.label}>
                   <div className="bg-white rounded-apple-lg p-6">
-                    <p className="text-[36px] font-bold tracking-[-0.03em] text-[#1d1d1f]">{stat.value}</p>
-                    <p className="text-[14px] text-[#86868b] mt-1">{stat.label}</p>
+                    <p className="text-[36px] font-bold tracking-[-0.03em] text-[#1E1B18]">{stat.value}</p>
+                    <p className="text-[14px] text-[#8A837B] mt-1">{stat.label}</p>
                   </div>
                 </FadeInSection>
               ))}
@@ -542,7 +552,7 @@ export default function SplashScreen() {
         <div className="max-w-[980px] mx-auto">
           <FadeInSection className="text-center mb-16">
             <p className="section-label mb-4">{t.reviewsSectionTag}</p>
-            <h2 className="font-bold tracking-[-0.035em] leading-[1.08] text-[#1d1d1f]"
+            <h2 className="font-display leading-[1.16] text-[#1E1B18]"
               style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
               {t.reviewsSectionTitle}
             </h2>
@@ -550,34 +560,34 @@ export default function SplashScreen() {
 
           {/* Apple-style big pull quote */}
           <FadeInSection className="mb-16 text-center">
-            <blockquote className="font-semibold tracking-[-0.025em] text-[#1d1d1f] max-w-[640px] mx-auto"
+            <blockquote className="font-display text-[#1E1B18] max-w-[640px] mx-auto"
               style={{ fontSize: "clamp(1.4rem, 3vw, 2rem)", lineHeight: 1.25 }}>
               {locale === "ko"
                 ? "\"KoriBridge가 없었으면 불가능했을 거예요. 3개월 만에 한국어로 자유롭게 대화할 수 있게 됐어요.\""
                 : "\"Without KoriBridge it wouldn't have been possible. In 3 months I can talk freely in Korean.\""}
             </blockquote>
-            <p className="mt-5 text-[15px] text-[#86868b]">Sofia K. · {locale === "ko" ? "카자흐스탄" : "Kazakhstan"}</p>
+            <p className="mt-5 text-[15px] text-[#8A837B]">Sofia K. · {locale === "ko" ? "카자흐스탄" : "Kazakhstan"}</p>
           </FadeInSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {REVIEWS.map((item, i) => (
               <FadeInSection key={item.name} delay={i * 80}>
-                <div className="bg-[#f5f5f7] rounded-apple-lg p-6 h-full flex flex-col">
+                <div className="bg-[#F3EEE6] rounded-apple-lg p-6 h-full flex flex-col">
                   <div className="flex gap-0.5 mb-4">
                     {Array.from({ length: item.rating }).map((_, ri) => (
-                      <svg key={ri} className="w-4 h-4 text-[#ff9f0a] fill-current" viewBox="0 0 20 20">
+                      <svg key={ri} className="w-4 h-4 text-[#D99A3D] fill-current" viewBox="0 0 20 20">
                         <path d="M10 15.27L16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z" />
                       </svg>
                     ))}
                   </div>
-                  <p className="text-[15px] text-[#1d1d1f] leading-relaxed flex-1">"{item.text}"</p>
-                  <div className="flex items-center gap-3 mt-5 pt-5 border-t border-[#d2d2d7]/50">
-                    <div className="w-8 h-8 rounded-full bg-[#d2d2d7] flex items-center justify-center text-xs font-bold text-[#6e6e73] flex-shrink-0">
+                  <p className="text-[15px] text-[#1E1B18] leading-relaxed flex-1">"{item.text}"</p>
+                  <div className="flex items-center gap-3 mt-5 pt-5 border-t border-[#E5DED2]/50">
+                    <div className="w-8 h-8 rounded-full bg-[#E5DED2] flex items-center justify-center text-xs font-bold text-[#6E675F] flex-shrink-0">
                       {item.name[0]}
                     </div>
                     <div>
-                      <p className="text-[13px] font-semibold text-[#1d1d1f]">{item.name}</p>
-                      <p className="text-[12px] text-[#86868b]">{item.country}</p>
+                      <p className="text-[13px] font-semibold text-[#1E1B18]">{item.name}</p>
+                      <p className="text-[12px] text-[#8A837B]">{item.country}</p>
                     </div>
                   </div>
                 </div>
@@ -588,43 +598,43 @@ export default function SplashScreen() {
       </section>
 
       {/* ── CTA (dark bg) ── */}
-      <section className="py-28 md:py-36 px-5 bg-[#1d1d1f]">
+      <section className="py-28 md:py-36 px-5 bg-[#4A1D3F]">
         <FadeInSection className="max-w-[640px] mx-auto text-center">
-          <h2 className="font-bold tracking-[-0.04em] leading-[1.07] text-white"
+          <h2 className="font-display leading-[1.14] text-[#FAF7F2]"
             style={{ fontSize: "clamp(2.4rem, 5vw, 3.6rem)" }}>
             {locale === "ko"
               ? <>오늘, 첫 대화를<br />시작해보세요.</>
               : <>Start your first<br />conversation today.</>}
           </h2>
-          <p className="mt-6 text-[17px] text-[#86868b] leading-relaxed max-w-sm mx-auto">
+          <p className="mt-6 text-[17px] text-[#FAF7F2]/70 leading-relaxed max-w-sm mx-auto">
             {locale === "ko"
               ? "이메일 인증 후 바로 매칭이 시작됩니다. 완전 무료, 광고 없음."
               : "Matching starts the moment you verify. Completely free, no ads."}
           </p>
           <button
             onClick={goToAuth}
-            className="mt-9 px-8 py-3.5 bg-[#0071e3] text-white text-[17px] font-medium rounded-full hover:bg-[#0077ed] transition-all duration-200 active:scale-[0.97]"
+            className="mt-9 px-8 py-3.5 bg-[#FAF7F2] text-[#4A1D3F] text-[17px] font-semibold rounded-full hover:bg-white transition-all duration-200 active:scale-[0.98]"
           >
             {locale === "ko" ? "무료로 시작하기" : "Start for Free"}
           </button>
-          <p className="mt-4 text-[13px] text-[#515154]">
+          <p className="mt-4 text-[13px] text-[#FAF7F2]/50">
             {locale === "ko" ? "신용카드 불필요 · 광고 없음 · 언제든 탈퇴 가능" : "No credit card · No ads · Leave anytime"}
           </p>
         </FadeInSection>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-[#f5f5f7] border-t border-[#d2d2d7]/50 px-5 pt-12 pb-10">
+      <footer className="bg-[#F3EEE6] border-t border-[#E5DED2]/50 px-5 pt-12 pb-10">
         <div className="max-w-[980px] mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-md bg-primary-500 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-[10px] font-bold">K</span>
+                <div className="w-6 h-6 rounded-full bg-[#4A1D3F] flex items-center justify-center flex-shrink-0">
+                  <span className="text-[#FAF7F2] text-[10px] font-display">K</span>
                 </div>
-                <span className="font-semibold text-[13px] text-[#1d1d1f]">KoriBridge</span>
+                <span className="font-semibold text-[13px] text-[#1E1B18]">KoriBridge</span>
               </div>
-              <p className="text-[12px] text-[#86868b] leading-relaxed">{t.footerDesc}</p>
+              <p className="text-[12px] text-[#8A837B] leading-relaxed">{t.footerDesc}</p>
             </div>
 
             {[
@@ -633,7 +643,7 @@ export default function SplashScreen() {
               { title: t.footerCol3, links: t.footerLinks3 },
             ].map((col) => (
               <div key={col.title}>
-                <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-4">{col.title}</p>
+                <p className="text-[11px] font-semibold text-[#8A837B] uppercase tracking-wider mb-4">{col.title}</p>
                 <ul className="space-y-2.5">
                   {col.links.map((link, li) => {
                     let action;
@@ -642,7 +652,7 @@ export default function SplashScreen() {
                     else if (locale === "ko" ? link === "프리미엄" : link === "Premium") action = goPricing;
                     return (
                       <li key={li}>
-                        <button onClick={action} className="text-[12px] text-[#86868b] hover:text-[#1d1d1f] transition-colors duration-150">
+                        <button onClick={action} className="text-[12px] text-[#8A837B] hover:text-[#1E1B18] transition-colors duration-150">
                           {link}
                         </button>
                       </li>
@@ -653,9 +663,9 @@ export default function SplashScreen() {
             ))}
           </div>
 
-          <div className="pt-6 border-t border-[#d2d2d7]/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-[12px] text-[#86868b]">{t.footerCopy}</p>
-            <p className="text-[12px] text-[#aeaeb2]">{t.footerMade}</p>
+          <div className="pt-6 border-t border-[#E5DED2]/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[12px] text-[#8A837B]">{t.footerCopy}</p>
+            <p className="text-[12px] text-[#B3AB9F]">{t.footerMade}</p>
           </div>
         </div>
       </footer>

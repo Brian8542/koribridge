@@ -131,7 +131,7 @@ export default function AdminPage() {
   if (authLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-surface-bg">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-2 border-[#d2d2d7] border-t-[#0071e3] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-[#E5DED2] border-t-[#4A1D3F] rounded-full animate-spin" />
         <p className="text-sm text-neutral-400 font-medium">{t.adminCheckingAuth}</p>
       </div>
     </div>
@@ -145,7 +145,7 @@ export default function AdminPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
           </svg>
         </div>
-        <p className="text-[#0071e3] font-bold text-[17px]">{t.adminNoAccess}</p>
+        <p className="text-[#4A1D3F] font-bold text-[17px]">{t.adminNoAccess}</p>
         <p className="text-sm text-neutral-500 mt-2">{t.adminNoAccessDesc}</p>
         <button onClick={() => nav("/home")} className="mt-6 btn-primary px-6 py-3 text-sm w-full">{t.adminGoHome}</button>
       </div>
@@ -169,8 +169,8 @@ export default function AdminPage() {
       <Helmet><title>KoriBridge - {t.adminTitle}</title></Helmet>
       <div className="bg-white border-b border-neutral-150 shadow-nav px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
         <button onClick={() => nav("/home")} className="text-neutral-500 hover:text-neutral-900 transition text-sm font-semibold">{t.adminHomeBtn}</button>
-        <h1 className="font-extrabold text-base text-neutral-900 flex-1">{t.adminTitle}</h1>
-        <span className="text-xs bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 px-2.5 py-1 rounded-full font-bold">ADMIN</span>
+        <h1 className="font-display text-[17px] text-neutral-900 flex-1">{t.adminTitle}</h1>
+        <span className="text-xs bg-[#F1E9EE] text-[#4A1D3F] border border-[#4A1D3F]/20 px-2.5 py-1 rounded-full font-bold">ADMIN</span>
       </div>
 
       <div className="bg-white border-b border-neutral-150 px-4 py-3">
@@ -209,7 +209,7 @@ export default function AdminPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: t.adminStatUsers, value: stats.users.toLocaleString(), color: "text-neutral-900", bg: "bg-white" },
-                  { label: t.adminStatToday, value: `+${stats.todayUsers}`, color: "text-[#0071e3]", bg: "bg-white" },
+                  { label: t.adminStatToday, value: `+${stats.todayUsers}`, color: "text-[#4A1D3F]", bg: "bg-white" },
                   { label: t.adminStatMessages, value: stats.messages.toLocaleString(), color: "text-neutral-900", bg: "bg-white" },
                   {
                     label: t.adminStatPending,
@@ -257,7 +257,7 @@ export default function AdminPage() {
                     key={f.key}
                     onClick={() => setReportFilter(f.key)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
-                      reportFilter === f.key ? "bg-[#0071e3] text-white" : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                      reportFilter === f.key ? "bg-[#4A1D3F] text-white" : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                     }`}
                   >
                     {f.label}
@@ -294,14 +294,14 @@ export default function AdminPage() {
                       <div className="flex items-center gap-2 text-sm flex-wrap">
                         <button
                           onClick={() => nav(`/profile/${report.reporter_id}`)}
-                          className="font-semibold text-neutral-700 hover:text-[#0071e3] hover:underline"
+                          className="font-semibold text-neutral-700 hover:text-[#4A1D3F] hover:underline"
                         >
                           {report.reporter?.display_name}
                         </button>
                         <span className="text-neutral-400">{t.adminReportedArrow}</span>
                         <button
                           onClick={() => nav(`/profile/${report.reported_id}`)}
-                          className="font-semibold text-neutral-900 hover:text-[#0071e3] hover:underline"
+                          className="font-semibold text-neutral-900 hover:text-[#4A1D3F] hover:underline"
                         >
                           {report.reported?.display_name}
                         </button>
@@ -378,7 +378,7 @@ export default function AdminPage() {
                       <div className="flex items-center gap-2">
                         <p className="font-semibold text-neutral-900 text-sm truncate">{u.display_name}</p>
                         {u.is_admin && (
-                          <span className="text-[10px] bg-[#e8f4ff] text-[#0071e3] px-1.5 py-0.5 rounded font-bold">ADMIN</span>
+                          <span className="text-[10px] bg-[#F1E9EE] text-[#4A1D3F] px-1.5 py-0.5 rounded font-bold">ADMIN</span>
                         )}
                       </div>
                       <p className="text-xs text-neutral-400">{u.nationality} · {formatRelativeTime(u.created_at)}</p>
@@ -396,7 +396,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => toggleUserAdmin(u.id, u.is_admin)}
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                            u.is_admin ? "bg-[#e8f4ff] text-[#0071e3] hover:bg-[#d6ecff]" : "bg-[#f5f5f7] text-[#86868b] hover:bg-[#e8e8ed]"
+                            u.is_admin ? "bg-[#F1E9EE] text-[#4A1D3F] hover:bg-[#E7DBE2]" : "bg-[#F3EEE6] text-[#8A837B] hover:bg-[#F3EEE6]"
                           }`}
                         >
                           {u.is_admin ? t.adminAdmin : t.adminNormal}

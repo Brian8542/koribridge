@@ -21,13 +21,14 @@
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-      "Apple SD Gothic Neo", Pretendard, "Helvetica Neue", Arial, sans-serif;
-    background-color: #ffffff;
-    color: #1d1d1f;
+    font-family: Pretendard, Inter, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Helvetica Neue", Arial, sans-serif;
+    background-color: #FAF7F2;
+    color: #1E1B18;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.6;
+    font-size: 16px;
   }
 
   input, textarea, select {
@@ -38,75 +39,91 @@
   @media (pointer: fine) {
     ::-webkit-scrollbar       { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 99px; }
-    ::-webkit-scrollbar-thumb:hover { background: #aeaeb2; }
+    ::-webkit-scrollbar-thumb { background: #E5DED2; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #C9C1B4; }
   }
 }
 
 @layer components {
 
-  /* ── Buttons ──────────────────────────────────────── */
+  /* ── Serif display headline (Hinge signature) ─────── */
+
+  .font-display {
+    font-family: "Noto Serif KR", "Playfair Display", Georgia, "Times New Roman", serif;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+
+  /* ── Buttons — pill shaped ────────────────────────── */
 
   .btn-primary {
     @apply inline-flex items-center justify-center w-full
            px-5 py-3 rounded-full
-           bg-[#0071e3] text-white text-sm font-medium tracking-[-0.01em]
-           hover:bg-[#0077ed]
-           active:scale-[0.97]
+           bg-[#4A1D3F] text-[#FAF7F2] text-sm font-semibold tracking-[-0.01em]
+           hover:bg-[#3B1732]
+           active:scale-[0.98]
            transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40 focus-visible:ring-offset-2;
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A1D3F]/40 focus-visible:ring-offset-2;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center w-full
            px-5 py-3 rounded-full
-           bg-white border border-[#d2d2d7] text-[#1d1d1f] text-sm font-medium
-           hover:bg-[#f5f5f7]
-           active:scale-[0.97]
+           bg-transparent border border-[#1E1B18]/25 text-[#1E1B18] text-sm font-semibold
+           hover:bg-[#F3EEE6] hover:border-[#1E1B18]/40
+           active:scale-[0.98]
            transition-all duration-200
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/30 focus-visible:ring-offset-2;
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A1D3F]/30 focus-visible:ring-offset-2;
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center
            px-3 py-2 rounded-full
-           text-[#86868b] text-sm font-medium
-           hover:text-[#1d1d1f] hover:bg-[#f5f5f7]
+           text-[#8A837B] text-sm font-medium
+           hover:text-[#1E1B18] hover:bg-[#F3EEE6]
            transition-all duration-200;
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center w-full
            px-5 py-3 rounded-full
-           bg-[#ff3b30] text-white text-sm font-medium
-           hover:bg-[#e0352b]
-           active:scale-[0.97]
+           bg-[#C4402E] text-white text-sm font-semibold
+           hover:bg-[#A83525]
+           active:scale-[0.98]
+           transition-all duration-200;
+  }
+
+  .btn-coral {
+    @apply inline-flex items-center justify-center
+           rounded-full bg-[#E8604C] text-white font-semibold
+           hover:bg-[#D9503C]
+           active:scale-[0.98]
            transition-all duration-200;
   }
 
   /* ── Inputs ───────────────────────────────────────── */
 
   .input-field {
-    @apply w-full px-4 py-3 rounded-apple text-sm
-           bg-[#f5f5f7] border-0
-           text-[#1d1d1f] placeholder:text-[#86868b]
-           focus:ring-2 focus:ring-[#0071e3]/25
+    @apply w-full px-4 py-3 rounded-2xl text-[15px]
+           bg-white border border-[#E5DED2]
+           text-[#1E1B18] placeholder:text-[#B3AB9F]
+           focus:border-[#4A1D3F]/40 focus:ring-2 focus:ring-[#4A1D3F]/15
            transition-all duration-200;
   }
 
   /* ── Cards ────────────────────────────────────────── */
 
   .card {
-    @apply bg-[#f5f5f7] rounded-apple-lg p-6;
+    @apply bg-white rounded-[22px] p-6 shadow-card;
   }
 
   .card-sm {
-    @apply bg-[#f5f5f7] rounded-apple p-4;
+    @apply bg-white rounded-[18px] p-4 shadow-xs;
   }
 
   .card-white {
-    @apply bg-white rounded-apple-lg border border-[#d2d2d7]/50 shadow-card p-6;
+    @apply bg-white rounded-[22px] shadow-card p-6;
   }
 
   /* ── Badges ───────────────────────────────────────── */
@@ -116,32 +133,32 @@
   }
 
   .badge-level-고급 {
-    @apply bg-blue-50 text-blue-700;
+    @apply bg-[#F1E9EE] text-[#4A1D3F];
   }
 
   .badge-level-중급 {
-    @apply bg-amber-50 text-amber-700;
+    @apply bg-[#F7EBDB] text-[#8A5A22];
   }
 
   .badge-level-초급 {
-    @apply bg-emerald-50 text-emerald-700;
+    @apply bg-[#EDF3EF] text-[#40664F];
   }
 
   /* ── Tag ──────────────────────────────────────────── */
 
   .tag {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-           bg-[#e8e8ed] text-[#6e6e73];
+           bg-[#F3EEE6] text-[#6E675F];
   }
 
   .tag-active {
-    @apply bg-[#0071e3] text-white;
+    @apply bg-[#4A1D3F] text-[#FAF7F2];
   }
 
   /* ── Section label ────────────────────────────────── */
 
   .section-label {
-    @apply text-xs font-semibold uppercase tracking-widest text-[#86868b];
+    @apply text-xs font-semibold uppercase tracking-widest text-[#8A837B];
   }
 
   /* ── Online indicator ─────────────────────────────── */
@@ -150,21 +167,15 @@
     @apply absolute w-3 h-3 rounded-full border-2 border-white;
   }
 
-  /* ── Skeleton ─────────────────────────────────────── */
+  /* ── Skeleton — solid pulse, no gradients ─────────── */
 
   .skeleton {
-    background: linear-gradient(
-      90deg,
-      #f5f5f7 25%,
-      #fafafa 50%,
-      #f5f5f7 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.8s linear infinite;
-    border-radius: 6px;
+    background-color: #F3EEE6;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 8px;
   }
 
-  /* ── Apple section helpers ────────────────────────── */
+  /* ── Section helpers ──────────────────────────────── */
 
   .section-apple {
     @apply py-24 md:py-32 px-5;
@@ -174,30 +185,33 @@
     @apply max-w-[980px] mx-auto;
   }
 
-  /* ── Dark-mode overrides ──────────────────────────── */
+  /* ── Dark-mode overrides (warm dark) ──────────────── */
 
   html.dark body {
-    background-color: #000000;
-    color: #f5f5f7;
+    background-color: #191512;
+    color: #F3EEE6;
   }
 
-  html.dark .card {
-    background-color: #1c1c1e;
-    color: #f5f5f7;
+  html.dark .card,
+  html.dark .card-sm,
+  html.dark .card-white {
+    background-color: #211C18;
+    color: #F3EEE6;
   }
 
   html.dark .input-field {
-    background-color: #2c2c2e;
-    color: #f5f5f7;
+    background-color: #2A241F;
+    border-color: #3E3934;
+    color: #F3EEE6;
   }
 
   html.dark .input-field::placeholder {
-    color: #6e6e73;
+    color: #8A837B;
   }
 
   html.dark .btn-secondary {
-    background-color: #1c1c1e;
-    border-color: #3a3a3c;
-    color: #f5f5f7;
+    background-color: transparent;
+    border-color: #57514A;
+    color: #F3EEE6;
   }
 }

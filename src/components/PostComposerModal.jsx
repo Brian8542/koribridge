@@ -90,14 +90,14 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1d1d1f]/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E1B18]/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-white rounded-t-[28px] sm:rounded-apple-lg w-full sm:max-w-lg max-h-[90vh] flex flex-col shadow-xl border border-[#d2d2d7]/40">
+      <div className="bg-white rounded-t-[28px] sm:rounded-apple-lg w-full sm:max-w-lg max-h-[90vh] flex flex-col shadow-xl border border-[#E5DED2]/40">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#d2d2d7]/40 flex-shrink-0">
-          <h2 className="text-[17px] font-bold text-[#1d1d1f]">{t.communityNewPost}</h2>
-          <button onClick={onClose} className="text-[#86868b] hover:text-[#1d1d1f] p-1 transition">
+        <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#E5DED2]/40 flex-shrink-0">
+          <h2 className="text-[17px] font-bold text-[#1E1B18]">{t.communityNewPost}</h2>
+          <button onClick={onClose} className="text-[#8A837B] hover:text-[#1E1B18] p-1 transition">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -111,15 +111,15 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
             <img
               src={currentUser?.avatar_url || `https://api.dicebear.com/8.x/thumbs/svg?seed=${currentUser?.id}`}
               alt=""
-              className="w-10 h-10 rounded-full object-cover bg-[#f5f5f7]"
+              className="w-10 h-10 rounded-full object-cover bg-[#F3EEE6]"
             />
-            <span className="text-[14px] font-semibold text-[#1d1d1f]">{currentUser?.display_name}</span>
+            <span className="text-[14px] font-semibold text-[#1E1B18]">{currentUser?.display_name}</span>
           </div>
 
           {/* Text area */}
           <div>
             <textarea
-              className="w-full resize-none rounded-[14px] bg-[#f5f5f7] border border-transparent focus:border-[#0071e3] focus:bg-white transition-colors p-3.5 text-[14px] text-[#1d1d1f] placeholder-[#86868b] outline-none"
+              className="w-full resize-none rounded-[14px] bg-[#F3EEE6] border border-transparent focus:border-[#4A1D3F] focus:bg-white transition-colors p-3.5 text-[14px] text-[#1E1B18] placeholder-[#8A837B] outline-none"
               rows={5}
               maxLength={MAX_CHARS}
               placeholder={t.communityPostPlaceholder}
@@ -127,7 +127,7 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
               onChange={(e) => setContent(e.target.value)}
             />
             <div className="flex justify-end mt-1">
-              <span className={`text-[12px] font-medium ${content.length >= MAX_CHARS ? "text-[#ff3b30]" : "text-[#86868b]"}`}>
+              <span className={`text-[12px] font-medium ${content.length >= MAX_CHARS ? "text-[#C4402E]" : "text-[#8A837B]"}`}>
                 {content.length}/{MAX_CHARS}{t.communityCharCount}
               </span>
             </div>
@@ -135,7 +135,7 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
 
           {/* Language select */}
           <div>
-            <label className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide block mb-1.5">
+            <label className="text-[12px] font-semibold text-[#8A837B] uppercase tracking-wide block mb-1.5">
               {t.communitySelectLang}
             </label>
             <select
@@ -154,7 +154,7 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
               <img src={imagePreview} alt="" className="w-full max-h-56 object-cover" />
               <button
                 onClick={removeImage}
-                className="absolute top-2 right-2 w-7 h-7 bg-[#1d1d1f]/60 text-white rounded-full flex items-center justify-center hover:bg-[#1d1d1f]/80 transition-colors"
+                className="absolute top-2 right-2 w-7 h-7 bg-[#1E1B18]/60 text-white rounded-full flex items-center justify-center hover:bg-[#1E1B18]/80 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -165,10 +165,10 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
         </div>
 
         {/* Footer */}
-        <div className="px-5 pb-5 pt-3 border-t border-[#d2d2d7]/40 flex items-center gap-3 flex-shrink-0">
+        <div className="px-5 pb-5 pt-3 border-t border-[#E5DED2]/40 flex items-center gap-3 flex-shrink-0">
           <button
             onClick={() => fileRef.current?.click()}
-            className="p-2.5 rounded-full bg-[#f5f5f7] text-[#86868b] hover:text-[#0071e3] hover:bg-[#e8f4ff] transition-colors"
+            className="p-2.5 rounded-full bg-[#F3EEE6] text-[#8A837B] hover:text-[#4A1D3F] hover:bg-[#F1E9EE] transition-colors"
             title="사진 첨부"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@ function PostComposerModal({ currentUser, onClose, onPosted }) {
           <button
             onClick={handleSubmit}
             disabled={posting || !content.trim()}
-            className="flex-1 py-3 rounded-full bg-[#0071e3] text-white text-[14px] font-semibold hover:bg-[#0077ed] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3 rounded-full bg-[#4A1D3F] text-white text-[14px] font-semibold hover:bg-[#3B1732] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {posting ? t.communityPosting : t.communityPostBtn}
           </button>

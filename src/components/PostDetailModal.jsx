@@ -109,14 +109,14 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1d1d1f]/40 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#1E1B18]/40 backdrop-blur-sm"
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="bg-white rounded-t-[28px] sm:rounded-apple-lg w-full sm:max-w-lg max-h-[92vh] flex flex-col shadow-xl border border-[#d2d2d7]/40">
+        <div className="bg-white rounded-t-[28px] sm:rounded-apple-lg w-full sm:max-w-lg max-h-[92vh] flex flex-col shadow-xl border border-[#E5DED2]/40">
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#d2d2d7]/40 flex-shrink-0">
-            <h2 className="text-[16px] font-bold text-[#1d1d1f]">{t.communityCommentCount}</h2>
-            <button onClick={onClose} className="text-[#86868b] hover:text-[#1d1d1f] p-1 transition">
+          <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#E5DED2]/40 flex-shrink-0">
+            <h2 className="text-[16px] font-bold text-[#1E1B18]">{t.communityCommentCount}</h2>
+            <button onClick={onClose} className="text-[#8A837B] hover:text-[#1E1B18] p-1 transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -126,30 +126,30 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
           {/* Scrollable area */}
           <div className="flex-1 overflow-y-auto">
             {/* Original post */}
-            <div className="px-5 py-4 border-b border-[#f5f5f7]">
+            <div className="px-5 py-4 border-b border-[#F3EEE6]">
               <div className="flex items-start gap-3 mb-2">
                 <img
                   src={post.author?.avatar_url || `https://api.dicebear.com/8.x/thumbs/svg?seed=${post.author_id}`}
                   alt=""
-                  className="w-9 h-9 rounded-full object-cover flex-shrink-0 bg-[#f5f5f7]"
+                  className="w-9 h-9 rounded-full object-cover flex-shrink-0 bg-[#F3EEE6]"
                 />
                 <div>
-                  <span className="text-[14px] font-semibold text-[#1d1d1f]">
+                  <span className="text-[14px] font-semibold text-[#1E1B18]">
                     {post.author?.display_name || t.unknownUser}
                   </span>
                   {post.language && (
-                    <span className="ml-2 bg-[#e8f4ff] text-[#0071e3] text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                    <span className="ml-2 bg-[#F1E9EE] text-[#4A1D3F] text-[11px] font-semibold px-2 py-0.5 rounded-full">
                       {post.language}
                     </span>
                   )}
-                  <div className="text-[12px] text-[#86868b]">{timeAgo(post.created_at, locale)}</div>
+                  <div className="text-[12px] text-[#8A837B]">{timeAgo(post.created_at, locale)}</div>
                 </div>
               </div>
-              <p className="text-[14px] text-[#1d1d1f] leading-relaxed whitespace-pre-wrap break-words mb-2">
+              <p className="text-[14px] text-[#1E1B18] leading-relaxed whitespace-pre-wrap break-words mb-2">
                 {post.content}
               </p>
               {post.image_url && (
-                <div className="rounded-[14px] overflow-hidden bg-[#f5f5f7] mb-2">
+                <div className="rounded-[14px] overflow-hidden bg-[#F3EEE6] mb-2">
                   <img src={post.image_url} alt="" className="w-full max-h-64 object-cover" />
                 </div>
               )}
@@ -157,7 +157,7 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
               <button
                 onClick={handleLike}
                 className={`flex items-center gap-1.5 text-[13px] font-semibold transition-colors mt-1 ${
-                  liked ? "text-[#ff3b30]" : "text-[#86868b] hover:text-[#ff3b30]"
+                  liked ? "text-[#C4402E]" : "text-[#8A837B] hover:text-[#C4402E]"
                 }`}
               >
                 <svg className="w-4 h-4" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -170,20 +170,20 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
             {/* Comments */}
             <div className="px-5 py-3 space-y-4">
               {loadingComments ? (
-                <div className="text-center py-6 text-[13px] text-[#86868b]">{t.loading}</div>
+                <div className="text-center py-6 text-[13px] text-[#8A837B]">{t.loading}</div>
               ) : comments.length === 0 ? (
-                <p className="text-center py-6 text-[13px] text-[#86868b]">{t.communityNoComments}</p>
+                <p className="text-center py-6 text-[13px] text-[#8A837B]">{t.communityNoComments}</p>
               ) : (
                 comments.map((c) => (
                   <div key={c.id} className="flex items-start gap-3">
                     <img
                       src={c.author?.avatar_url || `https://api.dicebear.com/8.x/thumbs/svg?seed=${c.author_id}`}
                       alt=""
-                      className="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-[#f5f5f7]"
+                      className="w-8 h-8 rounded-full object-cover flex-shrink-0 bg-[#F3EEE6]"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-[#1d1d1f]">
+                        <span className="text-[13px] font-semibold text-[#1E1B18]">
                           {c.author?.display_name || t.unknownUser}
                         </span>
                         {c.is_correction && (
@@ -191,11 +191,11 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
                             {t.communityCorrection}
                           </span>
                         )}
-                        <span className="text-[11px] text-[#86868b] ml-auto flex-shrink-0">
+                        <span className="text-[11px] text-[#8A837B] ml-auto flex-shrink-0">
                           {timeAgo(c.created_at, locale)}
                         </span>
                       </div>
-                      <p className="text-[13px] text-[#1d1d1f] leading-relaxed whitespace-pre-wrap break-words mt-0.5">
+                      <p className="text-[13px] text-[#1E1B18] leading-relaxed whitespace-pre-wrap break-words mt-0.5">
                         {c.content}
                       </p>
                       {c.is_correction && c.corrected_text && (
@@ -206,7 +206,7 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
                       {c.author_id === currentUserId && (
                         <button
                           onClick={() => setDeleteTarget(c.id)}
-                          className="mt-1 text-[11px] text-[#86868b] hover:text-[#ff3b30] transition-colors"
+                          className="mt-1 text-[11px] text-[#8A837B] hover:text-[#C4402E] transition-colors"
                         >
                           {t.deleteMsg}
                         </button>
@@ -220,14 +220,14 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
           </div>
 
           {/* Comment composer */}
-          <div className="px-5 pb-5 pt-3 border-t border-[#d2d2d7]/40 flex-shrink-0 space-y-2">
+          <div className="px-5 pb-5 pt-3 border-t border-[#E5DED2]/40 flex-shrink-0 space-y-2">
             {/* Correction toggle */}
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <button
                 type="button"
                 onClick={() => setIsCorrection((v) => !v)}
                 className={`relative w-9 h-5 rounded-full transition-colors duration-200 flex-shrink-0 ${
-                  isCorrection ? "bg-[#f59e0b]" : "bg-[#d2d2d7]"
+                  isCorrection ? "bg-[#f59e0b]" : "bg-[#E5DED2]"
                 }`}
               >
                 <span
@@ -236,11 +236,11 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
                   }`}
                 />
               </button>
-              <span className="text-[12px] font-semibold text-[#86868b]">{t.communityCorrectionToggle}</span>
+              <span className="text-[12px] font-semibold text-[#8A837B]">{t.communityCorrectionToggle}</span>
             </label>
 
             <textarea
-              className="w-full resize-none rounded-[14px] bg-[#f5f5f7] border border-transparent focus:border-[#0071e3] focus:bg-white transition-colors p-3 text-[13px] text-[#1d1d1f] placeholder-[#86868b] outline-none"
+              className="w-full resize-none rounded-[14px] bg-[#F3EEE6] border border-transparent focus:border-[#4A1D3F] focus:bg-white transition-colors p-3 text-[13px] text-[#1E1B18] placeholder-[#8A837B] outline-none"
               rows={2}
               maxLength={500}
               placeholder={isCorrection ? t.communityCorrectionPlaceholder : t.communityCommentPlaceholder}
@@ -250,7 +250,7 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
 
             {isCorrection && (
               <textarea
-                className="w-full resize-none rounded-[14px] bg-[#f0fdf4] border border-transparent focus:border-[#22c55e] transition-colors p-3 text-[13px] text-[#1d1d1f] placeholder-[#86868b] outline-none"
+                className="w-full resize-none rounded-[14px] bg-[#f0fdf4] border border-transparent focus:border-[#22c55e] transition-colors p-3 text-[13px] text-[#1E1B18] placeholder-[#8A837B] outline-none"
                 rows={2}
                 maxLength={500}
                 placeholder={t.communityCorrectedTextPlaceholder}
@@ -260,13 +260,13 @@ function PostDetailModal({ post, currentUserId, onClose, onLike, onPostDeleted }
             )}
 
             <div className="flex items-center gap-2">
-              <span className={`text-[11px] font-medium flex-1 ${commentText.length >= 500 ? "text-[#ff3b30]" : "text-[#86868b]"}`}>
+              <span className={`text-[11px] font-medium flex-1 ${commentText.length >= 500 ? "text-[#C4402E]" : "text-[#8A837B]"}`}>
                 {commentText.length}/500{t.communityCommentCharCount}
               </span>
               <button
                 onClick={handleSubmitComment}
                 disabled={submitting || !commentText.trim()}
-                className="px-5 py-2 rounded-full bg-[#0071e3] text-white text-[13px] font-semibold hover:bg-[#0077ed] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 rounded-full bg-[#4A1D3F] text-white text-[13px] font-semibold hover:bg-[#3B1732] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? t.communityCommentSubmitting : t.communityCommentSubmit}
               </button>

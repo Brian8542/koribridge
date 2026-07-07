@@ -45,13 +45,13 @@ function getIconForEmoji(icon) {
 
 export default function EmptyState({ icon, title, desc, action, actionLabel, secondary, secondaryLabel }) {
   return (
-    <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 text-center py-14 px-6 col-span-full">
-      <div className="w-14 h-14 rounded-apple bg-[#f5f5f7] flex items-center justify-center mx-auto mb-4">
+    <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 text-center py-14 px-6 col-span-full">
+      <div className="w-14 h-14 rounded-apple bg-[#F3EEE6] flex items-center justify-center mx-auto mb-4">
         {getIconForEmoji(icon)}
       </div>
-      <p className="font-semibold text-[#1d1d1f] text-[15px]">{title}</p>
+      <p className="font-semibold text-[#1E1B18] text-[15px]">{title}</p>
       {desc && (
-        <p className="text-[13px] text-[#86868b] mt-2 leading-relaxed max-w-xs mx-auto">{desc}</p>
+        <p className="text-[13px] text-[#8A837B] mt-2 leading-relaxed max-w-xs mx-auto">{desc}</p>
       )}
       {action && actionLabel && (
         <div className="mt-6 max-w-[200px] mx-auto">
@@ -59,7 +59,7 @@ export default function EmptyState({ icon, title, desc, action, actionLabel, sec
         </div>
       )}
       {secondary && secondaryLabel && (
-        <button onClick={secondary} className="mt-3 text-[13px] text-[#0071e3] font-semibold hover:underline transition-colors">
+        <button onClick={secondary} className="mt-3 text-[13px] text-[#4A1D3F] font-semibold hover:underline transition-colors">
           {secondaryLabel}
         </button>
       )}

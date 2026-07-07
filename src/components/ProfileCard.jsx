@@ -4,6 +4,7 @@ import { getMatchScore } from "../utils/matching";
 import { useLocale } from "../hooks/useLocale";
 import { isRealAvatar, getAvatarGradient } from "../utils/avatarUtils";
 import { COMMUNICATION_STYLES, CONVERSATION_GOALS, getProfileOptionLabel } from "../utils/profileOptions";
+import { isRecentlyActive } from "../hooks/usePresenceHeartbeat";
 
 const LEVEL_STYLE = {
   고급: "bg-blue-50 text-blue-700 border-blue-100",
@@ -57,18 +58,19 @@ function ProfileCard({
     (profile.interests || []).includes(i)
   );
   const trustScore = getTrustScore(profile);
+  const isActive = isOnline || isRecentlyActive(profile.last_seen_at);
 
   return (
-    <div className="bg-white rounded-apple-lg border border-[#d2d2d7]/40 shadow-card overflow-hidden transition-all duration-200 hover:shadow-card-md hover:-translate-y-0.5 group flex flex-col">
+    <div className="bg-white rounded-apple-lg border border-[#E5DED2]/40 shadow-card overflow-hidden transition-all duration-200 hover:shadow-card-md hover:-translate-y-0.5 group flex flex-col">
       {/* Top accent */}
-      <div className="h-0.5 bg-[#0071e3] opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div className="h-0.5 bg-[#4A1D3F] opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
 
       {/* Trust header row */}
       <div className="flex items-center justify-between px-4 pt-3 pb-0">
         <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
           profile.is_verified
             ? "bg-emerald-50 text-emerald-700"
-            : "bg-[#f5f5f7] text-[#86868b]"
+            : "bg-[#F3EEE6] text-[#8A837B]"
         }`}>
           {profile.is_verified ? (
             <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -85,11 +87,12 @@ function ProfileCard({
           <button
             type="button"
             onClick={() => onToggleFavorite?.(profile)}
-            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 ${
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 active:scale-[0.9] ${
               isFavorite
-                ? "text-[#0071e3] bg-[#e8f4ff]"
-                : "text-[#d2d2d7] hover:text-[#0071e3] hover:bg-[#e8f4ff]"
+                ? "text-[#E8604C] bg-[#FBEAE6]"
+                : "text-[#C9C1B4] hover:text-[#E8604C] hover:bg-[#FBEAE6]"
             }`}
+            aria-label={isFavorite ? t.favRemove : t.favAdd}
             title={isFavorite ? t.favRemove : t.favAdd}
           >
             {isFavorite ? (
@@ -129,25 +132,32 @@ function ProfileCard({
                 className="w-12 h-12 rounded-apple object-cover"
               />
             ) : (
-              <div className={`w-12 h-12 rounded-apple bg-gradient-to-br ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-lg text-white font-bold`}>
+              <div className={`w-12 h-12 rounded-apple ${getAvatarGradient(profile.avatar_url, profile.id)} flex items-center justify-center text-lg text-white font-bold`}>
                 {profile.display_name?.charAt(0)?.toUpperCase() || "?"}
               </div>
             )}
             <span
               className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
-                isOnline ? "bg-emerald-500" : "bg-[#d2d2d7]"
+                isActive ? "bg-[#5B8A72]" : "bg-[#E5DED2]"
               }`}
+              aria-hidden="true"
             />
           </div>
 
           {/* Name + level */}
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-bold text-[#1d1d1f] truncate">{profile.display_name}</p>
+            <p className="font-display text-[16px] text-[#1E1B18] truncate">{profile.display_name}</p>
             <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              {isActive && (
+                <span className="badge bg-[#EDF3EF] text-[#40664F] text-[10px] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#5B8A72]" aria-hidden="true" />
+                  {t.activeNow}
+                </span>
+              )}
               <span className={`badge border text-[10px] ${LEVEL_STYLE[level] || LEVEL_STYLE["초급"]}`}>
                 {levelLabel(level)}
               </span>
-              <span className="badge bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 text-[10px]">
+              <span className="badge bg-[#F1E9EE] text-[#4A1D3F] border border-[#4A1D3F]/20 text-[10px]">
                 {t.matchingLabel} {match.percentage}%
               </span>
             </div>
@@ -156,13 +166,13 @@ function ProfileCard({
 
         {/* Language info */}
         <div className="mt-3 grid grid-cols-2 gap-1.5">
-          <div className="bg-[#f5f5f7] rounded-apple px-2.5 py-2">
-            <p className="text-[10px] text-[#86868b] leading-none mb-0.5">{t.nativeLangShort}</p>
-            <p className="text-[11px] font-semibold text-[#1d1d1f] truncate">{profile.native_language}</p>
+          <div className="bg-[#F3EEE6] rounded-apple px-2.5 py-2">
+            <p className="text-[10px] text-[#8A837B] leading-none mb-0.5">{t.nativeLangShort}</p>
+            <p className="text-[11px] font-semibold text-[#1E1B18] truncate">{profile.native_language}</p>
           </div>
-          <div className="bg-[#f5f5f7] rounded-apple px-2.5 py-2">
-            <p className="text-[10px] text-[#86868b] leading-none mb-0.5">{t.learningLangShort}</p>
-            <p className="text-[11px] font-semibold text-[#0071e3] truncate">{profile.learning_language}</p>
+          <div className="bg-[#F3EEE6] rounded-apple px-2.5 py-2">
+            <p className="text-[10px] text-[#8A837B] leading-none mb-0.5">{t.learningLangShort}</p>
+            <p className="text-[11px] font-semibold text-[#4A1D3F] truncate">{profile.learning_language}</p>
           </div>
         </div>
 
@@ -230,7 +240,7 @@ function ProfileCard({
             {commonInterests.slice(0, 3).map((interest) => (
               <span
                 key={interest}
-                className="text-[10px] bg-[#e8f4ff] text-[#0071e3] border border-[#0071e3]/20 px-1.5 py-0.5 rounded-md font-medium"
+                className="text-[10px] bg-[#F1E9EE] text-[#4A1D3F] border border-[#4A1D3F]/20 px-1.5 py-0.5 rounded-md font-medium"
               >
                 {interest}
               </span>

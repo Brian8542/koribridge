@@ -15,8 +15,8 @@ function ProfileFilters({ activeCount, onOpenFilter, onReset, resultCount }) {
         onClick={onOpenFilter}
         className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold transition-all border ${
           activeCount > 0
-            ? "bg-[#e8f4ff] text-[#0071e3] border-[#0071e3]/30 hover:bg-[#daeeff]"
-            : "bg-white text-[#1d1d1f] border-[#d2d2d7] hover:bg-[#f5f5f7]"
+            ? "bg-[#F1E9EE] text-[#4A1D3F] border-[#4A1D3F]/30 hover:bg-[#E7DBE2]"
+            : "bg-white text-[#1E1B18] border-[#E5DED2] hover:bg-[#F3EEE6]"
         }`}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@ function ProfileFilters({ activeCount, onOpenFilter, onReset, resultCount }) {
         </svg>
         {t.filterOpenBtn}
         {activeCount > 0 && (
-          <span className="bg-[#0071e3] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0">
+          <span className="bg-[#4A1D3F] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0">
             {activeCount}
           </span>
         )}
@@ -33,7 +33,7 @@ function ProfileFilters({ activeCount, onOpenFilter, onReset, resultCount }) {
       {activeCount > 0 && (
         <button
           onClick={handleReset}
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-[12px] font-semibold text-[#86868b] hover:text-[#ff3b30] bg-white border border-[#d2d2d7] hover:border-[#ff3b30]/30 transition-all"
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-full text-[12px] font-semibold text-[#8A837B] hover:text-[#C4402E] bg-white border border-[#E5DED2] hover:border-[#C4402E]/30 transition-all"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -43,7 +43,7 @@ function ProfileFilters({ activeCount, onOpenFilter, onReset, resultCount }) {
       )}
 
       {resultCount !== undefined && (
-        <span className="ml-auto text-[12px] text-[#86868b] font-medium flex-shrink-0">
+        <span className="ml-auto text-[12px] text-[#8A837B] font-medium flex-shrink-0">
           {resultCount}{t.filterResultCount}
         </span>
       )}

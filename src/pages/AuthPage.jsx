@@ -96,20 +96,20 @@ export default function AuthPage() {
   /* ── Sign-up done screen ── */
   if (signupDone) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f7] px-5">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF7F2] px-5">
         <Helmet><title>KoriBridge - {t.emailVerifyTitle}</title></Helmet>
         <div className="bg-white rounded-apple-lg shadow-card-md p-8 max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-[#34c759] flex items-center justify-center mx-auto mb-5">
+          <div className="w-16 h-16 rounded-full bg-[#5B8A72] flex items-center justify-center mx-auto mb-5">
             <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h2 className="text-[22px] font-bold text-[#1d1d1f] tracking-tight">{t.emailVerifyTitle}</h2>
-          <p className="mt-3 text-[15px] text-[#86868b] leading-relaxed">
-            <span className="font-semibold text-[#1d1d1f]">{email}</span>{t.emailVerifySent}<br />
+          <h2 className="font-display text-[24px] text-[#1E1B18]">{t.emailVerifyTitle}</h2>
+          <p className="mt-3 text-[15px] text-[#8A837B] leading-relaxed">
+            <span className="font-semibold text-[#1E1B18]">{email}</span>{t.emailVerifySent}<br />
             {t.emailVerifyClick}
           </p>
-          <p className="mt-2 text-[13px] text-[#aeaeb2]">{t.emailVerifySpam}</p>
+          <p className="mt-2 text-[13px] text-[#B3AB9F]">{t.emailVerifySpam}</p>
           <button onClick={() => switchMode("login")} className="mt-7 btn-primary py-3">
             {t.goToLogin}
           </button>
@@ -118,7 +118,7 @@ export default function AuthPage() {
               await supabase.auth.resend({ type: "signup", email });
               showToast(t.resendEmail, "success");
             }}
-            className="mt-3 text-[13px] text-[#86868b] hover:text-[#0071e3] transition-colors block w-full"
+            className="mt-3 text-[13px] text-[#8A837B] hover:text-[#4A1D3F] transition-colors block w-full"
           >
             {t.resendEmail}
           </button>
@@ -128,22 +128,22 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-[#FAF7F2]">
       <Helmet>
         <title>KoriBridge - {mode === "login" ? t.signIn : mode === "signup" ? t.signUp : t.resetPassword}</title>
       </Helmet>
 
       {/* ── Left panel (desktop) ── */}
-      <div className="hidden lg:flex flex-col justify-between w-[420px] xl:w-[460px] flex-shrink-0 bg-[#f5f5f7] p-10 border-r border-[#d2d2d7]/50">
+      <div className="hidden lg:flex flex-col justify-between w-[420px] xl:w-[460px] flex-shrink-0 bg-[#F3EEE6] p-10 border-r border-[#E5DED2]/50">
         <div>
           <div className="flex items-center gap-2.5 mb-14">
-            <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-[11px] font-black">K</span>
+            <div className="w-8 h-8 rounded-full bg-[#4A1D3F] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#FAF7F2] text-[11px] font-display">K</span>
             </div>
-            <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1d1d1f]">KoriBridge</span>
+            <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1E1B18]">KoriBridge</span>
           </div>
 
-          <h2 className="font-bold tracking-[-0.04em] leading-[1.08] text-[#1d1d1f] mb-4"
+          <h2 className="font-display leading-[1.16] text-[#1E1B18] mb-4"
             style={{ fontSize: "clamp(1.6rem, 2.6vw, 2.2rem)" }}>
             {locale === "ko" ? (
               <>한국과 세계를<br />진심으로 잇다.</>
@@ -152,7 +152,7 @@ export default function AuthPage() {
             )}
           </h2>
 
-          <p className="text-[15px] text-[#86868b] leading-relaxed mb-10">
+          <p className="text-[15px] text-[#8A837B] leading-relaxed mb-10">
             {locale === "ko"
               ? "이메일 인증 기반의 한국어 교류 플랫폼. 허위 프로필 없이, 신뢰부터 시작합니다."
               : "A trust-first Korean language exchange platform. Real people, real conversations."}
@@ -174,25 +174,25 @@ export default function AuthPage() {
               },
             ].map((f) => (
               <div key={f.titleKey} className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#86868b] flex-shrink-0 shadow-xs">
+                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#8A837B] flex-shrink-0 shadow-xs">
                   {f.icon}
                 </div>
                 <div>
-                  <p className="text-[14px] font-semibold text-[#1d1d1f]">{t[f.titleKey]}</p>
-                  <p className="text-[13px] text-[#86868b] mt-0.5 leading-snug">{t[f.descKey]}</p>
+                  <p className="text-[14px] font-semibold text-[#1E1B18]">{t[f.titleKey]}</p>
+                  <p className="text-[13px] text-[#8A837B] mt-0.5 leading-snug">{t[f.descKey]}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white rounded-apple px-4 py-3.5 shadow-xs border border-[#d2d2d7]/50">
-          <div className="w-2 h-2 rounded-full bg-[#34c759] flex-shrink-0" />
+        <div className="flex items-center gap-3 bg-white rounded-apple px-4 py-3.5 shadow-xs border border-[#E5DED2]/50">
+          <div className="w-2 h-2 rounded-full bg-[#5B8A72] flex-shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-[#1d1d1f]">
+            <p className="text-[13px] font-semibold text-[#1E1B18]">
               {locale === "ko" ? "이메일 인증으로 신뢰를 보장합니다" : "Trust verified by email"}
             </p>
-            <p className="text-[12px] text-[#86868b]">
+            <p className="text-[12px] text-[#8A837B]">
               {locale === "ko" ? "인증된 멤버만 파트너 목록에 표시됩니다" : "Only verified members appear in the partner list"}
             </p>
           </div>
@@ -202,17 +202,17 @@ export default function AuthPage() {
       {/* ── Right panel (form) ── */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-12">
         <div className="lg:hidden flex items-center gap-2.5 mb-10">
-          <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-[11px] font-black">K</span>
+          <div className="w-8 h-8 rounded-full bg-[#4A1D3F] flex items-center justify-center flex-shrink-0">
+            <span className="text-[#FAF7F2] text-[11px] font-display">K</span>
           </div>
-          <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1d1d1f]">KoriBridge</span>
+          <span className="font-semibold text-[14px] tracking-[-0.01em] text-[#1E1B18]">KoriBridge</span>
         </div>
 
         <div className="w-full max-w-[340px]">
           <div className="flex justify-end mb-6">
             <button
               onClick={toggleLocale}
-              className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-[#f5f5f7] hover:bg-[#e8e8ed] transition text-[#6e6e73]"
+              className="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-[#F3EEE6] hover:bg-[#F3EEE6] transition text-[#6E675F]"
             >
               {locale === "ko" ? "EN" : "한"}
             </button>
@@ -220,31 +220,31 @@ export default function AuthPage() {
 
           <div className="mb-7">
             {mode === "reset" && (
-              <button onClick={() => switchMode("login")} className="flex items-center gap-1.5 text-[13px] text-[#86868b] hover:text-[#0071e3] transition-colors mb-5">
+              <button onClick={() => switchMode("login")} className="flex items-center gap-1.5 text-[13px] text-[#8A837B] hover:text-[#4A1D3F] transition-colors mb-5">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
                 {t.resetBack}
               </button>
             )}
-            <h1 className="text-[28px] font-bold text-[#1d1d1f] tracking-[-0.025em]">
+            <h1 className="font-display text-[30px] text-[#1E1B18]">
               {mode === "login" ? t.authLoginTitle : mode === "signup" ? t.authSignupTitle : t.authResetTitle}
             </h1>
-            <p className="text-[15px] text-[#86868b] mt-1.5">
+            <p className="text-[15px] text-[#8A837B] mt-1.5">
               {mode === "login" ? t.authLoginDesc : mode === "signup" ? t.authSignupDesc : t.authResetDesc}
             </p>
           </div>
 
           {mode !== "reset" && (
-            <div className="flex bg-[#f5f5f7] rounded-full p-1 mb-6">
+            <div className="flex bg-[#F3EEE6] rounded-full p-1 mb-6">
               {["login", "signup"].map((m) => (
                 <button
                   key={m}
                   onClick={() => switchMode(m)}
                   className={`flex-1 py-2 text-[13px] font-semibold rounded-full transition-all duration-200 ${
                     mode === m
-                      ? "bg-white text-[#1d1d1f] shadow-xs"
-                      : "text-[#86868b] hover:text-[#1d1d1f]"
+                      ? "bg-white text-[#1E1B18] shadow-xs"
+                      : "text-[#8A837B] hover:text-[#1E1B18]"
                   }`}
                 >
                   {m === "login" ? t.signIn : t.signUp}
@@ -255,11 +255,11 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "reset" && (
-              <p className="text-[14px] text-[#86868b]">{t.resetDesc}</p>
+              <p className="text-[14px] text-[#8A837B]">{t.resetDesc}</p>
             )}
 
             <div>
-              <label className="block text-[13px] font-medium text-[#1d1d1f] mb-1.5">{t.email}</label>
+              <label className="block text-[13px] font-medium text-[#1E1B18] mb-1.5">{t.email}</label>
               <input
                 type="email" className="input-field"
                 placeholder={t.emailPlaceholder}
@@ -270,7 +270,7 @@ export default function AuthPage() {
 
             {mode !== "reset" && (
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1f] mb-1.5">{t.password}</label>
+                <label className="block text-[13px] font-medium text-[#1E1B18] mb-1.5">{t.password}</label>
                 <input
                   type="password" className="input-field"
                   placeholder={t.passwordPlaceholder}
@@ -282,7 +282,7 @@ export default function AuthPage() {
 
             {mode === "signup" && (
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1f] mb-1.5">{t.confirmPassword}</label>
+                <label className="block text-[13px] font-medium text-[#1E1B18] mb-1.5">{t.confirmPassword}</label>
                 <input
                   type="password" className="input-field"
                   placeholder={t.confirmPasswordPlaceholder}
@@ -293,13 +293,13 @@ export default function AuthPage() {
             )}
 
             {error && (
-              <div className="bg-[#fff2f2] text-[#c0182b] text-[13px] px-4 py-3 rounded-apple">
+              <div className="bg-[#FBEAE6] text-[#A83525] text-[13px] px-4 py-3 rounded-apple">
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="bg-[#f0fff4] text-[#1a7f37] text-[13px] px-4 py-3 rounded-apple">
+              <div className="bg-[#EDF3EF] text-[#4E7A63] text-[13px] px-4 py-3 rounded-apple">
                 {message}
               </div>
             )}
@@ -313,12 +313,12 @@ export default function AuthPage() {
 
             {mode === "login" && (
               <>
-                <label className="flex items-center gap-2 text-[13px] text-[#86868b] cursor-pointer select-none">
+                <label className="flex items-center gap-2 text-[13px] text-[#8A837B] cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-[#d2d2d7] text-[#0071e3] focus:ring-[#0071e3]/20"
+                    className="h-4 w-4 rounded border-[#E5DED2] text-[#4A1D3F] focus:ring-[#4A1D3F]/20"
                   />
                   {t.rememberMe}
                 </label>
@@ -326,7 +326,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => switchMode("reset")}
-                    className="text-[13px] text-[#86868b] hover:text-[#0071e3] transition-colors"
+                    className="text-[13px] text-[#8A837B] hover:text-[#4A1D3F] transition-colors"
                   >
                     {t.forgotPassword}
                   </button>
@@ -337,14 +337,14 @@ export default function AuthPage() {
             {mode !== "reset" && (
               <>
                 <div className="relative flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-[#d2d2d7]/60" />
-                  <span className="text-[12px] text-[#86868b]">{locale === "ko" ? "또는" : "or"}</span>
-                  <div className="flex-1 h-px bg-[#d2d2d7]/60" />
+                  <div className="flex-1 h-px bg-[#E5DED2]/60" />
+                  <span className="text-[12px] text-[#8A837B]">{locale === "ko" ? "또는" : "or"}</span>
+                  <div className="flex-1 h-px bg-[#E5DED2]/60" />
                 </div>
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="w-full py-3 px-4 bg-[#f5f5f7] hover:bg-[#e8e8ed] rounded-full text-[#1d1d1f] font-medium text-[14px] transition-all duration-200 flex items-center justify-center gap-3"
+                  className="w-full py-3 px-4 bg-[#F3EEE6] hover:bg-[#F3EEE6] rounded-full text-[#1E1B18] font-medium text-[14px] transition-all duration-200 flex items-center justify-center gap-3"
                 >
                   <GoogleIcon />
                   {t.googleSignIn}
@@ -352,10 +352,10 @@ export default function AuthPage() {
               </>
             )}
 
-            <div className="flex items-center justify-center gap-3 pt-1 text-[12px] text-[#86868b]">
-              <a href="/terms" className="hover:text-[#0071e3] transition-colors">{t.terms}</a>
-              <span className="text-[#d2d2d7]">·</span>
-              <a href="/privacy" className="hover:text-[#0071e3] transition-colors">{t.privacy}</a>
+            <div className="flex items-center justify-center gap-3 pt-1 text-[12px] text-[#8A837B]">
+              <a href="/terms" className="hover:text-[#4A1D3F] transition-colors">{t.terms}</a>
+              <span className="text-[#E5DED2]">·</span>
+              <a href="/privacy" className="hover:text-[#4A1D3F] transition-colors">{t.privacy}</a>
             </div>
           </form>
         </div>
